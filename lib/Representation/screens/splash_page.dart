@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sonique/Representation/widgets/CustomButton.dart';
-import 'package:sonique/core/theme/routes/routes.dart';
+import 'package:sonique/core/theme/services/routes/routes.dart';
 class SplashPage extends StatelessWidget {
   const SplashPage({super.key});
 
