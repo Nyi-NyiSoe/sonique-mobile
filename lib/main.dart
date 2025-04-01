@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:sonique/Representation/screens/splash_page.dart';
 import 'package:sonique/core/theme/app_theme.dart';
+import 'package:sonique/core/theme/routes/routing_service.dart';
 
 void main() {
   runApp(const MyApp());
@@ -12,10 +12,11 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+     final RoutingService routingService = RoutingService();
+    return MaterialApp.router(
       title: 'Flutter Demo',
       theme: AppTheme().darkTheme,
-      home: SplashPage(),
+      routerConfig: routingService.router,
     );
   }
 }
