@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sonique/Representation/screens/login_page.dart';
+import 'package:sonique/Representation/screens/splash_page.dart';
 import 'package:sonique/core/theme/app_theme.dart';
 
 void main() {
@@ -15,7 +15,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: AppTheme().darkTheme,
-      home: LoginPage(),
+      home: SplashPage(),
     );
   }
 }
