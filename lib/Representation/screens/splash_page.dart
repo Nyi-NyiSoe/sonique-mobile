@@ -1,8 +1,9 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:sonique/Representation/widgets/CustomButton.dart';
-
+import 'package:sonique/core/theme/routes/routes.dart';
 class SplashPage extends StatelessWidget {
   const SplashPage({super.key});
 
@@ -85,7 +86,9 @@ class SplashPage extends StatelessWidget {
                               style: Theme.of(context).textTheme.titleLarge
                                   ?.copyWith(color: Colors.white),
                             ),
-                            onPressed: () {},
+                            onPressed: () {
+                              context.go(Routes.login);
+                            },
                           ),
                           SizedBox(height: 20),
                           Row(
