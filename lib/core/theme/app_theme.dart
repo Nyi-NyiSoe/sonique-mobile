@@ -4,6 +4,7 @@ import 'package:sonique/core/theme/app_color.dart';
 class AppTheme {
   // Light Theme
   final lightTheme = ThemeData(
+    scaffoldBackgroundColor: AppColor.lightBackgroundColor,
     textTheme: const TextTheme(
       displayLarge: TextStyle(
         fontSize: 32,
@@ -71,6 +72,7 @@ class AppTheme {
 
   //dark theme
   final darkTheme = ThemeData(
+    scaffoldBackgroundColor: AppColor.darkBackgroundColor,
     textTheme: const TextTheme(
       displayLarge: TextStyle(
         fontSize: 32,
