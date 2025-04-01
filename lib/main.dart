@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:sonique/core/theme/app_theme.dart';
-import 'package:sonique/core/theme/routes/routing_service.dart';
+import 'package:sonique/core/theme/services/locator/locator.dart';
 
-void main() {
+void main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+  await setupLocator();
   runApp(const MyApp());
 }
 
@@ -12,12 +15,11 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-     final RoutingService routingService = RoutingService();
+    final GoRouter router = locator<GoRouter>();
     return MaterialApp.router(
       title: 'Flutter Demo',
       theme: AppTheme().darkTheme,
-      routerConfig: routingService.router,
+      routerConfig: router,
     );
   }
 }
-
