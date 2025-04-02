@@ -47,19 +47,15 @@ class CustomTextFormField extends StatelessWidget {
         fillColor: fillColor,
         prefixIcon: prefixIcon,
         suffixIcon: suffixIcon,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(borderRadius),
+        border: UnderlineInputBorder(
           borderSide: BorderSide(color: borderColor, width: 1.5),
         ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(borderRadius),
+        enabledBorder: UnderlineInputBorder(
           borderSide: BorderSide(color: borderColor, width: 1.5),
         ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(borderRadius),
+        focusedBorder: UnderlineInputBorder(
           borderSide: BorderSide(color: focusedBorderColor, width: 2),
         ),
-      ),
-    );
+    ));
   }
 }

@@ -1,6 +1,7 @@
 import 'package:go_router/go_router.dart';
 import 'package:sonique/Representation/screens/home_page.dart';
 import 'package:sonique/Representation/screens/login_page.dart';
+import 'package:sonique/Representation/screens/signup_page.dart';
 import 'package:sonique/Representation/screens/splash_page.dart';
 import 'package:sonique/core/theme/services/routes/routes.dart';
 
@@ -14,7 +15,7 @@ class RoutingService {
       ),
       GoRoute(path: Routes.home, builder: (context, state) => const HomePage()),
       GoRoute(path: Routes.login, builder: (context, state) => LoginPage()),
-      //GoRoute(path: Routes.signUp, builder: (context, state) =>  SignUpPage()),
+      GoRoute(path: Routes.signUp, builder: (context, state) =>  SignupPage()),
     ],
   );
 }

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:go_router/go_router.dart';
 import 'package:sonique/Representation/widgets/CustomButton.dart';
 import 'package:sonique/Representation/widgets/CustomTextField.dart';
+import 'package:sonique/core/theme/services/routes/routes.dart';
 
 class LoginPage extends StatefulWidget {
   LoginPage({super.key});
@@ -142,6 +144,7 @@ class _LoginPageState extends State<LoginPage> {
                         child: GestureDetector(
                           onTap: () {
                             //Navigate to Sign Up page
+                            context.push(Routes.signUp);
                           },
                           child: Text(
                             "Sign Up",
