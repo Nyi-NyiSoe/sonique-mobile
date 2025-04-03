@@ -11,7 +11,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final AuthLocalDataSource authLocalDataSource;
 
   AuthBloc(this.authUsecase, this.authLocalDataSource)
-    : super(AuthInitialState()) {
+    : super(UnAuthenticatedState()) {
     on<AppStartedEvent>((event, emit) async {
       emit(AuthLoadingState());
 
@@ -19,7 +19,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       if (user != null) {
         emit(AuthSuccessState(user: user));
       } else {
-        emit(AuthErrorState(error: "No user found"));
+        emit(UnAuthenticatedState());
       }
     });
 
@@ -29,6 +29,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         final user = await authUsecase.login(event.email, event.password);
         log("User: $user");
         emit(AuthSuccessState(user: user));
+      } catch (e) {
+        emit(AuthErrorState(error: e.toString()));
+      }
+    });
+
+    on<LogoutEvent>((event, emit) async {
+      emit(AuthLoadingState());
+      try {
+        await authUsecase.logout();
+        emit(UnAuthenticatedState());
       } catch (e) {
         emit(AuthErrorState(error: e.toString()));
       }

@@ -9,4 +9,8 @@ class AuthUsecase {
   Future<UserModel> login(String username, String password) async {
     return _authRepository.login(username, password);
   }
+
+  Future<void> logout() async {
+    return _authRepository.logout();
+  }
 }
