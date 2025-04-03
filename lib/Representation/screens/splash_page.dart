@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sonique/Representation/widgets/CustomButton.dart';
 import 'package:sonique/core/theme/services/routes/routes.dart';
+
 class SplashPage extends StatelessWidget {
   const SplashPage({super.key});
 
@@ -88,6 +89,7 @@ class SplashPage extends StatelessWidget {
                             ),
                             onPressed: () {
                               context.go(Routes.login);
+                              print("Login button pressed");
                             },
                           ),
                           SizedBox(height: 20),
@@ -101,7 +103,15 @@ class SplashPage extends StatelessWidget {
                                     ?.copyWith(color: Colors.white),
                               ),
                               SizedBox(width: 20),
-                              Icon(Icons.arrow_forward_sharp, color: Colors.white),
+                              GestureDetector(
+                                onTap: () {
+                                  context.go(Routes.signUp);
+                                },
+                                child: Icon(
+                                  Icons.arrow_forward_sharp,
+                                  color: Colors.white,
+                                ),
+                              ),
                             ],
                           ),
                         ],
