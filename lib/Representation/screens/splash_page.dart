@@ -88,7 +88,8 @@ class SplashPage extends StatelessWidget {
                                   ?.copyWith(color: Colors.white),
                             ),
                             onPressed: () {
-                              context.go(Routes.login);
+                              context.push(Routes.login);
+                             
                               print("Login button pressed");
                             },
                           ),

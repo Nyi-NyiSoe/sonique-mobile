@@ -21,4 +21,13 @@ class AuthRepositoryImpl implements AuthRepository {
       throw Exception('Failed to login: $e');
     }
   }
+
+  @override
+  Future<void> logout() async {
+    try {
+      await localDataSource.deleteUser();
+    } catch (e) {
+      throw Exception('Failed to logout: $e');
+    }
+  }
 }
