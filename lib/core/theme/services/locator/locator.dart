@@ -7,6 +7,7 @@ import 'package:sonique/Data/source/auth_repo/auth_local_data_source.dart';
 import 'package:sonique/Data/source/auth_repo/auth_remote_data_source.dart';
 import 'package:sonique/Domain/repository/auth_repository.dart';
 import 'package:sonique/Domain/usecases/auth_usecase.dart';
+import 'package:sonique/Representation/Bloc/auth_bloc/auth_bloc.dart';
 import 'package:sonique/core/theme/services/routes/routing_service.dart';
 
 final GetIt locator = GetIt.instance;
@@ -22,8 +23,18 @@ Future<void> setupLocator() async {
   //register http
   locator.registerLazySingleton(() => http.Client());
 
+  //Register Blocs
+  locator.registerFactory<AuthBloc>(
+    () => AuthBloc(
+      locator<AuthUsecase>(),
+      locator<AuthLocalDataSource>(),
+    ),
+  );
+
   //GoRouter
-  locator.registerLazySingleton<GoRouter>(() => RoutingService().router);
+  locator.registerLazySingleton<GoRouter>(
+    () => RoutingService(locator<AuthBloc>()).router,
+  );
 
   //Data sources
   locator.registerLazySingleton<AuthLocalDataSource>(
