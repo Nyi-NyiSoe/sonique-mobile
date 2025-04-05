@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sonique/Data/source/auth_repo/auth_local_data_source.dart';
 import 'package:sonique/Domain/usecases/auth_usecase.dart';
 import 'package:sonique/Representation/Bloc/auth_bloc/auth_bloc.dart';
@@ -15,8 +14,6 @@ void main() async {
   await dotenv.load(fileName: ".env");
   await setupLocator();
 
-  //load shared preferences
-  final sharedPrefs = locator<SharedPreferences>();
   runApp(const MyApp());
 }
 
