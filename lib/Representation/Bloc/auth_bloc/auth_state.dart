@@ -2,7 +2,6 @@ import 'package:sonique/Data/models/user_model.dart';
 
 abstract class AuthState {}
 
-class AuthInitialState extends AuthState {}
 
 class UnAuthenticatedState extends AuthState {}
 

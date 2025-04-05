@@ -8,7 +8,6 @@ import 'package:sonique/Representation/Bloc/auth_bloc/auth_state.dart';
 import 'package:sonique/Representation/screens/home_page.dart';
 import 'package:sonique/Representation/screens/login_page.dart';
 import 'package:sonique/Representation/screens/signup_page.dart';
-import 'package:sonique/Representation/screens/splash_page.dart';
 import 'package:sonique/core/theme/services/routes/routes.dart';
 
 class RoutingService {
@@ -21,38 +20,31 @@ class RoutingService {
     redirect: (context, state) async {
       final authState = context.read<AuthBloc>().state;
 
-      // Define public routes that don't require authentication
-      final isPublicRoute = [
-        Routes.login,
-        Routes.signUp,
-        Routes.splash,
-      ].contains(state.uri.toString());
+      // Define auth pages that don't need redirection between them
+      final isAuthPage = [Routes.login, Routes.signUp].contains(state.uri.toString());
 
-      // Don't redirect during auth loading to avoid interrupting the process
-      if (authState is AuthLoadingState) {
-        return null;
+      // IMPORTANT: For auth pages, allow free navigation between them
+      if (isAuthPage) {
+        return null; // Don't redirect between auth pages
       }
 
-      // If authenticated, don't allow access to login/signup pages
-      if (authState is AuthSuccessState &&
-          isPublicRoute &&
-          state.uri.toString() != Routes.splash) {
+      // Handle states
+      if (authState is UnAuthenticatedState) {
+        // Only redirect to login if trying to access a protected route (not splash, login, or signup)
+        return ![
+              Routes.login,
+              Routes.signUp,
+              Routes.splash,
+            ].contains(state.uri.toString())
+            ? Routes.login
+            : null;
+      } else if (authState is AuthSuccessState) {
         return Routes.home;
       }
 
-      // If not authenticated, only allow access to public routes
-      if (authState is UnAuthenticatedState && !isPublicRoute) {
-        return Routes.login;
-      }
-
-      // Default case - no redirect needed
       return null;
     },
     routes: [
-      GoRoute(
-        path: Routes.splash,
-        builder: (context, state) => const SplashPage(),
-      ),
       GoRoute(path: Routes.home, builder: (context, state) => HomePage()),
       GoRoute(path: Routes.login, builder: (context, state) => LoginPage()),
       GoRoute(path: Routes.signUp, builder: (context, state) => SignupPage()),

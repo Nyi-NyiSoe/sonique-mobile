@@ -10,8 +10,6 @@ import 'package:sonique/Representation/Bloc/auth_bloc/auth_event.dart';
 import 'package:sonique/core/theme/app_theme.dart';
 import 'package:sonique/core/theme/services/locator/locator.dart';
 
-
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
