@@ -23,12 +23,27 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       }
     });
 
-
     on<LoginEvent>((event, emit) async {
       emit(AuthLoadingState());
       try {
         final user = await authUsecase.login(event.email, event.password);
         log("User: $user");
+        emit(AuthSuccessState(user: user));
+      } catch (e) {
+        emit(AuthErrorState(error: e.toString()));
+      }
+    });
+
+    on<RegisterEvent>((event, emit) async {
+      emit(AuthLoadingState());
+      try {
+        final user = await authUsecase.register(
+          event.email,
+          event.firstName,
+          event.lastName,
+          event.password,
+          event.username,
+        );
         emit(AuthSuccessState(user: user));
       } catch (e) {
         emit(AuthErrorState(error: e.toString()));
