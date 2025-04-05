@@ -43,4 +43,38 @@ class AuthRemoteDataSource {
       throw Exception('Failed to login: ${response.body}');
     }
   }
+
+  Future<UserModel> register(String email, String firstName, String lastName, String password,String username) async {
+    final headers = {'Content-Type': 'application/json'};
+    final body = jsonEncode({
+      'email': email,
+      'firstName': firstName,
+      'lastName': lastName,
+      'password': password,
+      'username': username,
+    });
+
+    late final http.Response response;
+    try {
+      response = await client.post(
+        Uri.parse(registerUrl),
+        headers: headers,
+        body: body,
+      );
+      log("Register response: ${response.body}");
+    } catch (e) {
+      throw Exception(' error: $e');
+    }
+    
+    log(response.statusCode.toString());
+    if (response.statusCode == 201) {
+      final data = jsonDecode(response.body);
+        log('FULL JSON: $data'); // 👈 Add this
+      log('user change: ${data['data']}');
+      
+      return UserModel.fromJson(data['data']);
+    } else {
+      throw Exception('Failed to register: ${response.body}');
+    }
+  }
 }
