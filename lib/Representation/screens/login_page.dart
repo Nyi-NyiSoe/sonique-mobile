@@ -166,6 +166,7 @@ class _LoginPageState extends State<LoginPage> {
                                     onTap: () {
                                       //Navigate to Sign Up page
                                       context.push(Routes.signUp);
+                                
                                     },
                                     child: Text(
                                       "Sign Up",
