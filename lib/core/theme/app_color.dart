@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 
 class AppColor {
+
+  //primary color 
+  static const Color primaryColor = Colors.green;
+
   //light theme colors
   static const Color lightTextColor = Color.fromARGB(255, 0, 0, 0);
   static const Color lightBackgroundColor = Color.fromARGB(255, 255, 255, 255);

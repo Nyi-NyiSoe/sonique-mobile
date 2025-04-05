@@ -3,7 +3,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sonique/Representation/widgets/CustomButton.dart';
 import 'package:sonique/Representation/widgets/CustomTextField.dart';
-import 'package:sonique/core/theme/services/routes/routes.dart';
+import 'package:sonique/core/services/routes/routes.dart';
 
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});

@@ -4,6 +4,13 @@ import 'package:sonique/core/theme/app_color.dart';
 class AppTheme {
   // Light Theme
   final lightTheme = ThemeData(
+    useMaterial3: true,
+    brightness: Brightness.light,
+    colorScheme: ColorScheme.light(
+      primary: AppColor.primaryColor,
+      onPrimary: Colors.white,
+      surface: AppColor.primaryColor,
+    ),
     scaffoldBackgroundColor: AppColor.lightBackgroundColor,
     textTheme: const TextTheme(
       displayLarge: TextStyle(
@@ -67,11 +74,25 @@ class AppTheme {
         color: AppColor.lightTextColor,
       ),
     ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ButtonStyle(
+        backgroundColor: WidgetStateProperty.all(AppColor.primaryColor),
+        foregroundColor: WidgetStateProperty.all(Colors.white),
+        shape: WidgetStateProperty.all(
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+        ),
+        padding: WidgetStateProperty.all(
+          const EdgeInsets.symmetric(vertical: 16.0),
+        ),
+      ),
+    ),
   );
-
 
   //dark theme
   final darkTheme = ThemeData(
+    useMaterial3: true,
+    brightness: Brightness.dark,
+    colorScheme: ColorScheme.dark(primary: AppColor.primaryColor),
     scaffoldBackgroundColor: AppColor.darkBackgroundColor,
     textTheme: const TextTheme(
       displayLarge: TextStyle(
@@ -133,6 +154,18 @@ class AppTheme {
         fontSize: 16,
         fontWeight: FontWeight.w400,
         color: AppColor.darkTextColor,
+      ),
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ButtonStyle(
+        backgroundColor: WidgetStateProperty.all(AppColor.primaryColor),
+        foregroundColor: WidgetStateProperty.all(Colors.white),
+        shape: WidgetStateProperty.all(
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+        ),
+        padding: WidgetStateProperty.all(
+          const EdgeInsets.symmetric(vertical: 16.0),
+        ),
       ),
     ),
   );

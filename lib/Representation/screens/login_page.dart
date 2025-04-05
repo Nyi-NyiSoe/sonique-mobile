@@ -7,7 +7,7 @@ import 'package:sonique/Representation/Bloc/auth_bloc/auth_event.dart';
 import 'package:sonique/Representation/Bloc/auth_bloc/auth_state.dart';
 import 'package:sonique/Representation/widgets/CustomButton.dart';
 import 'package:sonique/Representation/widgets/CustomTextField.dart';
-import 'package:sonique/core/theme/services/routes/routes.dart';
+import 'package:sonique/core/services/routes/routes.dart';
 
 class LoginPage extends StatefulWidget {
   LoginPage({super.key});
@@ -166,7 +166,6 @@ class _LoginPageState extends State<LoginPage> {
                                     onTap: () {
                                       //Navigate to Sign Up page
                                       context.push(Routes.signUp);
-                                
                                     },
                                     child: Text(
                                       "Sign Up",
