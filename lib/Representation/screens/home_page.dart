@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:sonique/Representation/Bloc/auth_bloc/auth_bloc.dart';
 import 'package:sonique/Representation/Bloc/auth_bloc/auth_event.dart';
 import 'package:sonique/Representation/Bloc/auth_bloc/auth_state.dart';
-import 'package:sonique/core/theme/services/routes/routes.dart';
+import 'package:sonique/core/services/routes/routes.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});

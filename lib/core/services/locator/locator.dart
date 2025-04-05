@@ -8,7 +8,7 @@ import 'package:sonique/Data/source/auth_repo/auth_remote_data_source.dart';
 import 'package:sonique/Domain/repository/auth_repository.dart';
 import 'package:sonique/Domain/usecases/auth_usecase.dart';
 import 'package:sonique/Representation/Bloc/auth_bloc/auth_bloc.dart';
-import 'package:sonique/core/theme/services/routes/routing_service.dart';
+import 'package:sonique/core/services/routes/routing_service.dart';
 
 final GetIt locator = GetIt.instance;
 

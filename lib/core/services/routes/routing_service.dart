@@ -8,7 +8,7 @@ import 'package:sonique/Representation/Bloc/auth_bloc/auth_state.dart';
 import 'package:sonique/Representation/screens/home_page.dart';
 import 'package:sonique/Representation/screens/login_page.dart';
 import 'package:sonique/Representation/screens/signup_page.dart';
-import 'package:sonique/core/theme/services/routes/routes.dart';
+import 'package:sonique/core/services/routes/routes.dart';
 
 class RoutingService {
   final AuthBloc authBloc;

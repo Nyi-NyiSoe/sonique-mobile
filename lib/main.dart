@@ -7,8 +7,8 @@ import 'package:sonique/Data/source/auth_repo/auth_local_data_source.dart';
 import 'package:sonique/Domain/usecases/auth_usecase.dart';
 import 'package:sonique/Representation/Bloc/auth_bloc/auth_bloc.dart';
 import 'package:sonique/Representation/Bloc/auth_bloc/auth_event.dart';
+import 'package:sonique/core/services/locator/locator.dart';
 import 'package:sonique/core/theme/app_theme.dart';
-import 'package:sonique/core/theme/services/locator/locator.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
