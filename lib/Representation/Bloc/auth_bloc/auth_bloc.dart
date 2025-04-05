@@ -23,6 +23,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       }
     });
 
+
     on<LoginEvent>((event, emit) async {
       emit(AuthLoadingState());
       try {
