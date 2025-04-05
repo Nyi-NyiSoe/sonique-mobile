@@ -18,11 +18,11 @@ class UserModel extends User {
     try {
       return UserModel(
         userId: json['userId'] ?? 0, // Handle null values
-        firstName: json['firstName'] ?? "Unknown",
-        lastName: json['lastName'] ?? "Unknown",
+        firstName: json['firstName'] ?? "",
+        lastName: json['lastName'] ?? "",
         email: json['email'] ?? "",
-        username: json['username'] ?? "Guest",
-        createdAt: json['createdAt'] ?? "",
+        username: json['username'] ?? "",
+        createdAt: json['createdAt'] ?? DateTime.now().toString(),
         isArtist: json['isArtist'] ?? false,
         total_songs: json['total_songs'] ?? 0,
       );
