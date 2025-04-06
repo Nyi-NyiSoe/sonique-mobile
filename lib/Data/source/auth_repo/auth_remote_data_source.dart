@@ -37,7 +37,7 @@ class AuthRemoteDataSource {
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       log('Login response: ${data['data']}');
-      
+
       return UserModel.fromJson(data['data']);
     } else {
       throw Exception('Failed to login: ${response.body}');
