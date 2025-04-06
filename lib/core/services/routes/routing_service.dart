@@ -6,7 +6,10 @@ import 'package:go_router/go_router.dart';
 import 'package:sonique/Representation/Bloc/auth_bloc/auth_bloc.dart';
 import 'package:sonique/Representation/Bloc/auth_bloc/auth_state.dart';
 import 'package:sonique/Representation/screens/home_page.dart';
+import 'package:sonique/Representation/screens/library_page.dart';
 import 'package:sonique/Representation/screens/login_page.dart';
+import 'package:sonique/Representation/screens/profile_page.dart';
+import 'package:sonique/Representation/screens/root_page.dart';
 import 'package:sonique/Representation/screens/signup_page.dart';
 import 'package:sonique/core/services/routes/routes.dart';
 
@@ -21,7 +24,10 @@ class RoutingService {
       final authState = context.read<AuthBloc>().state;
 
       // Define auth pages that don't need redirection between them
-      final isAuthPage = [Routes.login, Routes.signUp].contains(state.uri.toString());
+      final isAuthPage = [
+        Routes.login,
+        Routes.signUp,
+      ].contains(state.uri.toString());
 
       // IMPORTANT: For auth pages, allow free navigation between them
       if (isAuthPage) {
@@ -31,23 +37,63 @@ class RoutingService {
       // Handle states
       if (authState is UnAuthenticatedState) {
         // Only redirect to login if trying to access a protected route (not splash, login, or signup)
-        return ![
-              Routes.login,
-              Routes.signUp,
-              Routes.splash,
-            ].contains(state.uri.toString())
+        return ![Routes.login, Routes.signUp].contains(state.uri.toString())
             ? Routes.login
             : null;
       } else if (authState is AuthSuccessState) {
-        return Routes.home;
+        // Only redirect to home if trying to access auth pages
+        return [Routes.login, Routes.signUp].contains(state.uri.toString())
+            ? Routes.home
+            : null; // ← This change allows navigation between tabs
       }
 
       return null;
     },
     routes: [
-      GoRoute(path: Routes.home, builder: (context, state) => HomePage()),
-      GoRoute(path: Routes.login, builder: (context, state) => LoginPage()),
-      GoRoute(path: Routes.signUp, builder: (context, state) => SignupPage()),
+      GoRoute(
+        path: Routes.login,
+        builder: (context, state) {
+          return LoginPage();
+        },
+      ),
+      GoRoute(
+        path: Routes.signUp,
+        builder: (context, state) {
+          return SignupPage();
+        },
+      ),
+
+      StatefulShellRoute.indexedStack(
+        builder:
+            (context, state, navigationShell) =>
+                RootPage(navigationShell: navigationShell),
+        branches: [
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.home,
+                builder: (context, state) => const HomePage(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.library,
+                builder: (context, state) => const LibraryPage(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.profile,
+                builder: (context, state) => const ProfilePage(),
+              ),
+            ],
+          ),
+        ],
+      ),
     ],
   );
 }
