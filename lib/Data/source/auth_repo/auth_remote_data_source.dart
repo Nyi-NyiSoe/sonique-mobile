@@ -29,22 +29,51 @@ class AuthRemoteDataSource {
         headers: headers,
         body: body,
       );
+
       log(response.body);
     } catch (e) {
       throw Exception(' error: $e');
     }
 
     if (response.statusCode == 200) {
+      String? token;
+      String? refreshToken;
+      String? cookies;
+      if (response.headers.containsKey('set-cookie')) {
+        cookies = response.headers['set-cookie']!;
+      }
+
+      if (cookies!.contains('token=')) {
+        token = _extractCookieValue(cookies, 'token');
+      }
+
+      if (cookies.contains('refreshToken=')) {
+        refreshToken = _extractCookieValue(cookies, 'refreshToken');
+      }
+
+      log('Token: $token');
+      log('Refresh Token: $refreshToken');
+
       final data = jsonDecode(response.body);
       log('Login response: ${data['data']}');
 
-      return UserModel.fromJson(data['data']);
+      return UserModel.fromJson(
+        data['data'],
+        token: token,
+        refreshToken: refreshToken,
+      );
     } else {
       throw Exception('Failed to login: ${response.body}');
     }
   }
 
-  Future<UserModel> register(String email, String firstName, String lastName, String password,String username) async {
+  Future<UserModel> register(
+    String email,
+    String firstName,
+    String lastName,
+    String password,
+    String username,
+  ) async {
     final headers = {'Content-Type': 'application/json'};
     final body = jsonEncode({
       'email': email,
@@ -65,16 +94,22 @@ class AuthRemoteDataSource {
     } catch (e) {
       throw Exception(' error: $e');
     }
-    
+
     log(response.statusCode.toString());
     if (response.statusCode == 201) {
       final data = jsonDecode(response.body);
-        log('FULL JSON: $data'); // 👈 Add this
+      log('FULL JSON: $data'); // 👈 Add this
       log('user change: ${data['data']}');
-      
+
       return UserModel.fromJson(data['data']);
     } else {
       throw Exception('Failed to register: ${response.body}');
     }
   }
+}
+
+String? _extractCookieValue(String cookies, String key) {
+  final regex = RegExp('$key=([^;]*)');
+  final match = regex.firstMatch(cookies);
+  return match?.group(1);
 }

@@ -12,9 +12,15 @@ class UserModel extends User {
     required super.createdAt,
     required super.isArtist,
     required super.total_songs,
+    required super.token,
+    required super.refreshToken,
   });
 
-  factory UserModel.fromJson(Map<String, dynamic> json) {
+  factory UserModel.fromJson(
+    Map<String, dynamic> json, {
+    String? token,
+    String? refreshToken,
+  }) {
     try {
       return UserModel(
         userId: json['userId'] ?? 0, // Handle null values
@@ -25,6 +31,8 @@ class UserModel extends User {
         createdAt: json['createdAt'] ?? DateTime.now().toString(),
         isArtist: json['isArtist'] ?? false,
         total_songs: json['total_songs'] ?? 0,
+        token: token,
+        refreshToken: refreshToken,
       );
     } catch (e, stacktrace) {
       print("Error parsing UserModel: $e\n$stacktrace");
@@ -41,6 +49,8 @@ class UserModel extends User {
       'createdAt': createdAt,
       'isArtist': isArtist,
       'totalSongs': total_songs,
+      'token': token,
+      'refreshToken': refreshToken,
     };
   }
 
