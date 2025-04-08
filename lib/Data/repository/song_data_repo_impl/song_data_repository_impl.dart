@@ -1,0 +1,27 @@
+import 'package:sonique/Data/models/song_response_model.dart';
+import 'package:sonique/Data/source/song_data_repo/song_remote_data.dart';
+import 'package:sonique/Domain/repository/song_data_repository.dart';
+
+class SongDataRepositoryImpl implements SongDataRepository {
+  final SongRemoteData songRemoteData;
+
+  SongDataRepositoryImpl({required this.songRemoteData});
+
+  @override
+  Future<SongResponseModel> getAllSongs() async {
+    try {
+      return await songRemoteData.getAllSongs();
+    } catch (e) {
+      throw Exception('Failed to fetch songs: $e');
+    }
+  }
+
+  @override
+  Future<SongResponseModel> getMoreSongs(String cursor) async {
+    try {
+      return await songRemoteData.getMoreSongs(cursor);
+    } catch (e) {
+      throw Exception('Failed to fetch more songs: $e');
+    }
+  }
+}

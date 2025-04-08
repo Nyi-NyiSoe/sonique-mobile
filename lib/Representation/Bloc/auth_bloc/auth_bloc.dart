@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sonique/Data/source/auth_repo/auth_local_data_source.dart';
 import 'package:sonique/Domain/usecases/auth_usecase.dart';
@@ -16,19 +14,17 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(AuthLoadingState());
 
       final user = await authLocalDataSource.getUser();
-      if (user != null) {
-        emit(AuthSuccessState(user: user));
-      } else {
-        emit(UnAuthenticatedState());
-      }
-    });
+      //log("User from local data source: $user");
+      emit(AuthSuccessState(user: user));
+        });
 
     on<LoginEvent>((event, emit) async {
       emit(AuthLoadingState());
       try {
         final user = await authUsecase.login(event.email, event.password);
-        log("User: $user");
+        //log("User: $user");
         emit(AuthSuccessState(user: user));
+       // log("auth success state: ${state.runtimeType}");
       } catch (e) {
         emit(AuthErrorState(error: e.toString()));
       }

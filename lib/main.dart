@@ -6,6 +6,8 @@ import 'package:sonique/Data/source/auth_repo/auth_local_data_source.dart';
 import 'package:sonique/Domain/usecases/auth_usecase.dart';
 import 'package:sonique/Representation/Bloc/auth_bloc/auth_bloc.dart';
 import 'package:sonique/Representation/Bloc/auth_bloc/auth_event.dart';
+import 'package:sonique/Representation/Bloc/song_data_bloc/song_data_bloc.dart';
+import 'package:sonique/Representation/Bloc/song_data_bloc/song_data_event.dart';
 import 'package:sonique/core/services/locator/locator.dart';
 import 'package:sonique/core/theme/app_theme.dart';
 
@@ -35,6 +37,14 @@ class MyApp extends StatelessWidget {
 
             authBloc.add(AppStartedEvent());
             return authBloc;
+          },
+        ),
+
+        BlocProvider<SongDataBloc>(
+          create: (context) {
+            final songDataBloc = locator<SongDataBloc>();
+            songDataBloc.add(FetchAllSongEvent());
+            return songDataBloc;
           },
         ),
       ],
