@@ -7,6 +7,8 @@ abstract class User {
   final String createdAt;
   final bool isArtist;
   final int total_songs;
+  final String? token;
+  final String? refreshToken;
 
   User({
     required this.userId,
@@ -17,10 +19,13 @@ abstract class User {
     required this.createdAt,
     required this.isArtist,
     required this.total_songs,
+    required this.token,
+    required this.refreshToken,
+    
   });
 
   @override
   String toString() {
-    return 'User{userId: $userId, firstName: $firstName, lastName: $lastName, email: $email, username: $username, createdAt: $createdAt, isArtist: $isArtist, total_songs: $total_songs}';
+    return 'User{userId: $userId, firstName: $firstName, lastName: $lastName, email: $email, username: $username, createdAt: $createdAt, isArtist: $isArtist, total_songs: $total_songs, token: $token, refreshToken: $refreshToken}';
   }
 }
