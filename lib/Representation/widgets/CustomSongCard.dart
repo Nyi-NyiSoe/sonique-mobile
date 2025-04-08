@@ -1,7 +1,16 @@
 import 'package:flutter/material.dart';
 
 class Customsongcard extends StatelessWidget {
-  const Customsongcard({super.key});
+  const Customsongcard({super.key,
+    required this.img_url,
+    required this.songId,
+    required this.artistName,
+    required this.songTitle,
+  });
+  final String img_url;
+  final String songId;
+  final String artistName;
+  final String songTitle;
 
   @override
   Widget build(BuildContext context) {
@@ -14,8 +23,8 @@ class Customsongcard extends StatelessWidget {
             children: [
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Image.asset(
-                  'assets/images/music.png',
+                child: Image.network(
+                  img_url,
                   width: 80,
                   height: 80,
                   fit: BoxFit.cover,
@@ -26,12 +35,12 @@ class Customsongcard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text(
-                    'Song Title',
+                   Text(
+                    songTitle,
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
-                  const Text(
-                    'Artist Name',
+                   Text(
+                    artistName,
                     style: TextStyle(fontSize: 15, color: Colors.grey),
                   ),
                 ],

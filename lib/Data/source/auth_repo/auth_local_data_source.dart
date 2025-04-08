@@ -11,35 +11,40 @@ class AuthLocalDataSource {
   // Save user
   Future<void> saveUser(UserModel user) async {
     final prefs = await SharedPreferences.getInstance();
-    final userJson = jsonEncode(user.toJson());
-    await prefs.setString(_userKey, userJson);
+    final jsonString = jsonEncode(user.toJson());
+    //print("✅ Saving user JSON: $jsonString");
+    await prefs.setString(_userKey, jsonString);
   }
 
-  Future<UserModel?> getUser() async {
+  Future<UserModel> getUser() async {
     final prefs = await SharedPreferences.getInstance();
     final userJson = prefs.getString(_userKey);
 
+    //print('🔍 Raw userJson from SharedPreferences: $userJson');
+
     if (userJson == null) {
-      print("No user data found.");
-      return null;
+      throw Exception("User not found in local storage");
     }
 
     try {
-      print("Stored user JSON: $userJson");
-
-      // Try decoding once
       final userMap = jsonDecode(userJson);
 
-      // If userMap is still a string, decode again
       if (userMap is String) {
-        print("Double-encoded JSON detected. Decoding again...");
-        return UserModel.fromJson(jsonDecode(userMap));
+        //print("⚠️ Double-encoded JSON detected. Decoding again...");
+        final decodedUserMap = jsonDecode(userMap);
+
+        final token = decodedUserMap['token'];
+        final refreshToken = decodedUserMap['refreshToken'];
+        return UserModel.fromJson(
+          decodedUserMap,
+          token: token,
+          refreshToken: refreshToken,
+        );
       }
 
       return UserModel.fromJson(userMap);
     } catch (e) {
-      print("Error decoding user JSON: $e");
-      return null;
+      throw Exception("❌ Failed to decode user JSON: $e");
     }
   }
 
