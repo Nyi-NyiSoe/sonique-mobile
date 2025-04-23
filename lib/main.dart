@@ -8,6 +8,8 @@ import 'package:sonique/Representation/Bloc/auth_bloc/auth_bloc.dart';
 import 'package:sonique/Representation/Bloc/auth_bloc/auth_event.dart';
 import 'package:sonique/Representation/Bloc/song_data_bloc/song_data_bloc.dart';
 import 'package:sonique/Representation/Bloc/song_data_bloc/song_data_event.dart';
+import 'package:sonique/Representation/Bloc/user_data_bloc/user_data_bloc.dart';
+import 'package:sonique/Representation/Bloc/user_data_bloc/user_data_event.dart';
 import 'package:sonique/core/services/locator/locator.dart';
 import 'package:sonique/core/theme/app_theme.dart';
 
@@ -47,6 +49,12 @@ class MyApp extends StatelessWidget {
             return songDataBloc;
           },
         ),
+
+        BlocProvider<UserDataBloc>(create: (context){
+          final userDataBloc = locator<UserDataBloc>();
+          userDataBloc.add(FetchUserDataEvent());
+          return userDataBloc;
+        })
       ],
       child: MaterialApp.router(
         title: 'Flutter Demo',
