@@ -14,6 +14,8 @@ class UserModel extends User {
     required super.total_songs,
     required super.token,
     required super.refreshToken,
+    super.bio,
+    super.profile_image,
   });
 
   factory UserModel.fromJson(
@@ -33,6 +35,8 @@ class UserModel extends User {
         total_songs: json['total_songs'] ?? 0,
         token: token,
         refreshToken: refreshToken,
+        bio: json['bio'] ?? "",
+        profile_image: json['profile_image'] ?? "",
       );
     } catch (e, stacktrace) {
       print("Error parsing UserModel: $e\n$stacktrace");
@@ -51,6 +55,8 @@ class UserModel extends User {
       'totalSongs': total_songs,
       'token': token,
       'refreshToken': refreshToken,
+      'bio': bio,
+      'profile_image': profile_image,
     };
   }
 
