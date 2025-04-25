@@ -41,6 +41,8 @@ dependencies:
   flutter_dotenv:
   http:
   flutter_bloc:
+  image_picker:
+  permission_handler:
 
 dev_dependencies:
   flutter_test:
