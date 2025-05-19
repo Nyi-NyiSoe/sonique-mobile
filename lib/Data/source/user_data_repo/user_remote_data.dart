@@ -3,6 +3,7 @@ import 'dart:developer';
 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
 import 'package:sonique/Data/models/user_model.dart';
 import 'package:sonique/Data/source/auth_repo/auth_local_data_source.dart';
 
@@ -25,7 +26,6 @@ class UserRemoteData {
       throw Exception('API URL is not set in .env file');
     }
   }
-  
 
   Future<UserModel> fetchUserData() async {
     final currentUser = await authLocalDataSource.getUser();
@@ -59,5 +59,43 @@ class UserRemoteData {
     } else {
       throw Exception('Failed to load user data');
     }
+  }
+
+  Future<String> updateUserImage(XFile? profile_image) async {
+    final currentUser = await authLocalDataSource.getUser();
+    final userId = currentUser.userId.toString();
+
+    final headers = {'Content-Type': 'application/json'};
+
+    try {
+      final request = http.MultipartRequest(
+        'PATCH',
+        Uri.parse('$updateUserUrl/$userId'),
+      );
+      request.headers.addAll(headers);
+      request.files.add(
+        await http.MultipartFile.fromPath('profile_image', profile_image!.path),
+      );
+
+      final response = await request.send();
+
+      if (response.statusCode == 200) {
+        return 'Profile image updated successfully';
+      } else {
+        throw Exception('Failed to update profile image');
+      }
+    } catch (e) {
+      throw Exception('Error updating profile image: $e');
+    }
+  }
+
+  Future<void> updateUserDetails(
+    String? bio,
+    String? firstName,
+    String? lastName,
+    String? username,
+  ) async {
+    final currentUser = await authLocalDataSource.getUser();
+    final userId = currentUser.userId.toString();
   }
 }

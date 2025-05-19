@@ -1,8 +1,7 @@
+import 'package:image_picker/image_picker.dart';
 import 'package:sonique/Data/models/user_model.dart';
 
-abstract class UserDataState {
-
-}
+abstract class UserDataState {}
 
 class UserDataInitialState extends UserDataState {}
 
@@ -11,8 +10,28 @@ class UserDataLoadingState extends UserDataState {}
 class UserDataFetchedState extends UserDataState {
   final UserModel user;
 
-  UserDataFetchedState({
-    required this.user,
+  UserDataFetchedState({required this.user});
+}
+
+class UserImageUpdatedState extends UserDataState {
+  final String imageUrl;
+
+  UserImageUpdatedState({required this.imageUrl});
+}
+
+class UpdateUserDetailState extends UserDataState {
+  final XFile? profile_image;
+  final String? bio;
+  final String? firstName;
+  final String? lastName;
+  final String? username;
+
+  UpdateUserDetailState({
+    required this.profile_image,
+    required this.bio,
+    required this.firstName,
+    required this.lastName,
+    required this.username,
   });
 }
 
