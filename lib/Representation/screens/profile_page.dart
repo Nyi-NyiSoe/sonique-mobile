@@ -10,6 +10,7 @@ import 'package:sonique/Representation/Bloc/auth_bloc/auth_bloc.dart';
 import 'package:sonique/Representation/Bloc/auth_bloc/auth_event.dart';
 import 'package:sonique/Representation/Bloc/auth_bloc/auth_state.dart';
 import 'package:sonique/Representation/Bloc/user_data_bloc/user_data_bloc.dart';
+import 'package:sonique/Representation/Bloc/user_data_bloc/user_data_event.dart';
 import 'package:sonique/Representation/Bloc/user_data_bloc/user_data_state.dart';
 import 'package:sonique/Representation/widgets/CustomButton.dart';
 import 'package:sonique/core/services/routes/routes.dart';
@@ -190,7 +191,13 @@ class _ProfilePageState extends State<ProfilePage> {
                   const SizedBox(height: 20),
                   CustomElevatedButton(
                     child: Text('Save'),
-                    onPressed: () {
+                    onPressed: () async {
+                      if (temp_image != null) {
+                        context.read<UserDataBloc>().add(
+                          UserImageUpdateEvent(profile_image: temp_image),
+                        );
+                      }
+                    
                       setState(() {
                         temp_image = null;
                       });
