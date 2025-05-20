@@ -97,5 +97,25 @@ class UserRemoteData {
   ) async {
     final currentUser = await authLocalDataSource.getUser();
     final userId = currentUser.userId.toString();
+
+    final headers = {'Content-Type': 'application/json'};
+    final body = jsonEncode({
+      'bio': bio ?? currentUser.bio,
+      'firstName': firstName ?? currentUser.firstName,
+      'lastName': lastName ?? currentUser.lastName,
+      'username': username ?? currentUser.username,
+    });
+
+    try {
+      final response = await http.patch(
+        Uri.parse('$updateUserUrl/$userId'),
+        headers: headers,
+        body: body,
+      );
+
+      log('Update user details response: ${response.body}');
+    } catch (e) {
+      throw Exception('Error updating user details: $e');
+    }
   }
 }
