@@ -24,18 +24,11 @@ class CustomElevatedButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: width ?? double.infinity, // Default to full width
-      height: height ?? 50, // Default height
+      height: height ?? 60, // Default height
       child: ElevatedButton(
         onPressed: onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: backgroundColor ?? Theme.of(context).primaryColor,
-          foregroundColor: textColor ?? Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(borderRadius),
-          ),
-          padding: EdgeInsets.symmetric(vertical: 12), // Adjust button padding
-        ),
-        child: child
+        style: Theme.of(context).elevatedButtonTheme.style,
+        child: child,
       ),
     );
   }

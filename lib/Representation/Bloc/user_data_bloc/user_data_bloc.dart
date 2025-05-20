@@ -34,22 +34,23 @@ class UserDataBloc extends Bloc<UserDataEvent, UserDataState> {
           emit(UserDataErrorState(error: e.toString()));
         }
       }
+
+      if (event is UpdateUserDetailEvent) {
+        emit(UserDataLoadingState());
+        try {
+          await _userDataUsecase.updateUserData(
+            event.bio,
+            event.firstName,
+            event.lastName,
+            event.username,
+          );
+          log('User data updated: ${event.toString()}');
+          add(FetchUserDataEvent());
+        } catch (e) {
+          emit(UserDataErrorState(error: e.toString()));
+        }
+      };
     });
 
-    on<UpdateUserDetailEvent>((event, emit) async {
-      emit(UserDataLoadingState());
-      try {
-        await _userDataUsecase.updateUserData(
-          event.bio,
-          event.firstName,
-          event.lastName,
-          event.username,
-        );
-        log('User data updated: ${event.toString()}');
-        emit(UserDataFetchedState(user: event.user));
-      } catch (e) {
-        emit(UserDataErrorState(error: e.toString()));
-      }
-    });
-  }
+  }   
 }
