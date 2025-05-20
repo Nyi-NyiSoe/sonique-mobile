@@ -13,6 +13,7 @@ import 'package:sonique/Representation/Bloc/user_data_bloc/user_data_bloc.dart';
 import 'package:sonique/Representation/Bloc/user_data_bloc/user_data_event.dart';
 import 'package:sonique/Representation/Bloc/user_data_bloc/user_data_state.dart';
 import 'package:sonique/Representation/widgets/CustomButton.dart';
+import 'package:sonique/Representation/widgets/CustomTextFormField.dart';
 import 'package:sonique/core/services/routes/routes.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -25,6 +26,13 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   UserModel? user;
   XFile? temp_image; // Declare temp_image as a state variable
+
+  @override
+  void initState() {
+    super.initState();
+    // Fetch user data when the widget is initialized
+    context.read<UserDataBloc>().add(FetchUserDataEvent());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -72,9 +80,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
                             children: [
                               GestureDetector(
-                                onTap: () {
-                                  updateModal(context);
-                                },
+                                onTap: () => updateImageModal(context),
                                 child: CircleAvatar(
                                   radius: 50,
                                   backgroundImage: NetworkImage(
@@ -83,36 +89,39 @@ class _ProfilePageState extends State<ProfilePage> {
                                 ),
                               ),
                               const SizedBox(width: 20),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "${user!.firstName} ${user!.lastName}",
-                                    style:
-                                        Theme.of(
-                                          context,
-                                        ).textTheme.displayMedium!,
-                                  ),
-                                  const SizedBox(height: 10),
-                                  Text(
-                                    "@${user!.username}",
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .labelLarge!
-                                        .copyWith(color: Colors.grey),
-                                  ),
-                                ],
+                              GestureDetector(
+                                onTap: () => updateUserDetailsModal(context),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "${user!.firstName} ${user!.lastName}",
+                                      style:
+                                          Theme.of(
+                                            context,
+                                          ).textTheme.displayMedium!,
+                                    ),
+                                    const SizedBox(height: 10),
+                                    Text(
+                                      "@${user!.username}",
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelLarge!
+                                          .copyWith(color: Colors.grey),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ],
                           ),
 
                           const SizedBox(height: 20),
                           GestureDetector(
-                            onTap: () {
-                              updateModal(context);
-                            },
+                            onTap: () => updateUserDetailsModal(context),
                             child: Text(
-                              user!.bio == "" ? "'Add a bio'" : user!.bio!,
+                              user!.bio == ""
+                                  ? "'Add a bio'"
+                                  : "'${user!.bio}'",
                               style: Theme.of(context).textTheme.labelLarge!
                                   .copyWith(color: Colors.grey),
                             ),
@@ -134,7 +143,125 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Future<dynamic> updateModal(BuildContext context) {
+  Future<dynamic> updateUserDetailsModal(BuildContext context) {
+    final TextEditingController _firstNameController = TextEditingController(
+      text: user!.firstName,
+    );
+    final TextEditingController _lastNameController = TextEditingController(
+      text: user!.lastName,
+    );
+
+    final TextEditingController _bioController = TextEditingController(
+      text: user!.bio,
+    );
+    final TextEditingController _usernameController = TextEditingController(
+      text: user!.username,
+    );
+
+    return showModalBottomSheet(
+      useRootNavigator: true,
+      isScrollControlled: true,
+      context: context,
+      builder: (context) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.5,
+          minChildSize: 0.5,
+          maxChildSize: 0.9,
+          expand: false,
+          builder: (context, scrollController) {
+            return SingleChildScrollView(
+              controller: scrollController,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const SizedBox(height: 20),
+                  Text("Edit profile"),
+                  const SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: CustomTextFormField(
+                          label: "First Name",
+                          hintText: "First Name",
+                          controller: _firstNameController,
+
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter your first name';
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                      SizedBox(width: 10),
+                      Expanded(
+                        child: CustomTextFormField(
+                          label: "Last Name",
+                          hintText: "Last Name",
+                          controller: _lastNameController,
+
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter your first name';
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  CustomTextFormField(
+                    label: "Username",
+
+                    controller: _usernameController,
+
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter your first name';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  CustomTextFormField(label: "Bio", controller: _bioController),
+                  const SizedBox(height: 20),
+                  CustomElevatedButton(
+                    width: 200,
+                    child: Text('Save'),
+                    onPressed: () {
+                      // Handle save action
+                      try {
+                        context.read<UserDataBloc>().add(
+                          UpdateUserDetailEvent(
+                            firstName: _firstNameController.text,
+                            lastName: _lastNameController.text,
+                            username: _usernameController.text,
+                            bio: _bioController.text,
+                          ),
+                        );
+
+                        Navigator.pop(context);
+                      } catch (e) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Error: ${e.toString()}')),
+                        );
+                      }
+                    },
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Future<dynamic> updateImageModal(BuildContext context) {
     final ImagePicker picker = ImagePicker();
 
     return showModalBottomSheet(
@@ -190,6 +317,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                   const SizedBox(height: 20),
                   CustomElevatedButton(
+                    width: 200,
                     child: Text('Save'),
                     onPressed: () async {
                       if (temp_image != null) {
@@ -197,7 +325,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           UserImageUpdateEvent(profile_image: temp_image),
                         );
                       }
-                    
+
                       setState(() {
                         temp_image = null;
                       });

@@ -1,4 +1,3 @@
-import 'package:image_picker/image_picker.dart';
 import 'package:sonique/Data/models/user_model.dart';
 
 abstract class UserDataState {}
@@ -20,14 +19,12 @@ class UserImageUpdatedState extends UserDataState {
 }
 
 class UpdateUserDetailState extends UserDataState {
-  final XFile? profile_image;
   final String? bio;
   final String? firstName;
   final String? lastName;
   final String? username;
 
   UpdateUserDetailState({
-    required this.profile_image,
     required this.bio,
     required this.firstName,
     required this.lastName,
