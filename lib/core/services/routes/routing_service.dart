@@ -11,10 +11,12 @@ import 'package:sonique/Representation/screens/login_page.dart';
 import 'package:sonique/Representation/screens/profile_page.dart';
 import 'package:sonique/Representation/screens/root_page.dart';
 import 'package:sonique/Representation/screens/signup_page.dart';
+import 'package:sonique/Representation/screens/upload_song_page.dart';
 import 'package:sonique/core/services/routes/routes.dart';
 
 class RoutingService {
   final AuthBloc authBloc;
+
   RoutingService(this.authBloc);
 
   late final GoRouter router = GoRouter(
@@ -84,6 +86,15 @@ class RoutingService {
               ),
             ],
           ),
+          
+            StatefulShellBranch(
+              routes: [
+                GoRoute(
+                  path: Routes.upload,
+                  builder: (context, state) => const UploadSongPage(),
+                ),
+              ],
+            ),
           StatefulShellBranch(
             routes: [
               GoRoute(
