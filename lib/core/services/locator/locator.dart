@@ -43,7 +43,7 @@ Future<void> setupLocator() async {
   locator.registerLazySingleton<UserDataBloc>(
     () => UserDataBloc(locator<UserDataUsecase>()),
   );
-
+ 
   //GoRouter
   locator.registerLazySingleton<GoRouter>(
     () => RoutingService(locator<AuthBloc>()).router,
@@ -84,7 +84,7 @@ Future<void> setupLocator() async {
   );
 
   locator.registerLazySingleton<UserDataRepository>(
-   ()=> UserDataRepositoryImpl(userRemoteData: locator<UserRemoteData>()),
+    () => UserDataRepositoryImpl(userRemoteData: locator<UserRemoteData>()),
   );
 
   //Usecases

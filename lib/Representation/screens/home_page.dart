@@ -35,12 +35,7 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: const Text('Home Page'),
         actions: [
-          IconButton(
-            onPressed: () {
-              context.read<SongDataBloc>().add(FetchMoreSongEvent());
-            },
-            icon: Icon(Icons.search),
-          ),
+         
         ],
       ),
       body: BlocListener<SongDataBloc, SongDataState>(
