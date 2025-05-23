@@ -43,6 +43,7 @@ dependencies:
   flutter_bloc:
   image_picker:
   permission_handler:
+  file_picker: ^10.1.9
 
 dev_dependencies:
   flutter_test:
