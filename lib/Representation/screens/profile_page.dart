@@ -84,7 +84,9 @@ class _ProfilePageState extends State<ProfilePage> {
                                 child: CircleAvatar(
                                   radius: 50,
                                   backgroundImage: NetworkImage(
-                                    user!.profile_image!,
+                                    user!.profile_image == ""
+                                        ? 'https://i.imgur.com/BoN9kdC.png'
+                                        : user!.profile_image!,
                                   ),
                                 ),
                               ),
