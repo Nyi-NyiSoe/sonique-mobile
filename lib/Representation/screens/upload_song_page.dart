@@ -5,6 +5,17 @@ class UploadSongPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(body: Center(child: Text('Upload Page')));
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Upload Song'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+      ),
+      body: Center(child: Text('Upload Page')),
+    );
   }
 }

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:sonique/Representation/Bloc/user_data_bloc/user_data_bloc.dart';
 import 'package:sonique/Representation/Bloc/user_data_bloc/user_data_state.dart';
 import 'package:sonique/Representation/widgets/CustomButton.dart';
 import 'package:sonique/Representation/widgets/CustomTextFormField.dart';
+import 'package:sonique/core/services/routes/routes.dart';
 
 class LibraryPage extends StatefulWidget {
   const LibraryPage({super.key});
@@ -32,7 +34,7 @@ class _LibraryPageState extends State<LibraryPage> {
                 ? FloatingActionButton(
                   onPressed: () {
                     // Add your action for artists here
-                    showBottomSheet(context);
+                    context.push(Routes.upload);
                   },
                   child: const Icon(Icons.add),
                 )
@@ -47,6 +49,7 @@ class _LibraryPageState extends State<LibraryPage> {
 void showBottomSheet(BuildContext context) {
   final ImagePicker picker = ImagePicker();
   String selectedTrack = '';
+  XFile? selectedCover;
 
   showModalBottomSheet(
     useRootNavigator: true,
@@ -59,7 +62,7 @@ void showBottomSheet(BuildContext context) {
 
         expand: false,
         builder: (context, controller) {
-          return Container(
+          return SizedBox(
             height: 300,
 
             child: Padding(
@@ -100,7 +103,7 @@ void showBottomSheet(BuildContext context) {
                         source: ImageSource.gallery,
                       );
                       if (image != null) {
-                        selectedTrack = image.path;
+                        
                       }
                     },
                   ),
