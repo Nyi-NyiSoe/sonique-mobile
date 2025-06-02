@@ -11,6 +11,7 @@ import 'package:sonique/Representation/screens/login_page.dart';
 import 'package:sonique/Representation/screens/profile_page.dart';
 import 'package:sonique/Representation/screens/root_page.dart';
 import 'package:sonique/Representation/screens/signup_page.dart';
+import 'package:sonique/Representation/screens/upload_song_page.dart';
 import 'package:sonique/core/services/routes/routes.dart';
 
 class RoutingService {
@@ -61,6 +62,12 @@ class RoutingService {
         path: Routes.signUp,
         builder: (context, state) {
           return SignupPage();
+        },
+      ),
+      GoRoute(
+        path: Routes.upload,
+        builder: (context, state) {
+          return UploadSongPage();
         },
       ),
 
