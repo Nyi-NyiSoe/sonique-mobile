@@ -52,5 +52,15 @@ class SongDataBloc extends Bloc<SongDataEvent, SongDataState> {
         }
       }
     });
+
+    on<FetchSongGenreEvent>((event,emit) async{
+      emit(GenreLoadingState());
+      try{
+        final genres = await songDataUsecase.getGenre();
+        emit(GenreFetchedState(genres: genres));
+      }catch (e){
+        emit(GenreFetchingErrorState(error: e.toString()));
+      }
+    });
   }
 }

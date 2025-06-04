@@ -43,6 +43,7 @@ Future<void> setupLocator() async {
   locator.registerLazySingleton<UserDataBloc>(
     () => UserDataBloc(locator<UserDataUsecase>()),
   );
+  
  
   //GoRouter
   locator.registerLazySingleton<GoRouter>(
