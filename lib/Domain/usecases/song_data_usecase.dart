@@ -1,3 +1,4 @@
+import 'package:sonique/Data/models/genre_model.dart';
 import 'package:sonique/Data/models/song_response_model.dart';
 import 'package:sonique/Domain/repository/song_data_repository.dart';
 
@@ -20,6 +21,15 @@ class SongDataUsecase {
       return songResponse;
     } catch (e) {
       throw Exception('Failed to fetch more songs: $e');
+    }
+  }
+
+  Future<List<GenreModel>> getGenre() async {
+    try {
+      final genre = await songDataRepository.getGenre();
+      return genre;
+    } catch (e) {
+      throw Exception('Failed to get genre: $e');
     }
   }
 }

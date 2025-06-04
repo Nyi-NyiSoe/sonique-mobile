@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
+import 'package:sonique/Data/models/genre_model.dart';
 import 'package:sonique/Data/models/song_response_model.dart';
 import 'package:sonique/Data/source/auth_repo/auth_local_data_source.dart';
 
@@ -9,14 +10,20 @@ class SongRemoteData {
   final http.Client client;
   late String getSongUrl;
   late String getSongByIdUrl;
+  late String getGenreUrl;
   final AuthLocalDataSource authLocalDataSource;
 
   SongRemoteData({required this.client, required this.authLocalDataSource}) {
     getSongUrl =
         dotenv.env['GET_ALL_SONGS_URL'] ?? ''; // Replace with your actual URL
 
+    getGenreUrl = dotenv.env['GET_SONG_GENRES_URL'] ?? '';
     if (getSongUrl.isEmpty) {
       throw Exception('API URL is not set in .env file');
+    }
+
+    if (getGenreUrl.isEmpty) {
+      throw Exception('genre URL is not set in .env file');
     }
   }
   Future<SongResponseModel> getAllSongs() async {
@@ -53,7 +60,7 @@ class SongRemoteData {
     }
   }
 
-   Future<SongResponseModel> getMoreSongs(String cursor) async {
+  Future<SongResponseModel> getMoreSongs(String cursor) async {
     final currentUser = await authLocalDataSource.getUser();
     final refreshToken = currentUser.refreshToken;
     final token = currentUser.token;
@@ -87,5 +94,31 @@ class SongRemoteData {
     }
   }
 
-  
+  Future<List<GenreModel>> getGenre() async {
+    final currentUser = await authLocalDataSource.getUser();
+    final refreshToken = currentUser.refreshToken;
+    final token = currentUser.token;
+
+    if (refreshToken == null || token == null) {
+      throw Exception('Refresh token or access token is missing');
+    }
+
+    final headers = {
+      'Content-Type': 'application/json',
+      'Cookie': 'token=$token;refreshToken=$refreshToken',
+    };
+    try {
+      final response = await client.get(Uri.parse(getGenreUrl), headers: headers);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final List<dynamic> dataList = data['data'];
+        return dataList.map((json)=> GenreModel.fromJson(json)).toList();
+      } else {
+        throw Exception('Failed to turn into model ${response.body}');
+      }
+    } catch (e) {
+      throw Exception('Request failed: $e');
+    }
+  }
 }

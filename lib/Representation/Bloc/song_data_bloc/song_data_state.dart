@@ -1,3 +1,4 @@
+import 'package:sonique/Data/models/genre_model.dart';
 import 'package:sonique/Data/models/song_model.dart';
 
 abstract class SongDataState {}
@@ -11,7 +12,23 @@ class SongDataFetchedState extends SongDataState {
   final bool hasMore;
   final String cursor;
 
-  SongDataFetchedState({required this.songs, required this.hasMore, required this.cursor});
+  SongDataFetchedState({
+    required this.songs,
+    required this.hasMore,
+    required this.cursor,
+  });
+}
+
+class GenreFetchedState extends SongDataState {
+  final List<GenreModel> genres;
+  GenreFetchedState({required this.genres});
+}
+
+class GenreLoadingState extends SongDataState{}
+
+class GenreFetchingErrorState extends SongDataState{
+  final String error;
+  GenreFetchingErrorState({required this.error});
 }
 
 class SongDataErrorState extends SongDataState {
