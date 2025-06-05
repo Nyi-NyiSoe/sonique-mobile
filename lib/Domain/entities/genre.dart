@@ -1,5 +1,5 @@
 class Genre {
-  final String id;
+  final int id;
   final String name;
   final String created_at;
   final String updated_at;

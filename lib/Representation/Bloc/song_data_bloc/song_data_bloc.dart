@@ -12,12 +12,14 @@ class SongDataBloc extends Bloc<SongDataEvent, SongDataState> {
       emit(SongDataLoadingState());
       try {
         final songs = await songDataUsecase.getAllSongs();
+        final genres = await songDataUsecase.getGenre();
 
         emit(
           SongDataFetchedState(
             songs: songs.songs,
             hasMore: songs.hasMore,
             cursor: songs.nextCursor,
+            genres: genres
           ),
         );
       } catch (e) {
@@ -29,13 +31,17 @@ class SongDataBloc extends Bloc<SongDataEvent, SongDataState> {
       final currentState = state;
       if (currentState is SongDataFetchedState) {
         try {
-          final songResponse = await songDataUsecase.getMoreSongs(currentState.cursor);
+          final songResponse = await songDataUsecase.getMoreSongs(
+            currentState.cursor,
+          );
+          final genres = await songDataUsecase.getGenre();
           if (songResponse.hasMore) {
             emit(
               SongDataFetchedState(
                 songs: currentState.songs + songResponse.songs,
                 hasMore: songResponse.hasMore,
                 cursor: songResponse.nextCursor,
+                genres: genres
               ),
             );
           } else {
@@ -44,22 +50,13 @@ class SongDataBloc extends Bloc<SongDataEvent, SongDataState> {
                 songs: currentState.songs + songResponse.songs,
                 hasMore: false,
                 cursor: currentState.cursor,
+                genres: genres
               ),
             );
           }
         } catch (e) {
           emit(SongDataErrorState(error: e.toString()));
         }
-      }
-    });
-
-    on<FetchSongGenreEvent>((event,emit) async{
-      emit(GenreLoadingState());
-      try{
-        final genres = await songDataUsecase.getGenre();
-        emit(GenreFetchedState(genres: genres));
-      }catch (e){
-        emit(GenreFetchingErrorState(error: e.toString()));
       }
     });
   }
