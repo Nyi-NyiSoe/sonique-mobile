@@ -46,7 +46,7 @@ class MyApp extends StatelessWidget {
           create: (context) {
             final songDataBloc = locator<SongDataBloc>();
             songDataBloc.add(FetchAllSongEvent());
-            songDataBloc.add(FetchSongGenreEvent());
+           
             return songDataBloc;
           },
         ),

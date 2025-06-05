@@ -11,24 +11,14 @@ class SongDataFetchedState extends SongDataState {
   final List<SongModel> songs;
   final bool hasMore;
   final String cursor;
+  final List<GenreModel> genres;
 
   SongDataFetchedState({
     required this.songs,
     required this.hasMore,
     required this.cursor,
+    required this.genres
   });
-}
-
-class GenreFetchedState extends SongDataState {
-  final List<GenreModel> genres;
-  GenreFetchedState({required this.genres});
-}
-
-class GenreLoadingState extends SongDataState{}
-
-class GenreFetchingErrorState extends SongDataState{
-  final String error;
-  GenreFetchingErrorState({required this.error});
 }
 
 class SongDataErrorState extends SongDataState {
