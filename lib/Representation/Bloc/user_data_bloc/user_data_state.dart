@@ -32,6 +32,7 @@ class UpdateUserDetailState extends UserDataState {
   });
 }
 
+
 class UserDataErrorState extends UserDataState {
   final String error;
 

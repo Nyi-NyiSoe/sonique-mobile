@@ -7,4 +7,5 @@ abstract class SongDataRepository {
   Future<SongResponseModel> getMoreSongs(String cursor);
 
   Future<List<GenreModel>> getGenre();
+  Future<void> uploadGenre(String genreName);
 }

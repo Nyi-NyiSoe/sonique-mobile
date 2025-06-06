@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
@@ -11,6 +12,7 @@ class SongRemoteData {
   late String getSongUrl;
   late String getSongByIdUrl;
   late String getGenreUrl;
+  late String uploadGenreUrl;
   final AuthLocalDataSource authLocalDataSource;
 
   SongRemoteData({required this.client, required this.authLocalDataSource}) {
@@ -18,6 +20,7 @@ class SongRemoteData {
         dotenv.env['GET_ALL_SONGS_URL'] ?? ''; // Replace with your actual URL
 
     getGenreUrl = dotenv.env['GET_SONG_GENRES_URL'] ?? '';
+    uploadGenreUrl = dotenv.env['UPLOAD_SONG_GENRE_URL'] ?? '';
     if (getSongUrl.isEmpty) {
       throw Exception('API URL is not set in .env file');
     }
@@ -108,17 +111,49 @@ class SongRemoteData {
       'Cookie': 'token=$token;refreshToken=$refreshToken',
     };
     try {
-      final response = await client.get(Uri.parse(getGenreUrl), headers: headers);
+      final response = await client.get(
+        Uri.parse(getGenreUrl),
+        headers: headers,
+      );
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         final List<dynamic> dataList = data['data'];
-        return dataList.map((json)=> GenreModel.fromJson(json)).toList();
+        return dataList.map((json) => GenreModel.fromJson(json)).toList();
       } else {
         throw Exception('Failed to turn into model ${response.body}');
       }
     } catch (e) {
       throw Exception('Request failed: $e');
+    }
+  }
+
+  Future<void> uploadSongGenre(String genreName) async {
+    final currentUser = await authLocalDataSource.getUser();
+    final refreshToken = currentUser.refreshToken;
+    final token = currentUser.token;
+
+    if (refreshToken == null || token == null) {
+      throw Exception('Refresh token or access token is missing');
+    }
+
+    final headers = {
+      'Content-Type': 'application/json',
+      'Cookie': 'token=$token;refreshToken=$refreshToken',
+    };
+    final body = jsonEncode({'name': genreName});
+
+    try {
+      final response = await client.post(
+        Uri.parse(uploadGenreUrl),
+        headers: headers,
+        body: body,
+      );
+
+      log(response.body);
+     
+    } catch (e) {
+      throw Exception('Error uploading gnere; $e');
     }
   }
 }
