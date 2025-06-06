@@ -19,7 +19,7 @@ class SongDataBloc extends Bloc<SongDataEvent, SongDataState> {
             songs: songs.songs,
             hasMore: songs.hasMore,
             cursor: songs.nextCursor,
-            genres: genres
+            genres: genres,
           ),
         );
       } catch (e) {
@@ -41,7 +41,7 @@ class SongDataBloc extends Bloc<SongDataEvent, SongDataState> {
                 songs: currentState.songs + songResponse.songs,
                 hasMore: songResponse.hasMore,
                 cursor: songResponse.nextCursor,
-                genres: genres
+                genres: genres,
               ),
             );
           } else {
@@ -50,13 +50,24 @@ class SongDataBloc extends Bloc<SongDataEvent, SongDataState> {
                 songs: currentState.songs + songResponse.songs,
                 hasMore: false,
                 cursor: currentState.cursor,
-                genres: genres
+                genres: genres,
               ),
             );
           }
         } catch (e) {
           emit(SongDataErrorState(error: e.toString()));
         }
+      }
+    });
+
+    on<UploadSongGenreEvent>((event, emit) async {
+      emit(SongDataLoadingState());
+      try {
+        await songDataUsecase.uploadSongGenre(event.genreName);
+
+        add(FetchAllSongEvent());
+      } catch (e) {
+        emit(SongDataErrorState(error: e.toString()));
       }
     });
   }

@@ -21,8 +21,11 @@ class SongDataFetchedState extends SongDataState {
   });
 }
 
+
+
 class SongDataErrorState extends SongDataState {
   final String error;
 
   SongDataErrorState({required this.error});
 }
+
