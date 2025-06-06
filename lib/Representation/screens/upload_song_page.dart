@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:sonique/Representation/Bloc/song_data_bloc/song_data_bloc.dart';
+import 'package:sonique/Representation/Bloc/song_data_bloc/song_data_event.dart';
 import 'package:sonique/Representation/Bloc/song_data_bloc/song_data_state.dart';
 import 'package:sonique/Representation/widgets/CustomButton.dart';
 import 'package:sonique/Representation/widgets/CustomTextFormField.dart';
@@ -83,8 +84,25 @@ class UploadSongPage extends StatelessWidget {
                                       ),
                                       CustomElevatedButton(
                                         width: 100,
-                                        child: Text('Add'),
-                                        onPressed: () {},
+                                        child: BlocBuilder<SongDataBloc,SongDataState>(
+                                          builder: (context, state) {
+                                            if (state is SongDataLoadingState) {
+                                              return CircularProgressIndicator();
+                                            }
+                                            if (state is SongDataFetchedState) {
+                                              return Text('Add');
+                                            } else {
+                                              return Text('Error');
+                                            }
+                                          },
+                                        ),
+                                        onPressed: () {
+                                          context.read<SongDataBloc>().add(
+                                            UploadSongGenreEvent(
+                                              genreName: 'Metal',
+                                            ),
+                                          );
+                                        },
                                       ),
                                     ],
                                   ),

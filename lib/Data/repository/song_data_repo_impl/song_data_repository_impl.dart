@@ -36,4 +36,14 @@ class SongDataRepositoryImpl implements SongDataRepository {
     }
   }
 
+  @override 
+  Future<void> uploadGenre(String genreName)async{
+    try{
+      return await songRemoteData.uploadSongGenre(genreName);
+
+    }catch(e){
+      throw Exception('Failed to fetch genre : $e');
+    }
+  }
+
 }

@@ -11,6 +11,7 @@ class UserRemoteData {
   final http.Client client;
   late String getUserUrl;
   late String updateUserUrl;
+  late String uploadGenreUrl;
   final AuthLocalDataSource authLocalDataSource;
   // This class is responsible for fetching user data from a remote source.
   // It could be an API or a database.
@@ -22,7 +23,9 @@ class UserRemoteData {
         dotenv.env['UPDATE_USER_DETAIL_URL'] ??
         ''; // Replace with your actual URL
 
-    if (getUserUrl.isEmpty || updateUserUrl.isEmpty) {
+   
+
+    if (getUserUrl.isEmpty || updateUserUrl.isEmpty ) {
       throw Exception('API URL is not set in .env file');
     }
   }
@@ -118,4 +121,7 @@ class UserRemoteData {
       throw Exception('Error updating user details: $e');
     }
   }
-}
+
+ }
+
+
