@@ -5,4 +5,5 @@ abstract class UserDataRepository {
   Future<UserModel> getUserData();
   Future<String> updateUserImage(XFile? profile_image);
   Future<void> updateUserData(String? bio,String? firstName,String? lastName,String? username);
+  
 }

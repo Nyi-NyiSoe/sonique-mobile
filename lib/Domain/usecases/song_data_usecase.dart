@@ -32,4 +32,7 @@ class SongDataUsecase {
       throw Exception('Failed to get genre: $e');
     }
   }
+   Future<void> uploadSongGenre(String name){
+    return songDataRepository.uploadGenre(name);
+  }
 }

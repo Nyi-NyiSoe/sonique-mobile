@@ -9,3 +9,8 @@ class FetchSongByIdEvent extends SongDataEvent {
 
   FetchSongByIdEvent({required this.songId});
 }
+
+class UploadSongGenreEvent extends SongDataEvent{
+  final String genreName;
+  UploadSongGenreEvent({required this.genreName});
+}
