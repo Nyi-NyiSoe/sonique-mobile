@@ -59,10 +59,7 @@ class _HomePageState extends State<HomePage> {
                   if (index < state.songs.length) {
                     final song = state.songs[index];
                     return Customsongcard(
-                      songId: song.id,
-                      img_url: song.coverImageUrl,
-                      songTitle: song.title,
-                      artistName: song.artist.name,
+                      song: song,
                     );
                   } else {
                     return const Center(child: CircularProgressIndicator());
