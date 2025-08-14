@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sonique/Data/models/playback_status.dart';
+import 'package:sonique/Representation/Bloc/music_player_bloc/music_player_bloc.dart';
+import 'package:sonique/Representation/Bloc/music_player_bloc/music_player_event.dart';
+import 'package:sonique/Representation/Bloc/music_player_bloc/music_player_state.dart';
+import 'package:sonique/Representation/widgets/miniplayer.dart';
 
 class RootPage extends StatefulWidget {
   final StatefulNavigationShell navigationShell;
@@ -14,7 +20,38 @@ class _RootPageState extends State<RootPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: widget.navigationShell,
+      body: Stack(
+        children: [
+          widget.navigationShell,
+
+          BlocBuilder<MusicPlayerBloc, MusicPlayerState>(
+            builder: (context, state) {
+              if (state.currentSong == null) {
+                return const SizedBox.shrink();
+              }
+
+              return Align(
+                alignment: Alignment.bottomCenter,
+
+                child: MiniPlayer(
+                  song: state.currentSong!,
+                  isPlaying: state.status == PlayBackStatus.playing,
+                  onPlayPause: () {
+                    if (state.status == PlayBackStatus.playing) {
+                      context.read<MusicPlayerBloc>().add(PauseSong());
+                    } else {
+                      context.read<MusicPlayerBloc>().add(ResumeSong());
+                    }
+                  },
+                  onNext: () {
+                    context.read<MusicPlayerBloc>().add(NextSong());
+                  },
+                ),
+              );
+            },
+          ),
+        ],
+      ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: widget.navigationShell.currentIndex,
         onDestinationSelected: (index) {

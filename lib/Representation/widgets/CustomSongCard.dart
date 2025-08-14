@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:sonique/Domain/entities/song.dart';
+import 'package:sonique/Representation/Bloc/music_player_bloc/music_player_bloc.dart';
+import 'package:sonique/Representation/Bloc/music_player_bloc/music_player_event.dart';
 
 class Customsongcard extends StatelessWidget {
   const Customsongcard({super.key,
-    required this.img_url,
-    required this.songId,
-    required this.artistName,
-    required this.songTitle,
+    required this.song
   });
-  final String img_url;
-  final String songId;
-  final String artistName;
-  final String songTitle;
+  final Song song;
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +23,7 @@ class Customsongcard extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Image.network(
-                  img_url,
+                  song.coverImageUrl,
                   width: 80,
                   height: 80,
                   fit: BoxFit.cover,
@@ -36,11 +35,11 @@ class Customsongcard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                    Text(
-                    songTitle,
+                    song.title,
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                    Text(
-                    artistName,
+                    song.artist.name,
                     style: TextStyle(fontSize: 15, color: Colors.grey),
                   ),
                 ],
@@ -59,13 +58,26 @@ class Customsongcard extends StatelessWidget {
 
                         child: Column(
                           children: [
-                            ListTile(
-                              leading: Icon(Icons.play_arrow),
-                              title: Text('Play'),
+                            GestureDetector(
+                              onTap: (){
+                                print('clicked');
+                                context.read<MusicPlayerBloc>().add(PlaySong(song));
+                                context.pop();
+                              },
+                              child: ListTile(
+                                leading: Icon(Icons.play_arrow),
+                                title: Text('Play'),
+                              ),
                             ),
-                            ListTile(
-                              leading: Icon(Icons.add),
-                              title: Text('Add to Playlist'),
+                            GestureDetector(
+                              onTap: (){
+                                 context.read<MusicPlayerBloc>().add(AddToQueue(song));
+                                  context.pop();
+                              },
+                              child: ListTile(
+                                leading: Icon(Icons.add),
+                                title: Text('Add to Playlist'),
+                              ),
                             ),
                             ListTile(
                               leading: Icon(Icons.info),
