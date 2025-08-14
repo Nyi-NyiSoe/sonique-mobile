@@ -6,6 +6,8 @@ import 'package:sonique/Data/source/auth_repo/auth_local_data_source.dart';
 import 'package:sonique/Domain/usecases/auth_usecase.dart';
 import 'package:sonique/Representation/Bloc/auth_bloc/auth_bloc.dart';
 import 'package:sonique/Representation/Bloc/auth_bloc/auth_event.dart';
+import 'package:sonique/Representation/Bloc/music_player_bloc/music_player_bloc.dart';
+import 'package:sonique/Representation/Bloc/music_player_bloc/music_player_event.dart';
 import 'package:sonique/Representation/Bloc/song_data_bloc/song_data_bloc.dart';
 import 'package:sonique/Representation/Bloc/song_data_bloc/song_data_event.dart';
 import 'package:sonique/Representation/Bloc/user_data_bloc/user_data_bloc.dart';
@@ -55,6 +57,13 @@ class MyApp extends StatelessWidget {
           final userDataBloc = locator<UserDataBloc>();
           userDataBloc.add(FetchUserDataEvent());
           return userDataBloc;
+        }),
+
+        BlocProvider<MusicPlayerBloc>(create: (context){
+          final musicPlayerBloc = locator<MusicPlayerBloc>();
+          musicPlayerBloc.add(StopSong());
+          return musicPlayerBloc;
+
         })
       ],
       child: MaterialApp.router(
