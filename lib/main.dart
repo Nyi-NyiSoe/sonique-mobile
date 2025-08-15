@@ -3,7 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sonique/Data/source/auth_repo/auth_local_data_source.dart';
-import 'package:sonique/Domain/usecases/auth_usecase.dart';
+import 'package:sonique/Domain/usecases/login_usecase.dart';
+import 'package:sonique/Domain/usecases/logout_usecase.dart';
+import 'package:sonique/Domain/usecases/register_usecase.dart';
 import 'package:sonique/Representation/Bloc/auth_bloc/auth_bloc.dart';
 import 'package:sonique/Representation/Bloc/auth_bloc/auth_event.dart';
 import 'package:sonique/Representation/Bloc/music_player_bloc/music_player_bloc.dart';
@@ -35,8 +37,10 @@ class MyApp extends StatelessWidget {
         BlocProvider<AuthBloc>(
           create: (context) {
             final authBloc = AuthBloc(
-              locator<AuthUsecase>(),
               locator<AuthLocalDataSource>(),
+              locator<LoginUsecase>(),
+              locator<RegisterUsecase>(),
+              locator<LogoutUsecase>(),
             );
 
             authBloc.add(AppStartedEvent());
@@ -48,23 +52,26 @@ class MyApp extends StatelessWidget {
           create: (context) {
             final songDataBloc = locator<SongDataBloc>();
             songDataBloc.add(FetchAllSongEvent());
-           
+
             return songDataBloc;
           },
         ),
 
-        BlocProvider<UserDataBloc>(create: (context){
-          final userDataBloc = locator<UserDataBloc>();
-          userDataBloc.add(FetchUserDataEvent());
-          return userDataBloc;
-        }),
+        BlocProvider<UserDataBloc>(
+          create: (context) {
+            final userDataBloc = locator<UserDataBloc>();
+            userDataBloc.add(FetchUserDataEvent());
+            return userDataBloc;
+          },
+        ),
 
-        BlocProvider<MusicPlayerBloc>(create: (context){
-          final musicPlayerBloc = locator<MusicPlayerBloc>();
-          musicPlayerBloc.add(StopSong());
-          return musicPlayerBloc;
-
-        })
+        BlocProvider<MusicPlayerBloc>(
+          create: (context) {
+            final musicPlayerBloc = locator<MusicPlayerBloc>();
+            musicPlayerBloc.add(StopSong());
+            return musicPlayerBloc;
+          },
+        ),
       ],
       child: MaterialApp.router(
         title: 'Flutter Demo',
