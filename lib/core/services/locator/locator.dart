@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sonique/Data/repository/auth_repo_impl/auth_repository_impl.dart';
 import 'package:sonique/Data/repository/song_data_repo_impl/song_data_repository_impl.dart';
 import 'package:sonique/Data/repository/user_data_repo_impl/user_data_repository_impl.dart';
+import 'package:sonique/Data/services/song_service.dart';
 import 'package:sonique/Data/source/auth_repo/auth_local_data_source.dart';
 import 'package:sonique/Data/source/auth_repo/auth_remote_data_source.dart';
 import 'package:sonique/Data/source/song_data_repo/song_remote_data.dart';
@@ -12,7 +13,9 @@ import 'package:sonique/Data/source/user_data_repo/user_remote_data.dart';
 import 'package:sonique/Domain/repository/auth_repository.dart';
 import 'package:sonique/Domain/repository/song_data_repository.dart';
 import 'package:sonique/Domain/repository/user_data_repository.dart';
-import 'package:sonique/Domain/usecases/auth_usecase.dart';
+import 'package:sonique/Domain/usecases/login_usecase.dart';
+import 'package:sonique/Domain/usecases/logout_usecase.dart';
+import 'package:sonique/Domain/usecases/register_usecase.dart';
 import 'package:sonique/Domain/usecases/song_data_usecase.dart';
 import 'package:sonique/Domain/usecases/user_data_usecase.dart';
 import 'package:sonique/Representation/Bloc/auth_bloc/auth_bloc.dart';
@@ -34,20 +37,27 @@ Future<void> setupLocator() async {
   //register http
   locator.registerLazySingleton(() => http.Client());
 
+  //register services
+  locator.registerLazySingleton<SongService>(()=> SongService(locator<SongDataRepository>()));
+
   //Register Blocs
   locator.registerLazySingleton<AuthBloc>(
-    () => AuthBloc(locator<AuthUsecase>(), locator<AuthLocalDataSource>()),
+    () => AuthBloc(
+      locator<AuthLocalDataSource>(),
+      locator<LoginUsecase>(),
+      locator<RegisterUsecase>(),
+      locator<LogoutUsecase>(),
+    ),
   );
   locator.registerLazySingleton<SongDataBloc>(
-    () => SongDataBloc(songDataUsecase: locator<SongDataUsecase>()),
+    () => SongDataBloc(songDataUsecase: locator<SongDataUsecase>(),songService: locator<SongService>()),
   );
   locator.registerLazySingleton<UserDataBloc>(
     () => UserDataBloc(locator<UserDataUsecase>()),
   );
 
-  locator.registerLazySingleton<MusicPlayerBloc>(()=>MusicPlayerBloc());
-  
- 
+  locator.registerLazySingleton<MusicPlayerBloc>(() => MusicPlayerBloc());
+
   //GoRouter
   locator.registerLazySingleton<GoRouter>(
     () => RoutingService(locator<AuthBloc>()).router,
@@ -92,8 +102,14 @@ Future<void> setupLocator() async {
   );
 
   //Usecases
-  locator.registerLazySingleton<AuthUsecase>(
-    () => AuthUsecase(locator<AuthRepository>()),
+  locator.registerLazySingleton<LoginUsecase>(
+    () => LoginUsecase(locator<AuthRepository>()),
+  );
+  locator.registerLazySingleton<RegisterUsecase>(
+    () => RegisterUsecase(locator<AuthRepository>()),
+  );
+  locator.registerLazySingleton<LogoutUsecase>(
+    () => LogoutUsecase(locator<AuthRepository>()),
   );
 
   locator.registerLazySingleton<SongDataUsecase>(

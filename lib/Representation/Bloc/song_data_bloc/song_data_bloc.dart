@@ -1,18 +1,20 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sonique/Data/services/song_service.dart';
 import 'package:sonique/Domain/usecases/song_data_usecase.dart';
 import 'package:sonique/Representation/Bloc/song_data_bloc/song_data_event.dart';
 import 'package:sonique/Representation/Bloc/song_data_bloc/song_data_state.dart';
 
 class SongDataBloc extends Bloc<SongDataEvent, SongDataState> {
   final SongDataUsecase songDataUsecase;
+  final SongService songService;
 
-  SongDataBloc({required this.songDataUsecase})
+  SongDataBloc({required this.songDataUsecase,required this.songService})
     : super(SongDataInitialState()) {
     on<FetchAllSongEvent>((event, emit) async {
       emit(SongDataLoadingState());
       try {
-        final songs = await songDataUsecase.getAllSongs();
-        final genres = await songDataUsecase.getGenre();
+        final songs = await songService.fetchSongs();
+        final genres = await songService.getGenre();
 
         emit(
           SongDataFetchedState(
@@ -31,10 +33,10 @@ class SongDataBloc extends Bloc<SongDataEvent, SongDataState> {
       final currentState = state;
       if (currentState is SongDataFetchedState) {
         try {
-          final songResponse = await songDataUsecase.getMoreSongs(
+          final songResponse = await songService.fetchMoreSongs(
             currentState.cursor,
           );
-          final genres = await songDataUsecase.getGenre();
+          final genres = await songService.getGenre();
           if (songResponse.hasMore) {
             emit(
               SongDataFetchedState(
