@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sonique/Domain/entities/song.dart';
 
-
-
 class MiniPlayer extends StatelessWidget {
   final Song song;
   final bool isPlaying;
@@ -21,8 +19,7 @@ class MiniPlayer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: 60,
-      margin: const EdgeInsets.only(bottom: 80), // space for NavigationBar
-      padding: const EdgeInsets.symmetric(horizontal: 12),
+
       decoration: BoxDecoration(
         color: Colors.grey[900],
         borderRadius: BorderRadius.circular(8),
@@ -33,7 +30,7 @@ class MiniPlayer extends StatelessWidget {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              '${song.title} - ${song.artist}',
+              '${song.title} - ${song.artist.name}',
               style: const TextStyle(color: Colors.white),
               overflow: TextOverflow.ellipsis,
             ),

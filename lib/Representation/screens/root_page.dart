@@ -20,59 +20,55 @@ class _RootPageState extends State<RootPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
+      body: widget.navigationShell,
+      bottomNavigationBar: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          widget.navigationShell,
-
           BlocBuilder<MusicPlayerBloc, MusicPlayerState>(
             builder: (context, state) {
               if (state.currentSong == null) {
                 return const SizedBox.shrink();
               }
 
-              return Align(
-                alignment: Alignment.bottomCenter,
-
-                child: MiniPlayer(
-                  song: state.currentSong!,
-                  isPlaying: state.status == PlayBackStatus.playing,
-                  onPlayPause: () {
-                    if (state.status == PlayBackStatus.playing) {
-                      context.read<MusicPlayerBloc>().add(PauseSong());
-                    } else {
-                      context.read<MusicPlayerBloc>().add(ResumeSong());
-                    }
-                  },
-                  onNext: () {
-                    context.read<MusicPlayerBloc>().add(NextSong());
-                  },
-                ),
+              return MiniPlayer(
+                song: state.currentSong!,
+                isPlaying: state.status == PlayBackStatus.playing,
+                onPlayPause: () {
+                  if (state.status == PlayBackStatus.playing) {
+                    context.read<MusicPlayerBloc>().add(PauseSong());
+                  } else {
+                    context.read<MusicPlayerBloc>().add(ResumeSong());
+                  }
+                },
+                onNext: () {
+                  context.read<MusicPlayerBloc>().add(NextSong());
+                },
               );
             },
           ),
-        ],
-      ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: widget.navigationShell.currentIndex,
-        onDestinationSelected: (index) {
-          widget.navigationShell.goBranch(index);
-        },
-        destinations: [
-          NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.library_music_outlined),
-            selectedIcon: Icon(Icons.library_music),
-            label: 'Library',
-          ),
+          NavigationBar(
+            selectedIndex: widget.navigationShell.currentIndex,
+            onDestinationSelected: (index) {
+              widget.navigationShell.goBranch(index);
+            },
+            destinations: [
+              NavigationDestination(
+                icon: Icon(Icons.home_outlined),
+                selectedIcon: Icon(Icons.home),
+                label: 'Home',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.library_music_outlined),
+                selectedIcon: Icon(Icons.library_music),
+                label: 'Library',
+              ),
 
-          NavigationDestination(
-            icon: Icon(Icons.person_outline),
-            selectedIcon: Icon(Icons.person),
-            label: 'Profile',
+              NavigationDestination(
+                icon: Icon(Icons.person_outline),
+                selectedIcon: Icon(Icons.person),
+                label: 'Profile',
+              ),
+            ],
           ),
         ],
       ),
