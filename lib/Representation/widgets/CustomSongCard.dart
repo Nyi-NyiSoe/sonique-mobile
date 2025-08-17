@@ -4,17 +4,30 @@ import 'package:go_router/go_router.dart';
 import 'package:sonique/Domain/entities/song.dart';
 import 'package:sonique/Representation/Bloc/music_player_bloc/music_player_bloc.dart';
 import 'package:sonique/Representation/Bloc/music_player_bloc/music_player_event.dart';
+import 'package:sonique/Representation/widgets/SongDetailCard.dart';
 
 class Customsongcard extends StatelessWidget {
-  const Customsongcard({super.key,
-    required this.song
-  });
+  const Customsongcard({super.key, required this.song});
   final Song song;
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () {},
+      onTap: () {
+        showModalBottomSheet(
+          isScrollControlled: true,
+          useRootNavigator: true,
+          context: context,
+          builder: (context) {
+            return DraggableScrollableSheet(
+              initialChildSize: 1,
+              builder: (context, controller) {
+                return Songdetailcard(song: song,controller: controller,);
+              },
+            );
+          },
+        );
+      },
       child: SizedBox(
         height: 100,
         child: Card(
@@ -34,11 +47,11 @@ class Customsongcard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                   Text(
+                  Text(
                     song.title,
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
-                   Text(
+                  Text(
                     song.artist.name,
                     style: TextStyle(fontSize: 15, color: Colors.grey),
                   ),
@@ -59,9 +72,11 @@ class Customsongcard extends StatelessWidget {
                         child: Column(
                           children: [
                             GestureDetector(
-                              onTap: (){
+                              onTap: () {
                                 print('clicked');
-                                context.read<MusicPlayerBloc>().add(PlaySong(song));
+                                context.read<MusicPlayerBloc>().add(
+                                  PlaySong(song),
+                                );
                                 context.pop();
                               },
                               child: ListTile(
@@ -70,9 +85,26 @@ class Customsongcard extends StatelessWidget {
                               ),
                             ),
                             GestureDetector(
-                              onTap: (){
-                                 context.read<MusicPlayerBloc>().add(AddToQueue(song));
-                                  context.pop();
+                              onTap: () {
+                                try {
+                                  context.read<MusicPlayerBloc>().add(
+                                    AddToQueue(song),
+                                  );
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('Added to playlist'),
+                                    ),
+                                  );
+                                } catch (e) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        'Failed to add to playlist',
+                                      ),
+                                    ),
+                                  );
+                                }
+                                context.pop();
                               },
                               child: ListTile(
                                 leading: Icon(Icons.add),
