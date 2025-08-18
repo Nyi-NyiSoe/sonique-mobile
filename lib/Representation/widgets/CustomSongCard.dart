@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:sonique/Domain/entities/song.dart';
 import 'package:sonique/Representation/Bloc/music_player_bloc/music_player_bloc.dart';
 import 'package:sonique/Representation/Bloc/music_player_bloc/music_player_event.dart';
-import 'package:sonique/Representation/widgets/SongDetailCard.dart';
+import 'package:sonique/Representation/screens/SongDetailPage.dart';
 
 class Customsongcard extends StatelessWidget {
   const Customsongcard({super.key, required this.song});

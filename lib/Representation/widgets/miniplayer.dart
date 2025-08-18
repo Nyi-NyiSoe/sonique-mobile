@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sonique/Domain/entities/song.dart';
-import 'package:sonique/Representation/widgets/SongDetailCard.dart';
+import 'package:sonique/Representation/screens/queue_page.dart';
 
 class MiniPlayer extends StatelessWidget {
   final Song song;
@@ -22,7 +22,7 @@ class MiniPlayer extends StatelessWidget {
       onTap: () {
         showModalBottomSheet(
           isScrollControlled: true,
-          backgroundColor: Colors.transparent, // no black background
+          //backgroundColor: Colors.transparent, // no black background
           context: context,
           builder: (context) {
             return DraggableScrollableSheet(
@@ -34,9 +34,8 @@ class MiniPlayer extends StatelessWidget {
                 return SafeArea(
                   top: false,
                   bottom: false, // 🔑 remove bottom SafeArea gap
-                  child: Songdetailcard(
-                    song: song,
-                    controller: controller, // make it scrollable
+                  child: QueuePage(
+                    // make it scrollable
                   ),
                 );
               },
