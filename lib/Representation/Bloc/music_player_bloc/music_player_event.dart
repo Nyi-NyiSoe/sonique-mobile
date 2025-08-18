@@ -23,3 +23,9 @@ class UpdatePosition extends MusicEvent {
 }
 class ToggleShuffle extends MusicEvent {}
 class ToggleRepeat extends MusicEvent {}
+
+class ReorderQueue extends MusicEvent{
+  final int oldIndex;
+  final int newIndex;
+  ReorderQueue({required this.oldIndex,required this.newIndex});
+}
