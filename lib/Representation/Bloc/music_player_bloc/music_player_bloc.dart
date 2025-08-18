@@ -5,7 +5,6 @@ import 'package:sonique/Domain/entities/song.dart';
 import 'package:sonique/Representation/Bloc/music_player_bloc/music_player_event.dart';
 import 'package:sonique/Representation/Bloc/music_player_bloc/music_player_state.dart';
 
-
 class MusicPlayerBloc extends Bloc<MusicEvent, MusicPlayerState> {
   final AudioPlayer _player = AudioPlayer();
 
@@ -21,6 +20,7 @@ class MusicPlayerBloc extends Bloc<MusicEvent, MusicPlayerState> {
     on<UpdatePosition>(_onUpdatePosition);
     on<ToggleShuffle>(_onToggleShuffle);
     on<ToggleRepeat>(_onToggleRepeat);
+    on<ReorderQueue>(_onReorderQueue);
 
     // Listen for completion to auto-play next song
     _player.onPlayerComplete.listen((_) {
@@ -33,7 +33,10 @@ class MusicPlayerBloc extends Bloc<MusicEvent, MusicPlayerState> {
     });
   }
 
-  Future<void> _onPlaySong(PlaySong event, Emitter<MusicPlayerState> emit) async {
+  Future<void> _onPlaySong(
+    PlaySong event,
+    Emitter<MusicPlayerState> emit,
+  ) async {
     // Stop current song if any
     await _player.stop();
 
@@ -41,13 +44,13 @@ class MusicPlayerBloc extends Bloc<MusicEvent, MusicPlayerState> {
     await _player.play(UrlSource(event.song.audioUrl));
 
     // Update state
-    final newQueue = List<Song>.from(state.queue);
-    emit(state.copyWith(
-      currentSong: event.song,
-      status: PlayBackStatus.playing,
-      queue: newQueue,
-      position: Duration.zero,
-    ));
+    emit(
+      state.copyWith(
+        currentSong: event.song,
+        status: PlayBackStatus.playing,
+        position: Duration.zero,
+      ),
+    );
   }
 
   void _onAddToQueue(AddToQueue event, Emitter<MusicPlayerState> emit) {
@@ -76,7 +79,12 @@ class MusicPlayerBloc extends Bloc<MusicEvent, MusicPlayerState> {
         // Repeat current song
         await _player.seek(Duration.zero);
         await _player.resume();
-        emit(state.copyWith(status: PlayBackStatus.playing, position: Duration.zero));
+        emit(
+          state.copyWith(
+            status: PlayBackStatus.playing,
+            position: Duration.zero,
+          ),
+        );
       } else {
         await _player.stop();
         emit(state.copyWith(currentSong: null, status: PlayBackStatus.stopped));
@@ -85,21 +93,24 @@ class MusicPlayerBloc extends Bloc<MusicEvent, MusicPlayerState> {
     }
 
     // Determine next song
-    final nextSong = state.shuffle
-        ? (List<Song>.from(state.queue)..shuffle()).first
-        : state.queue.first;
+    final nextSong =
+        state.shuffle
+            ? (List<Song>.from(state.queue)..shuffle()).first
+            : state.queue.first;
 
     final updatedQueue = List<Song>.from(state.queue)..remove(nextSong);
 
     await _player.stop();
     await _player.play(UrlSource(nextSong.audioUrl));
 
-    emit(state.copyWith(
-      currentSong: nextSong,
-      queue: updatedQueue,
-      status: PlayBackStatus.playing,
-      position: Duration.zero,
-    ));
+    emit(
+      state.copyWith(
+        currentSong: nextSong,
+        queue: updatedQueue,
+        status: PlayBackStatus.playing,
+        position: Duration.zero,
+      ),
+    );
   }
 
   void _onPreviousSong(PreviousSong event, Emitter<MusicPlayerState> emit) {
@@ -118,5 +129,13 @@ class MusicPlayerBloc extends Bloc<MusicEvent, MusicPlayerState> {
 
   void _onToggleRepeat(ToggleRepeat event, Emitter<MusicPlayerState> emit) {
     emit(state.copyWith(repeat: !state.repeat));
+  }
+
+  void _onReorderQueue(ReorderQueue event, Emitter<MusicPlayerState> emit) {
+    final updatedQueue = List<Song>.from(state.queue);
+
+    final song = updatedQueue.removeAt(event.oldIndex);
+    updatedQueue.insert(event.newIndex, song);
+    emit(state.copyWith(queue: updatedQueue));
   }
 }
