@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sonique/Data/models/song_data_status.dart';
 import 'package:sonique/Representation/Bloc/song_data_bloc/song_data_bloc.dart';
 import 'package:sonique/Representation/Bloc/song_data_bloc/song_data_event.dart';
 import 'package:sonique/Representation/Bloc/song_data_bloc/song_data_state.dart';
@@ -22,7 +23,7 @@ class _HomePageState extends State<HomePage> {
       if (_scrollController.position.pixels >=
           _scrollController.position.maxScrollExtent) {
         final currentState = context.read<SongDataBloc>().state;
-        if (currentState is SongDataFetchedState && currentState.hasMore) {
+        if (currentState.fetchStatus == SongDataStatus.success && currentState.hasMore) {
           context.read<SongDataBloc>().add(FetchMoreSongEvent());
         }
       }
@@ -40,17 +41,17 @@ class _HomePageState extends State<HomePage> {
       ),
       body: BlocListener<SongDataBloc, SongDataState>(
         listener: (context, state) {
-          if (state is SongDataErrorState) {
+          if (state.fetchStatus == SongDataStatus.failure) {
             ScaffoldMessenger.of(
               context,
-            ).showSnackBar(SnackBar(content: Text(state.error)));
+            ).showSnackBar(SnackBar(content: Text(state.error.toString())));
           }
         },
         child: BlocBuilder<SongDataBloc, SongDataState>(
           builder: (context, state) {
-            if (state is SongDataLoadingState) {
+            if (state.fetchStatus == SongDataStatus.loading) {
               return const Center(child: CircularProgressIndicator());
-            } else if (state is SongDataFetchedState) {
+            } else if (state.fetchStatus == SongDataStatus.success) {
               return ListView.builder(
                 controller: _scrollController,
                 physics: const BouncingScrollPhysics(),
