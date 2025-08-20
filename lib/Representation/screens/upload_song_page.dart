@@ -7,6 +7,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:sonique/Data/models/genre_model.dart';
 import 'package:sonique/Data/models/song_data_status.dart';
 import 'package:sonique/Representation/Bloc/song_data_bloc/song_data_bloc.dart';
 import 'package:sonique/Representation/Bloc/song_data_bloc/song_data_event.dart';
@@ -25,7 +26,7 @@ class _UploadSongPageState extends State<UploadSongPage> {
   final TextEditingController _genreController = TextEditingController();
   final TextEditingController _titleController = TextEditingController();
 
-  String? _genre;
+  GenreModel? _genre;
   XFile? _coverImage;
   XFile? _audioFile;
   final ImagePicker picker = ImagePicker();
@@ -55,12 +56,12 @@ class _UploadSongPageState extends State<UploadSongPage> {
               key: _formKey,
               child: ListView(
                 children: [
-                    CustomTextFormField(
+                  CustomTextFormField(
                     label: 'Track title',
                     controller: _titleController,
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
-                      return 'Please enter a track title';
+                        return 'Please enter a track title';
                       }
                       return null;
                     },
@@ -70,11 +71,10 @@ class _UploadSongPageState extends State<UploadSongPage> {
                     children: [
                       Expanded(
                         child: DropdownMenu(
-                      
                           initialSelection: null,
                           onSelected: (value) {
                             if (value != null) {
-                              _genre = genres.elementAt(value - 1).name;
+                              _genre = genres.elementAt(value - 1);
                             }
                           },
                           inputDecorationTheme: InputDecorationTheme(
@@ -115,12 +115,13 @@ class _UploadSongPageState extends State<UploadSongPage> {
                                         Text('Genre'),
                                         Padding(
                                           padding: const EdgeInsets.all(8.0),
-                                            child: CustomTextFormField(
+                                          child: CustomTextFormField(
                                             controller: _genreController,
                                             label: 'Genre',
                                             validator: (value) {
-                                              if (value == null || value.trim().isEmpty) {
-                                              return 'Please enter a genre';
+                                              if (value == null ||
+                                                  value.trim().isEmpty) {
+                                                return 'Please enter a genre';
                                               }
                                               return null;
                                             },
@@ -254,21 +255,54 @@ class _UploadSongPageState extends State<UploadSongPage> {
                       ),
                     ),
                   ),
-                    SizedBox(height: 20,),
+                  SizedBox(height: 20),
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Center(
                       child: CustomElevatedButton(
                         onPressed: () {
+                          if (_formKey.currentState!.validate() &&
+                              _audioFile != null &&
+                              _coverImage != null) {
+                            // Check if audio file is mp3
+                            if (_audioFile!.name.toLowerCase().endsWith(
+                              '.mp3',
+                            )) {
+                              try {
+                                context.read<SongDataBloc>().add(
+                                  UploadSongEvent(
+                                    audioFile: _audioFile!,
+                                    coverImage: _coverImage!,
+                                    genreId: _genre!.id.toString(),
+                                    title: _titleController.text,
+                                  ),
+                                );
 
-                          if(_formKey.currentState!.validate() && _audioFile!= null && _coverImage != null){
-                              log(
-                            '_title: ${_titleController.text}, _genre: $_genre, _audioFile: ${_audioFile?.name}, _coverImage: ${_coverImage?.name}',
-                          );
-                          }else{
-                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Fill all the necessary fields')));
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      'Uploaded song successfully!',
+                                    ),
+                                  ),
+                                );
+
+                                context.pop();
+                              } catch (e) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text(e.toString())),
+                                );
+                              }
+                              // Proceed with upload logic here
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'Please select an MP3 audio file',
+                                  ),
+                                ),
+                              );
+                            }
                           }
-                          
                         },
                         child: const Text('Upload'),
                       ),

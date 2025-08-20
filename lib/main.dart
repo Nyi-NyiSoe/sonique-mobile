@@ -19,7 +19,9 @@ import 'package:sonique/core/theme/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   await dotenv.load(fileName: ".env");
+  
   await setupLocator();
 
   runApp(const MyApp());
