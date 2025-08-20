@@ -9,13 +9,12 @@ class SongDataBloc extends Bloc<SongDataEvent, SongDataState> {
   final SongDataUsecase songDataUsecase;
   final SongService songService;
 
-  SongDataBloc({
-    required this.songDataUsecase,
-    required this.songService,
-  }) : super(const SongDataState()) {
+  SongDataBloc({required this.songDataUsecase, required this.songService})
+    : super(const SongDataState()) {
     on<FetchAllSongEvent>(_onFetchAllSongs);
     on<FetchMoreSongEvent>(_onFetchMoreSongs);
     on<UploadSongGenreEvent>(_onUploadSongGenre);
+    on<UploadSongEvent>(_onUploadSong);
   }
 
   Future<void> _onFetchAllSongs(
@@ -39,10 +38,12 @@ class SongDataBloc extends Bloc<SongDataEvent, SongDataState> {
         ),
       );
     } catch (e) {
-      emit(state.copyWith(
-        fetchStatus: SongDataStatus.failure,
-        error: e.toString(),
-      ));
+      emit(
+        state.copyWith(
+          fetchStatus: SongDataStatus.failure,
+          error: e.toString(),
+        ),
+      );
     }
   }
 
@@ -66,10 +67,12 @@ class SongDataBloc extends Bloc<SongDataEvent, SongDataState> {
           ),
         );
       } catch (e) {
-        emit(state.copyWith(
-          fetchStatus: SongDataStatus.failure,
-          error: e.toString(),
-        ));
+        emit(
+          state.copyWith(
+            fetchStatus: SongDataStatus.failure,
+            error: e.toString(),
+          ),
+        );
       }
     }
   }
@@ -88,10 +91,33 @@ class SongDataBloc extends Bloc<SongDataEvent, SongDataState> {
 
       emit(state.copyWith(uploadStatus: SongDataStatus.success, error: null));
     } catch (e) {
-      emit(state.copyWith(
-        uploadStatus: SongDataStatus.failure,
-        error: e.toString(),
-      ));
+      emit(
+        state.copyWith(
+          uploadStatus: SongDataStatus.failure,
+          error: e.toString(),
+        ),
+      );
+    }
+  }
+
+  Future<void> _onUploadSong(
+    UploadSongEvent event,
+    Emitter<SongDataState> emit,
+  ) async {
+    emit(state.copyWith(uploadStatus: SongDataStatus.loading));
+
+    try {
+      await songService.uploadSong(
+        event.audioFile,
+        event.coverImage,
+        event.genreId,
+        event.title,
+      );
+
+      add(FetchAllSongEvent());
+      emit(state.copyWith(uploadStatus: SongDataStatus.success, error: null));
+    } catch (e) {
+      state.copyWith(uploadStatus: SongDataStatus.failure, error: e.toString());
     }
   }
 }

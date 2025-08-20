@@ -1,3 +1,4 @@
+import 'package:image_picker/image_picker.dart';
 import 'package:sonique/Data/models/genre_model.dart';
 import 'package:sonique/Data/models/song_response_model.dart';
 import 'package:sonique/Data/source/song_data_repo/song_remote_data.dart';
@@ -43,6 +44,15 @@ class SongDataRepositoryImpl implements SongDataRepository {
 
     }catch(e){
       throw Exception('Failed to fetch genre : $e');
+    }
+  }
+
+  @override
+  Future<void> uploadSong(XFile audioFile,XFile coverImage,String genreId,String title)async{
+    try{
+      return await songRemoteData.uploadSong(audioFile, coverImage, genreId, title);
+    }catch(e){
+      throw Exception('Failed to upload Song: $e');
     }
   }
 
