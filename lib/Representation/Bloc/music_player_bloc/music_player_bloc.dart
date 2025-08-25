@@ -21,6 +21,9 @@ class MusicPlayerBloc extends Bloc<MusicEvent, MusicPlayerState> {
     on<ToggleShuffle>(_onToggleShuffle);
     on<ToggleRepeat>(_onToggleRepeat);
     on<ReorderQueue>(_onReorderQueue);
+    on<ResetPlayer>((event, emit) {
+      emit(MusicPlayerState.initial());
+    });
 
     // Listen for completion to auto-play next song
     _player.onPlayerComplete.listen((_) {
