@@ -29,3 +29,5 @@ class ReorderQueue extends MusicEvent{
   final int newIndex;
   ReorderQueue({required this.oldIndex,required this.newIndex});
 }
+
+class ResetPlayer extends MusicEvent{}
