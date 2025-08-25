@@ -36,4 +36,16 @@ class MusicPlayerState {
       repeat: repeat ?? this.repeat,
     );
   }
+
+  factory MusicPlayerState.initial() {
+  return const MusicPlayerState(
+    queue: [],
+    currentSong: null,
+    status: PlayBackStatus.stopped,
+    position: Duration.zero,
+    shuffle: false,
+    repeat: false,
+  );
+}
+
 }
