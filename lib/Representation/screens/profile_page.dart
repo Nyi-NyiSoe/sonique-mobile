@@ -9,6 +9,8 @@ import 'package:sonique/Data/models/user_model.dart';
 import 'package:sonique/Representation/Bloc/auth_bloc/auth_bloc.dart';
 import 'package:sonique/Representation/Bloc/auth_bloc/auth_event.dart';
 import 'package:sonique/Representation/Bloc/auth_bloc/auth_state.dart';
+import 'package:sonique/Representation/Bloc/music_player_bloc/music_player_bloc.dart';
+import 'package:sonique/Representation/Bloc/music_player_bloc/music_player_event.dart';
 import 'package:sonique/Representation/Bloc/user_data_bloc/user_data_bloc.dart';
 import 'package:sonique/Representation/Bloc/user_data_bloc/user_data_event.dart';
 import 'package:sonique/Representation/Bloc/user_data_bloc/user_data_state.dart';
@@ -46,6 +48,10 @@ class _ProfilePageState extends State<ProfilePage> {
               // Handle settings action
 
               context.read<AuthBloc>().add(LogoutEvent());
+              context.read<MusicPlayerBloc>().add(ResetPlayer());
+
+             
+
             },
           ),
         ],
