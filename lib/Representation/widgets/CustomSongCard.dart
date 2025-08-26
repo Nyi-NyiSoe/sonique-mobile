@@ -14,19 +14,7 @@ class Customsongcard extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        showModalBottomSheet(
-          isScrollControlled: true,
-          useRootNavigator: true,
-          context: context,
-          builder: (context) {
-            return DraggableScrollableSheet(
-              initialChildSize: 1,
-              builder: (context, controller) {
-                return Songdetailcard(song: song,controller: controller,);
-              },
-            );
-          },
-        );
+        context.read<MusicPlayerBloc>().add(PlaySong(song));
       },
       child: SizedBox(
         height: 100,
@@ -111,9 +99,39 @@ class Customsongcard extends StatelessWidget {
                                 title: Text('Add to Playlist'),
                               ),
                             ),
-                            ListTile(
-                              leading: Icon(Icons.info),
-                              title: Text('Song Info'),
+                            GestureDetector(
+                              onTap: () {
+                                showModalBottomSheet(
+                                  isScrollControlled: true,
+                                  //backgroundColor: Colors.transparent, // no black background
+                                  context: context,
+                                  builder: (context) {
+                                    return DraggableScrollableSheet(
+                                      expand: true,
+                                      initialChildSize:
+                                          1.0, // full height when opened
+                                      maxChildSize: 1.0, // prevent leaving gap
+                                      minChildSize:
+                                          0.3, // you can allow small drag state if you like
+                                      builder: (context, controller) {
+                                        return SafeArea(
+                                          top: false,
+                                          bottom:
+                                              false, // 🔑 remove bottom SafeArea gap
+                                          child: Songdetailcard(
+                                            song: song,
+                                            controller: controller,
+                                          ),
+                                        );
+                                      },
+                                    );
+                                  },
+                                );
+                              },
+                              child: ListTile(
+                                leading: Icon(Icons.info),
+                                title: Text('Song Info'),
+                              ),
                             ),
                           ],
                         ),
