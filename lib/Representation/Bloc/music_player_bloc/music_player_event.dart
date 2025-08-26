@@ -31,3 +31,9 @@ class ReorderQueue extends MusicEvent{
 }
 
 class ResetPlayer extends MusicEvent{}
+
+class SeekToEvent extends MusicEvent{
+  final Duration position;
+ 
+  SeekToEvent(this.position);
+}

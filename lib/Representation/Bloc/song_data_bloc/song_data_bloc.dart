@@ -48,34 +48,41 @@ class SongDataBloc extends Bloc<SongDataEvent, SongDataState> {
   }
 
   Future<void> _onFetchMoreSongs(
-    FetchMoreSongEvent event,
-    Emitter<SongDataState> emit,
-  ) async {
-    if (state.hasMore && state.fetchStatus != SongDataStatus.loading) {
-      try {
-        final songResponse = await songService.fetchMoreSongs(state.cursor);
-        final genres = await songService.getGenre();
+  FetchMoreSongEvent event,
+  Emitter<SongDataState> emit,
+) async {
+  if (!state.hasMore || state.fetchStatus == SongDataStatus.loading) return;
 
-        emit(
-          state.copyWith(
-            songs: state.songs + songResponse.songs,
-            hasMore: songResponse.hasMore,
-            cursor: songResponse.nextCursor,
-            genres: genres,
-            fetchStatus: SongDataStatus.success,
-            error: null,
-          ),
-        );
-      } catch (e) {
-        emit(
-          state.copyWith(
-            fetchStatus: SongDataStatus.failure,
-            error: e.toString(),
-          ),
-        );
-      }
-    }
+  emit(state.copyWith(fetchStatus: SongDataStatus.loading)); // lock while loading
+
+  try {
+    final songResponse = await songService.fetchMoreSongs(state.cursor);
+
+    // Avoid duplicates (by ID for example)
+    final existingIds = state.songs.map((s) => s.id).toSet();
+    final newSongs = songResponse.songs
+        .where((s) => !existingIds.contains(s.id))
+        .toList();
+
+    emit(
+      state.copyWith(
+        songs: [...state.songs, ...newSongs],
+        hasMore: songResponse.hasMore,
+        cursor: songResponse.nextCursor,
+        fetchStatus: SongDataStatus.success,
+        error: null,
+      ),
+    );
+  } catch (e) {
+    emit(
+      state.copyWith(
+        fetchStatus: SongDataStatus.failure,
+        error: e.toString(),
+      ),
+    );
   }
+}
+
 
   Future<void> _onUploadSongGenre(
     UploadSongGenreEvent event,

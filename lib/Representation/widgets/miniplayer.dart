@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sonique/Domain/entities/song.dart';
-import 'package:sonique/Representation/screens/queue_page.dart';
+import 'package:sonique/Representation/screens/SongDetailPage.dart';
 
 class MiniPlayer extends StatelessWidget {
   final Song song;
@@ -34,9 +34,7 @@ class MiniPlayer extends StatelessWidget {
                 return SafeArea(
                   top: false,
                   bottom: false, // 🔑 remove bottom SafeArea gap
-                  child: QueuePage(
-                    // make it scrollable
-                  ),
+                  child: Songdetailcard(song: song, controller: controller),
                 );
               },
             );
