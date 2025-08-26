@@ -41,7 +41,7 @@ class _QueuePageState extends State<QueuePage> {
                     Text('Queue'),
                     IconButton(
                       onPressed: () {},
-                      icon: Icon(FontAwesomeIcons.trash, size: 20),
+                      icon: Icon(FontAwesomeIcons.bars, size: 20),
                     ),
                   ],
                 ),

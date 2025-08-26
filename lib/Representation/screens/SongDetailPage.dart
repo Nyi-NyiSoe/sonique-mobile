@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -5,6 +7,8 @@ import 'package:go_router/go_router.dart';
 import 'package:sonique/Domain/entities/song.dart';
 import 'package:sonique/Representation/Bloc/music_player_bloc/music_player_bloc.dart';
 import 'package:sonique/Representation/Bloc/music_player_bloc/music_player_event.dart';
+import 'package:sonique/Representation/Bloc/music_player_bloc/music_player_state.dart';
+import 'package:sonique/Representation/screens/queue_page.dart';
 
 class Songdetailcard extends StatelessWidget {
   final Song song;
@@ -14,6 +18,14 @@ class Songdetailcard extends StatelessWidget {
     required this.song,
     required this.controller,
   });
+
+  //convert duration to min,sec
+  String formatTime(Duration duration){
+    String twoDigitSeconds = duration.inSeconds.remainder(60).toString();
+    String formattedTime = "${duration.inMinutes}:${twoDigitSeconds}";
+
+    return formattedTime;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +52,23 @@ class Songdetailcard extends StatelessWidget {
                   icon: Icon(FontAwesomeIcons.angleDown),
                 ),
                 Text(song.title),
-                IconButton(onPressed: () {}, icon: Icon(FontAwesomeIcons.bars)),
+                IconButton(
+                  onPressed: () {},
+                  icon: BlocBuilder<MusicPlayerBloc, MusicPlayerState>(
+                    builder: (context, state) {
+                      if (state.queue.isEmpty) {
+                        return SizedBox.shrink();
+                      } else {
+                        return GestureDetector(
+                          onTap: () {
+                            _showQueue(context);
+                          },
+                          child: Icon(FontAwesomeIcons.bars),
+                        );
+                      }
+                    },
+                  ),
+                ),
               ],
             ),
             Padding(
@@ -97,44 +125,72 @@ class Songdetailcard extends StatelessWidget {
               ),
             ),
             SizedBox(height: 10),
-            Padding(
-              padding: EdgeInsets.only(left: 20, right: 20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('0:00'),
-                  IconButton(onPressed: () {}, icon: Icon(Icons.shuffle)),
-                  IconButton(onPressed: () {}, icon: Icon(Icons.repeat)),
-                  Text('0:00'),
-                ],
-              ),
-            ),
-            SliderTheme(
-              data: SliderTheme.of(context).copyWith(
-                thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 0),
-              ),
-              child: Slider(
-                min: 0,
-                max: 100,
-                activeColor: Colors.green,
-                value: 50,
-                onChanged: (value) {},
-              ),
+
+            BlocBuilder<MusicPlayerBloc, MusicPlayerState>(
+              builder: (context, state) {
+                final total = Duration(
+                  seconds: (state.currentSong?.duration ?? 0).toInt(),
+                );
+                final position = state.position;
+                return Column(
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.only(left: 20, right: 20),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(formatTime(position)),
+                          IconButton(
+                            onPressed: () {},
+                            icon: Icon(Icons.shuffle),
+                          ),
+                          IconButton(
+                            onPressed: () {},
+                            icon: Icon(Icons.repeat),
+                          ),
+                          Text(formatTime(total)),
+                        ],
+                      ),
+                    ),
+                    SliderTheme(
+                      data: SliderTheme.of(context).copyWith(
+                        thumbShape: const RoundSliderThumbShape(
+                          enabledThumbRadius: 0,
+                        ),
+                      ),
+                      child: Slider(
+                        min: 0.0,
+                        max: total.inSeconds.toDouble(),
+                        activeColor: Colors.green,
+                        value: position.inSeconds.toDouble(),
+                        onChanged: (value) {
+                          context.read<MusicPlayerBloc>().add(
+                            UpdatePosition(Duration(seconds: value.toInt())),
+                          );
+                        },
+                        onChangeEnd: (value) {
+                          context.read<MusicPlayerBloc>().add(
+                            SeekToEvent(Duration(seconds: value.toInt())),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                );
+              },
             ),
 
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 IconButton(onPressed: () {}, icon: Icon(Icons.skip_previous)),
-                IconButton(onPressed: () {
-                    context.read<MusicPlayerBloc>().add(PlaySong(song));
-                }, icon: Icon(Icons.play_arrow)),
                 IconButton(
                   onPressed: () {
-                  
+                    context.read<MusicPlayerBloc>().add(PlaySong(song));
                   },
-                  icon: Icon(Icons.skip_next),
+                  icon: Icon(Icons.play_arrow),
                 ),
+                IconButton(onPressed: () {}, icon: Icon(Icons.skip_next)),
               ],
             ),
           ],
@@ -142,4 +198,37 @@ class Songdetailcard extends StatelessWidget {
       ),
     );
   }
+}
+
+void _showQueue(BuildContext context) {
+  showGeneralDialog(
+    context: context,
+    barrierDismissible: true,
+    barrierLabel: "Queue",
+    transitionDuration: const Duration(milliseconds: 300),
+    pageBuilder: (context, animation, secondaryAnimation) {
+      return Align(
+        alignment: Alignment.centerRight,
+        child: SizedBox(
+          width: MediaQuery.of(context).size.width, // slide panel width
+          child: Material(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+              child: Container(
+                color: Colors.black.withOpacity(0.3),
+                child: QueuePage(),
+              ),
+            ),
+          ),
+        ),
+      );
+    },
+    transitionBuilder: (context, animation, secondaryAnimation, child) {
+      final offsetAnimation = Tween<Offset>(
+        begin: const Offset(1, 0), // from right
+        end: Offset.zero,
+      ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOut));
+      return SlideTransition(position: offsetAnimation, child: child);
+    },
+  );
 }

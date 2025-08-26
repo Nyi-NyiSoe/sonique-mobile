@@ -21,9 +21,11 @@ class MusicPlayerBloc extends Bloc<MusicEvent, MusicPlayerState> {
     on<ToggleShuffle>(_onToggleShuffle);
     on<ToggleRepeat>(_onToggleRepeat);
     on<ReorderQueue>(_onReorderQueue);
-    on<ResetPlayer>((event, emit) {
+    on<ResetPlayer>((event, emit) async {
+      await _player.stop();
       emit(MusicPlayerState.initial());
     });
+    on<SeekToEvent>((_seekToEvent));
 
     // Listen for completion to auto-play next song
     _player.onPlayerComplete.listen((_) {
@@ -122,7 +124,15 @@ class MusicPlayerBloc extends Bloc<MusicEvent, MusicPlayerState> {
     emit(state.copyWith(position: Duration.zero));
   }
 
-  void _onUpdatePosition(UpdatePosition event, Emitter<MusicPlayerState> emit) {
+  void _seekToEvent(SeekToEvent event, Emitter<MusicPlayerState> emit) async {
+    await _player.seek(event.position);
+    emit(state.copyWith(position: event.position));
+  }
+
+  void _onUpdatePosition(
+    UpdatePosition event,
+    Emitter<MusicPlayerState> emit,
+  ) async {
     emit(state.copyWith(position: event.position));
   }
 
