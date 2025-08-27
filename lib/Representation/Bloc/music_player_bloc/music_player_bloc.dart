@@ -79,49 +79,89 @@ class MusicPlayerBloc extends Bloc<MusicEvent, MusicPlayerState> {
   }
 
   void _onNextSong(NextSong event, Emitter<MusicPlayerState> emit) async {
-    if (state.queue.isEmpty) {
-      if (state.repeat && state.currentSong != null) {
-        // Repeat current song
-        await _player.seek(Duration.zero);
-        await _player.resume();
-        emit(
-          state.copyWith(
-            status: PlayBackStatus.playing,
-            position: Duration.zero,
-          ),
-        );
-      } else {
-        await _player.stop();
-        emit(state.copyWith(currentSong: null, status: PlayBackStatus.stopped));
+    if (state.currentSong != null) {
+      final updatedHistory = List<Song>.from(state.history)
+        ..add(state.currentSong!);
+
+      if (state.queue.isEmpty) {
+        if (state.repeat && state.currentSong != null) {
+          // Repeat current song
+          await _player.seek(Duration.zero);
+          await _player.resume();
+          emit(
+            state.copyWith(
+              status: PlayBackStatus.playing,
+              position: Duration.zero,
+            ),
+          );
+        } else {
+          await _player.stop();
+          emit(
+            state.copyWith(currentSong: null, status: PlayBackStatus.stopped),
+          );
+        }
+        return;
       }
+
+      // Determine next song
+      final nextSong =
+          state.shuffle
+              ? (List<Song>.from(state.queue)..shuffle()).first
+              : state.queue.first;
+
+      final updatedQueue = List<Song>.from(state.queue)..remove(nextSong);
+
+      await _player.stop();
+      await _player.play(UrlSource(nextSong.audioUrl));
+
+      emit(
+        state.copyWith(
+          currentSong: nextSong,
+          queue: updatedQueue,
+          history: updatedHistory,
+          status: PlayBackStatus.playing,
+          position: Duration.zero,
+        ),
+      );
+    }
+  }
+
+  void _onPreviousSong(
+    PreviousSong event,
+    Emitter<MusicPlayerState> emit,
+  ) async {
+    if (state.position > const Duration(seconds: 3)) {
+      // If played more than 3s, restart current track
+      await _player.seek(Duration.zero);
+      emit(state.copyWith(position: Duration.zero));
       return;
     }
 
-    // Determine next song
-    final nextSong =
-        state.shuffle
-            ? (List<Song>.from(state.queue)..shuffle()).first
-            : state.queue.first;
+    if (state.history.isEmpty) {
+      // No previous song → just restart
+      await _player.seek(Duration.zero);
+      emit(state.copyWith(position: Duration.zero));
+      return;
+    }
 
-    final updatedQueue = List<Song>.from(state.queue)..remove(nextSong);
+    final prevSong = state.history.last;
+    final updatedHistory = List<Song>.from(state.history)..removeLast();
 
     await _player.stop();
-    await _player.play(UrlSource(nextSong.audioUrl));
+    await _player.play(UrlSource(prevSong.audioUrl));
 
     emit(
       state.copyWith(
-        currentSong: nextSong,
-        queue: updatedQueue,
+        currentSong: prevSong,
+        history: updatedHistory,
+        queue: [
+          state.currentSong!,
+          ...state.queue,
+        ], // put current back to queue
         status: PlayBackStatus.playing,
         position: Duration.zero,
       ),
     );
-  }
-
-  void _onPreviousSong(PreviousSong event, Emitter<MusicPlayerState> emit) {
-    // Optional: implement history stack
-    _player.seek(Duration.zero);
-    emit(state.copyWith(position: Duration.zero));
   }
 
   void _seekToEvent(SeekToEvent event, Emitter<MusicPlayerState> emit) async {
