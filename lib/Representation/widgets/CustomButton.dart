@@ -26,8 +26,15 @@ class CustomElevatedButton extends StatelessWidget {
       width: width ?? double.infinity, // Default to full width
       height: height ?? 60, // Default height
       child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: backgroundColor, // 👈 your custom color
+          foregroundColor: Colors.white, // text/icon color
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          elevation: 0,
+        ),
         onPressed: onPressed,
-        style: Theme.of(context).elevatedButtonTheme.style,
         child: child,
       ),
     );

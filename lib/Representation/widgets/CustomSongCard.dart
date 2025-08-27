@@ -4,11 +4,11 @@ import 'package:go_router/go_router.dart';
 import 'package:sonique/Domain/entities/song.dart';
 import 'package:sonique/Representation/Bloc/music_player_bloc/music_player_bloc.dart';
 import 'package:sonique/Representation/Bloc/music_player_bloc/music_player_event.dart';
-import 'package:sonique/Representation/screens/SongDetailPage.dart';
 
 class Customsongcard extends StatelessWidget {
-  const Customsongcard({super.key, required this.song});
+  const Customsongcard({super.key, required this.song,required this.queue});
   final Song song;
+  final bool queue;
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +48,7 @@ class Customsongcard extends StatelessWidget {
               const Spacer(),
               //if in playlist display check icon
               //Icon(Icons.check_circle, color: Colors.green),
-              IconButton(
+              queue ? IconButton(
                 onPressed: () {
                   showModalBottomSheet(
                     useRootNavigator: true,
@@ -58,6 +58,7 @@ class Customsongcard extends StatelessWidget {
                         height: 200,
 
                         child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
                             GestureDetector(
                               onTap: () {
@@ -99,40 +100,6 @@ class Customsongcard extends StatelessWidget {
                                 title: Text('Add to Playlist'),
                               ),
                             ),
-                            GestureDetector(
-                              onTap: () {
-                                showModalBottomSheet(
-                                  isScrollControlled: true,
-                                  //backgroundColor: Colors.transparent, // no black background
-                                  context: context,
-                                  builder: (context) {
-                                    return DraggableScrollableSheet(
-                                      expand: true,
-                                      initialChildSize:
-                                          1.0, // full height when opened
-                                      maxChildSize: 1.0, // prevent leaving gap
-                                      minChildSize:
-                                          0.3, // you can allow small drag state if you like
-                                      builder: (context, controller) {
-                                        return SafeArea(
-                                          top: false,
-                                          bottom:
-                                              false, // 🔑 remove bottom SafeArea gap
-                                          child: Songdetailcard(
-                                            song: song,
-                                            controller: controller,
-                                          ),
-                                        );
-                                      },
-                                    );
-                                  },
-                                );
-                              },
-                              child: ListTile(
-                                leading: Icon(Icons.info),
-                                title: Text('Song Info'),
-                              ),
-                            ),
                           ],
                         ),
                       );
@@ -140,7 +107,7 @@ class Customsongcard extends StatelessWidget {
                   );
                 },
                 icon: Icon(Icons.more_vert),
-              ),
+              ) : SizedBox.shrink()
             ],
           ),
         ),
