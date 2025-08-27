@@ -4,11 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sonique/Data/models/playback_status.dart';
 import 'package:sonique/Domain/entities/song.dart';
 import 'package:sonique/Representation/Bloc/music_player_bloc/music_player_bloc.dart';
 import 'package:sonique/Representation/Bloc/music_player_bloc/music_player_event.dart';
 import 'package:sonique/Representation/Bloc/music_player_bloc/music_player_state.dart';
 import 'package:sonique/Representation/screens/queue_page.dart';
+import 'package:sonique/Representation/widgets/CustomButton.dart';
 
 class Songdetailcard extends StatelessWidget {
   final Song song;
@@ -20,7 +22,7 @@ class Songdetailcard extends StatelessWidget {
   });
 
   //convert duration to min,sec
-  String formatTime(Duration duration){
+  String formatTime(Duration duration) {
     String twoDigitSeconds = duration.inSeconds.remainder(60).toString();
     String formattedTime = "${duration.inMinutes}:${twoDigitSeconds}";
 
@@ -39,161 +41,220 @@ class Songdetailcard extends StatelessWidget {
       ),
       child: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: ListView(
+        child: SingleChildScrollView(
           controller: controller,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                IconButton(
-                  onPressed: () {
-                    context.pop();
-                  },
-                  icon: Icon(FontAwesomeIcons.angleDown),
-                ),
-                Text(song.title),
-                IconButton(
-                  onPressed: () {},
-                  icon: BlocBuilder<MusicPlayerBloc, MusicPlayerState>(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  IconButton(
+                    onPressed: () {
+                      context.pop();
+                    },
+                    icon: Icon(FontAwesomeIcons.angleDown),
+                  ),
+                  BlocBuilder<MusicPlayerBloc, MusicPlayerState>(
                     builder: (context, state) {
-                      if (state.queue.isEmpty) {
-                        return SizedBox.shrink();
-                      } else {
-                        return GestureDetector(
-                          onTap: () {
-                            _showQueue(context);
-                          },
-                          child: Icon(FontAwesomeIcons.bars),
-                        );
-                      }
+                      return Text(state.currentSong!.title);
                     },
                   ),
-                ),
-              ],
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Card(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(
-                        height: 300,
-                        child: Image.network(
-                          song.coverImageUrl,
-                          fit: BoxFit.cover,
-                          alignment: Alignment.center,
-                          width: double.infinity,
+                  IconButton(
+                    onPressed: () {},
+                    icon: BlocBuilder<MusicPlayerBloc, MusicPlayerState>(
+                      builder: (context, state) {
+                        if (state.queue.isEmpty) {
+                          return SizedBox.shrink();
+                        } else {
+                          return GestureDetector(
+                            onTap: () {
+                              _showQueue(context);
+                            },
+                            child: Icon(FontAwesomeIcons.bars),
+                          );
+                        }
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Card(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // 🎵 Song cover image
+                        BlocBuilder<MusicPlayerBloc, MusicPlayerState>(
+                          buildWhen:
+                              (prev, curr) =>
+                                  prev.currentSong != curr.currentSong,
+                          builder: (context, state) {
+                            final song = state.currentSong;
+                            if (song == null)
+                              return const SizedBox(height: 300);
+                            return SizedBox(
+                              height: 300,
+                              child: Image.network(
+                                song.coverImageUrl,
+                                fit: BoxFit.cover,
+                                alignment: Alignment.center,
+                                width: double.infinity,
+                              ),
+                            );
+                          },
                         ),
-                      ),
 
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text(
-                                  song.title,
-                                  style:
-                                      Theme.of(context).textTheme.displayMedium,
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text(song.artist.name),
-                              ),
-                            ],
-                          ),
+                        // 🎵 Title + artist + like button
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            BlocBuilder<MusicPlayerBloc, MusicPlayerState>(
+                              buildWhen:
+                                  (prev, curr) =>
+                                      prev.currentSong != curr.currentSong,
+                              builder: (context, state) {
+                                final song = state.currentSong;
+                                if (song == null) return const SizedBox();
+                                return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Text(
+                                        song.title,
+                                        style:
+                                            Theme.of(
+                                              context,
+                                            ).textTheme.displayMedium,
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Text(song.artist.name),
+                                    ),
+                                  ],
+                                );
+                              },
+                            ),
 
-                          IconButton(
-                            onPressed: () {},
-                            icon: Icon(FontAwesomeIcons.heart),
-                          ),
-                        ],
-                      ),
-                    ],
+                            IconButton(
+                              onPressed: () {
+                                // Maybe another bloc: FavoritesBloc
+                              },
+                              icon: const Icon(FontAwesomeIcons.heart),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-            SizedBox(height: 10),
 
-            BlocBuilder<MusicPlayerBloc, MusicPlayerState>(
-              builder: (context, state) {
-                final total = Duration(
-                  seconds: (state.currentSong?.duration ?? 0).toInt(),
-                );
-                final position = state.position;
-                return Column(
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.only(left: 20, right: 20),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(formatTime(position)),
-                          IconButton(
-                            onPressed: () {},
-                            icon: Icon(Icons.shuffle),
-                          ),
-                          IconButton(
-                            onPressed: () {},
-                            icon: Icon(Icons.repeat),
-                          ),
-                          Text(formatTime(total)),
-                        ],
-                      ),
-                    ),
-                    SliderTheme(
-                      data: SliderTheme.of(context).copyWith(
-                        thumbShape: const RoundSliderThumbShape(
-                          enabledThumbRadius: 0,
+              SizedBox(height: 10),
+
+              BlocBuilder<MusicPlayerBloc, MusicPlayerState>(
+                builder: (context, state) {
+                  final total = Duration(
+                    seconds: (state.currentSong?.duration ?? 0).toInt(),
+                  );
+                  final position = state.position;
+                  final isPlaying = state.status;
+                  return Column(
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.only(left: 20, right: 20),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(formatTime(position)),
+
+                            Text(formatTime(total)),
+                          ],
                         ),
                       ),
-                      child: Slider(
-                        min: 0.0,
-                        max: total.inSeconds.toDouble(),
-                        activeColor: Colors.green,
-                        value: position.inSeconds.toDouble(),
-                        onChanged: (value) {
-                          context.read<MusicPlayerBloc>().add(
-                            UpdatePosition(Duration(seconds: value.toInt())),
-                          );
-                        },
-                        onChangeEnd: (value) {
-                          context.read<MusicPlayerBloc>().add(
-                            SeekToEvent(Duration(seconds: value.toInt())),
-                          );
-                        },
+                      SliderTheme(
+                        data: SliderTheme.of(context).copyWith(
+                          thumbShape: const RoundSliderThumbShape(
+                            enabledThumbRadius: 0,
+                          ),
+                        ),
+                        child: Slider(
+                          min: 0.0,
+                          max: total.inSeconds.toDouble(),
+                          activeColor: Colors.blueGrey,
+                          value: position.inSeconds.toDouble(),
+                          onChanged: (value) {
+                            context.read<MusicPlayerBloc>().add(
+                              UpdatePosition(Duration(seconds: value.toInt())),
+                            );
+                          },
+                          onChangeEnd: (value) {
+                            context.read<MusicPlayerBloc>().add(
+                              SeekToEvent(Duration(seconds: value.toInt())),
+                            );
+                          },
+                        ),
                       ),
-                    ),
-                  ],
-                );
-              },
-            ),
-
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                IconButton(onPressed: () {}, icon: Icon(Icons.skip_previous)),
-                IconButton(
-                  onPressed: () {
-                    context.read<MusicPlayerBloc>().add(PlaySong(song));
-                  },
-                  icon: Icon(Icons.play_arrow),
-                ),
-                IconButton(onPressed: () {}, icon: Icon(Icons.skip_next)),
-              ],
-            ),
-          ],
+                      Padding(
+                        padding: const EdgeInsets.all(20.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            CustomElevatedButton(
+                              backgroundColor: Colors.blueGrey,
+                              width: 100,
+                              onPressed: () {
+                                context.read<MusicPlayerBloc>().add(
+                                  PreviousSong(),
+                                );
+                              },
+                              child: Icon(Icons.skip_previous),
+                            ),
+                            CustomElevatedButton(
+                              backgroundColor: Colors.blueGrey,
+                              width: 100,
+                              onPressed: () {
+                                if (state.status == PlayBackStatus.playing) {
+                                  context.read<MusicPlayerBloc>().add(
+                                    PauseSong(),
+                                  );
+                                } else {
+                                  context.read<MusicPlayerBloc>().add(
+                                    ResumeSong(),
+                                  );
+                                }
+                              },
+                              child: Icon(
+                                state.status == PlayBackStatus.playing
+                                    ? Icons.pause
+                                    : Icons.play_arrow,
+                              ),
+                            ),
+                            CustomElevatedButton(
+                              backgroundColor: Colors.blueGrey,
+                              width: 100,
+                              onPressed: () {
+                                context.read<MusicPlayerBloc>().add(NextSong());
+                              },
+                              child: Icon(Icons.skip_next),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -211,9 +272,10 @@ void _showQueue(BuildContext context) {
         alignment: Alignment.centerRight,
         child: SizedBox(
           width: MediaQuery.of(context).size.width, // slide panel width
-          child: Material(
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+            child: Material(
+              type: MaterialType.transparency,
               child: Container(
                 color: Colors.black.withOpacity(0.3),
                 child: QueuePage(),
