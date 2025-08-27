@@ -61,6 +61,7 @@ class _HomePageState extends State<HomePage> {
                     final song = state.songs[index];
                     return Customsongcard(
                       song: song,
+                      queue: true,
                     );
                   } else {
                     return const Center(child: CircularProgressIndicator());

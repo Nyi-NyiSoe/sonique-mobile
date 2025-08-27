@@ -35,14 +35,10 @@ class _QueuePageState extends State<QueuePage> {
                       onPressed: () {
                         context.pop();
                       },
-                      icon: Icon(FontAwesomeIcons.angleDown),
+                      icon: Icon(FontAwesomeIcons.angleRight),
                     ),
 
-                    Text('Queue'),
-                    IconButton(
-                      onPressed: () {},
-                      icon: Icon(FontAwesomeIcons.bars, size: 20),
-                    ),
+                    Center(child: Text('Queue')),
                   ],
                 ),
 
@@ -56,7 +52,7 @@ class _QueuePageState extends State<QueuePage> {
                     itemBuilder: (context, index) {
                       return Container(
                         key: ValueKey(songs[index]),
-                        child: Customsongcard(song: songs[index]),
+                        child: Customsongcard(song: songs[index],queue: false,),
                       );
                     },
                     itemCount: songs.length,

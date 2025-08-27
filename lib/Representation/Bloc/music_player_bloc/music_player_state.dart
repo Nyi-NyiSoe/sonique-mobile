@@ -1,10 +1,9 @@
 import 'package:sonique/Data/models/playback_status.dart';
 import 'package:sonique/Domain/entities/song.dart';
 
-
-
 class MusicPlayerState {
   final List<Song> queue;
+  final List<Song> history;
   final Song? currentSong;
   final PlayBackStatus status;
   final Duration position;
@@ -12,6 +11,7 @@ class MusicPlayerState {
   final bool repeat;
   const MusicPlayerState({
     this.queue = const [],
+    this.history = const [],
     this.currentSong,
     this.status = PlayBackStatus.stopped,
     this.position = Duration.zero,
@@ -21,6 +21,7 @@ class MusicPlayerState {
 
   MusicPlayerState copyWith({
     List<Song>? queue,
+    List<Song>? history,
     Song? currentSong,
     PlayBackStatus? status,
     Duration? position,
@@ -29,6 +30,7 @@ class MusicPlayerState {
   }) {
     return MusicPlayerState(
       queue: queue ?? this.queue,
+      history: history ?? this.history,
       currentSong: currentSong ?? this.currentSong,
       status: status ?? this.status,
       position: position ?? this.position,
@@ -38,14 +40,13 @@ class MusicPlayerState {
   }
 
   factory MusicPlayerState.initial() {
-  return const MusicPlayerState(
-    queue: [],
-    currentSong: null,
-    status: PlayBackStatus.stopped,
-    position: Duration.zero,
-    shuffle: false,
-    repeat: false,
-  );
-}
-
+    return const MusicPlayerState(
+      queue: [],
+      currentSong: null,
+      status: PlayBackStatus.stopped,
+      position: Duration.zero,
+      shuffle: false,
+      repeat: false,
+    );
+  }
 }
