@@ -88,7 +88,7 @@ class RoutingService {
             routes: [
               GoRoute(
                 path: Routes.library,
-                builder: (context, state) => const LibraryPage(),
+                builder: (context, state) =>  LibraryPage(),
               ),
             ],
           ),
