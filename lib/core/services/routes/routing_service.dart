@@ -7,6 +7,7 @@ import 'package:sonique/Representation/Bloc/auth_bloc/auth_bloc.dart';
 import 'package:sonique/Representation/Bloc/auth_bloc/auth_state.dart';
 import 'package:sonique/Representation/screens/home_page.dart';
 import 'package:sonique/Representation/screens/library_page.dart';
+import 'package:sonique/Representation/screens/like_song_page.dart';
 import 'package:sonique/Representation/screens/login_page.dart';
 import 'package:sonique/Representation/screens/profile_page.dart';
 import 'package:sonique/Representation/screens/root_page.dart';
@@ -88,7 +89,15 @@ class RoutingService {
             routes: [
               GoRoute(
                 path: Routes.library,
-                builder: (context, state) =>  LibraryPage(),
+                builder: (context, state) => LibraryPage(),
+                routes: [
+                  GoRoute(
+                    path: Routes.likedSongPage,
+                    builder: (context, state) {
+                      return LikeSongPage();
+                    },
+                  ),
+                ],
               ),
             ],
           ),
