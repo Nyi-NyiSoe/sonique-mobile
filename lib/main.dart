@@ -8,6 +8,8 @@ import 'package:sonique/Domain/usecases/logout_usecase.dart';
 import 'package:sonique/Domain/usecases/register_usecase.dart';
 import 'package:sonique/Representation/Bloc/auth_bloc/auth_bloc.dart';
 import 'package:sonique/Representation/Bloc/auth_bloc/auth_event.dart';
+import 'package:sonique/Representation/Bloc/like_song_bloc/like_song_bloc.dart';
+import 'package:sonique/Representation/Bloc/like_song_bloc/like_song_event.dart';
 import 'package:sonique/Representation/Bloc/music_player_bloc/music_player_bloc.dart';
 import 'package:sonique/Representation/Bloc/music_player_bloc/music_player_event.dart';
 import 'package:sonique/Representation/Bloc/song_data_bloc/song_data_bloc.dart';
@@ -21,7 +23,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await dotenv.load(fileName: ".env");
-  
+
   await setupLocator();
 
   runApp(const MyApp());
@@ -72,6 +74,14 @@ class MyApp extends StatelessWidget {
             final musicPlayerBloc = locator<MusicPlayerBloc>();
             musicPlayerBloc.add(StopSong());
             return musicPlayerBloc;
+          },
+        ),
+
+        BlocProvider<LikesBloc>(
+          create: (context) {
+            final likeSongBloc = locator<LikesBloc>();
+            likeSongBloc.add(LoadLikedSongs());
+            return likeSongBloc;
           },
         ),
       ],

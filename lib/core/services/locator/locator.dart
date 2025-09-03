@@ -19,6 +19,7 @@ import 'package:sonique/Domain/usecases/register_usecase.dart';
 import 'package:sonique/Domain/usecases/song_data_usecase.dart';
 import 'package:sonique/Domain/usecases/user_data_usecase.dart';
 import 'package:sonique/Representation/Bloc/auth_bloc/auth_bloc.dart';
+import 'package:sonique/Representation/Bloc/like_song_bloc/like_song_bloc.dart';
 import 'package:sonique/Representation/Bloc/music_player_bloc/music_player_bloc.dart';
 import 'package:sonique/Representation/Bloc/song_data_bloc/song_data_bloc.dart';
 import 'package:sonique/Representation/Bloc/user_data_bloc/user_data_bloc.dart';
@@ -57,6 +58,8 @@ Future<void> setupLocator() async {
   );
 
   locator.registerLazySingleton<MusicPlayerBloc>(() => MusicPlayerBloc());
+
+  locator.registerLazySingleton<LikesBloc>(()=> LikesBloc(songDataUsecase: locator<SongDataUsecase>(), songService: locator<SongService>()));
 
   //GoRouter
   locator.registerLazySingleton<GoRouter>(

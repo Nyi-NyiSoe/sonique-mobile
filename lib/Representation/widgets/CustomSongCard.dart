@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sonique/Domain/entities/song.dart';
+import 'package:sonique/Representation/Bloc/like_song_bloc/like_song_bloc.dart';
+import 'package:sonique/Representation/Bloc/like_song_bloc/like_song_event.dart';
 import 'package:sonique/Representation/Bloc/music_player_bloc/music_player_bloc.dart';
 import 'package:sonique/Representation/Bloc/music_player_bloc/music_player_event.dart';
 
@@ -76,6 +79,33 @@ class Customsongcard extends StatelessWidget {
                             GestureDetector(
                               onTap: () {
                                 try {
+                                  context.read<LikesBloc>().add(
+                                    LikeSong(song.id)
+                                  );
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('Liked Song'),
+                                    ),
+                                  );
+                                } catch (e) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        'Failed to like the song',
+                                      ),
+                                    ),
+                                  );
+                                }
+                                context.pop();
+                              },
+                              child: ListTile(
+                                leading: Icon(FontAwesomeIcons.heart),
+                                title: Text('Like Song'),
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: () {
+                                try {
                                   context.read<MusicPlayerBloc>().add(
                                     AddToQueue(song),
                                   );
@@ -100,6 +130,7 @@ class Customsongcard extends StatelessWidget {
                                 title: Text('Add to Playlist'),
                               ),
                             ),
+
                           ],
                         ),
                       );

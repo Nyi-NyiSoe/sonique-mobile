@@ -1,5 +1,6 @@
 import 'package:image_picker/image_picker.dart';
 import 'package:sonique/Data/models/genre_model.dart';
+import 'package:sonique/Data/models/liked_song_model.dart';
 import 'package:sonique/Data/models/song_response_model.dart';
 import 'package:sonique/Data/source/song_data_repo/song_remote_data.dart';
 import 'package:sonique/Domain/repository/song_data_repository.dart';
@@ -56,4 +57,26 @@ class SongDataRepositoryImpl implements SongDataRepository {
     }
   }
 
+  @override
+  Future<void> likeASong(String songId)async{
+    try{
+      return await songRemoteData.likeASong(songId);
+    }catch(e){
+      throw Exception('Failed to upload Song: $e');
+    }
+  }
+
+  @override 
+  Future<List<LikedSongModel>> loadLikedSongs()async{
+    try{
+      return await songRemoteData.loadLikedSongs();
+    }catch(e){
+      throw Exception("Failed to load liked songs: $e");
+    }
+  }
+
+ 
+
 }
+
+ 
