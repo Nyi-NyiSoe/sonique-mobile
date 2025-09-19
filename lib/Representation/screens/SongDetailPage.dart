@@ -6,6 +6,9 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sonique/Data/models/playback_status.dart';
 import 'package:sonique/Domain/entities/song.dart';
+import 'package:sonique/Representation/Bloc/like_song_bloc/like_song_bloc.dart';
+import 'package:sonique/Representation/Bloc/like_song_bloc/like_song_event.dart';
+import 'package:sonique/Representation/Bloc/like_song_bloc/like_song_state.dart';
 import 'package:sonique/Representation/Bloc/music_player_bloc/music_player_bloc.dart';
 import 'package:sonique/Representation/Bloc/music_player_bloc/music_player_event.dart';
 import 'package:sonique/Representation/Bloc/music_player_bloc/music_player_state.dart';
@@ -144,11 +147,35 @@ class Songdetailcard extends StatelessWidget {
                               },
                             ),
 
-                            IconButton(
-                              onPressed: () {
-                                // Maybe another bloc: FavoritesBloc
+                            BlocBuilder<MusicPlayerBloc, MusicPlayerState>(
+                              builder: (context, playerState) {
+                                final currentSong = playerState.currentSong;
+
+                                return BlocSelector<
+                                  LikesBloc,
+                                  LikeSongState,
+                                  bool
+                                >(
+                                  selector:
+                                      (state) => state.likedSongs.any(
+                                        (s) => s.id == currentSong?.id,
+                                      ),
+                                  builder: (context, isLiked) {
+                                    return IconButton(
+                                      icon: Icon(
+                                        Icons.favorite,
+                                        color:
+                                            isLiked ? Colors.red : Colors.grey,
+                                      ),
+                                      onPressed: () {
+                                        context.read<LikesBloc>().add(
+                                          LikeSong(currentSong!.id),
+                                        );
+                                      },
+                                    );
+                                  },
+                                );
                               },
-                              icon: const Icon(FontAwesomeIcons.heart),
                             ),
                           ],
                         ),
@@ -175,6 +202,50 @@ class Songdetailcard extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(formatTime(position)),
+                            BlocBuilder<MusicPlayerBloc, MusicPlayerState>(
+                              buildWhen:
+                                  (prev, curr) =>
+                                      prev.repeatMode != curr.repeatMode,
+                              builder: (context, state) {
+                                IconData icon;
+                                Color color;
+
+                                switch (state.repeatMode) {
+                                  case RepeatMode.off:
+                                    icon = Icons.repeat;
+                                    color = Colors.grey;
+                                    break;
+                                  case RepeatMode.all:
+                                    icon = Icons.repeat;
+                                    color = Colors.green;
+                                    break;
+                                  case RepeatMode.one:
+                                    icon = Icons.repeat_one;
+                                    color = Colors.green;
+                                    break;
+                                }
+
+                                return IconButton(
+                                  icon: Icon(icon, color: color),
+                                  onPressed: () {
+                                    context.read<MusicPlayerBloc>().add(
+                                      ToggleRepeat(),
+                                    );
+                                  },
+                                );
+                              },
+                            ),
+
+                            GestureDetector(
+                              onTap:
+                                  () => context.read<MusicPlayerBloc>().add(
+                                    ToggleShuffle(),
+                                  ),
+                              child: Icon(
+                                Icons.shuffle,
+                                color: state.shuffle ? Colors.green : null,
+                              ),
+                            ),
 
                             Text(formatTime(total)),
                           ],
