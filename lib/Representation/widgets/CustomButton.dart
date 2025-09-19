@@ -17,7 +17,7 @@ class CustomElevatedButton extends StatelessWidget {
     this.textColor,
     this.width,
     this.height,
-    this.borderRadius = 8.0, // Default radius
+    this.borderRadius = 12.0, // Default radius
   });
 
   @override
@@ -30,7 +30,7 @@ class CustomElevatedButton extends StatelessWidget {
           backgroundColor: backgroundColor, // 👈 your custom color
           foregroundColor: Colors.white, // text/icon color
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(borderRadius),
           ),
           elevation: 0,
         ),
