@@ -6,4 +6,5 @@ class Routes {
   static const String library = '/library';
   static const String upload = '/upload';
   static const String profile = '/profile';
+  static const String likedSongPage = 'likedSong';
 }

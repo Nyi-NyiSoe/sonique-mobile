@@ -12,6 +12,11 @@ class AddToQueue extends MusicEvent {
   AddToQueue(this.song);
 }
 
+class PlayAList extends MusicEvent{
+  final List<Song> songs;
+  PlayAList(this.songs);
+}
+
 class PauseSong extends MusicEvent {}
 class ResumeSong extends MusicEvent {}
 class StopSong extends MusicEvent {}
@@ -21,8 +26,16 @@ class UpdatePosition extends MusicEvent {
   final Duration position;
   UpdatePosition(this.position);
 }
-class ToggleShuffle extends MusicEvent {}
+class ToggleShuffle extends MusicEvent {
+  
+}
 class ToggleRepeat extends MusicEvent {}
+
+class ShufflePlay extends MusicEvent{
+  final List<Song> songs;
+  ShufflePlay(this.songs);
+}
+
 
 class ReorderQueue extends MusicEvent{
   final int oldIndex;
