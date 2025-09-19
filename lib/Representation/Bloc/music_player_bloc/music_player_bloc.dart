@@ -21,6 +21,8 @@ class MusicPlayerBloc extends Bloc<MusicEvent, MusicPlayerState> {
     on<ToggleShuffle>(_onToggleShuffle);
     on<ToggleRepeat>(_onToggleRepeat);
     on<ReorderQueue>(_onReorderQueue);
+    on<PlayAList>(_onPlayAList);
+    on<ShufflePlay>(_onShufflePlay);
     on<ResetPlayer>((event, emit) async {
       await _player.stop();
       emit(MusicPlayerState.initial());
@@ -42,18 +44,22 @@ class MusicPlayerBloc extends Bloc<MusicEvent, MusicPlayerState> {
     PlaySong event,
     Emitter<MusicPlayerState> emit,
   ) async {
-    // Stop current song if any
+    // Stop any current playback
     await _player.stop();
 
-    // Start new song
+    // Play the selected song
     await _player.play(UrlSource(event.song.audioUrl));
 
-    // Update state
+    // Emit a fresh state
     emit(
       state.copyWith(
+        queue: [],
+        history: [],
         currentSong: event.song,
         status: PlayBackStatus.playing,
         position: Duration.zero,
+        shuffle: false, // reset shuffle
+        repeatMode: RepeatMode.off, // reset repeat
       ),
     );
   }
@@ -78,52 +84,76 @@ class MusicPlayerBloc extends Bloc<MusicEvent, MusicPlayerState> {
     emit(const MusicPlayerState());
   }
 
-  void _onNextSong(NextSong event, Emitter<MusicPlayerState> emit) async {
-    if (state.currentSong != null) {
-      final updatedHistory = List<Song>.from(state.history)
-        ..add(state.currentSong!);
+  Future<void> _onNextSong(
+    NextSong event,
+    Emitter<MusicPlayerState> emit,
+  ) async {
+    if (state.currentSong == null) return;
 
-      if (state.queue.isEmpty) {
-        if (state.repeat && state.currentSong != null) {
-          // Repeat current song
-          await _player.seek(Duration.zero);
-          await _player.resume();
-          emit(
-            state.copyWith(
-              status: PlayBackStatus.playing,
-              position: Duration.zero,
-            ),
-          );
-        } else {
-          await _player.stop();
-          emit(
-            state.copyWith(currentSong: null, status: PlayBackStatus.stopped),
-          );
-        }
-        return;
-      }
+    final updatedHistory = List<Song>.from(state.history)
+      ..add(state.currentSong!);
 
-      // Determine next song
-      final nextSong =
-          state.shuffle
-              ? (List<Song>.from(state.queue)..shuffle()).first
-              : state.queue.first;
-
-      final updatedQueue = List<Song>.from(state.queue)..remove(nextSong);
-
-      await _player.stop();
-      await _player.play(UrlSource(nextSong.audioUrl));
+    if (state.repeatMode == RepeatMode.one) {
+      // Repeat current song
+      await _player.seek(Duration.zero);
+      await _player.resume();
 
       emit(
         state.copyWith(
-          currentSong: nextSong,
-          queue: updatedQueue,
-          history: updatedHistory,
           status: PlayBackStatus.playing,
           position: Duration.zero,
+          history: updatedHistory,
         ),
       );
+      return;
     }
+
+    if (state.queue.isEmpty) {
+      if (state.repeatMode == RepeatMode.all && state.history.isNotEmpty) {
+        // Restart the whole playlist
+        final allSongs = [...state.history, state.currentSong!];
+        final firstSong = allSongs.first;
+
+        await _player.stop();
+        await _player.play(UrlSource(firstSong.audioUrl));
+
+        emit(
+          state.copyWith(
+            currentSong: firstSong,
+            queue: allSongs.skip(1).toList(),
+            history: [],
+            status: PlayBackStatus.playing,
+            position: Duration.zero,
+          ),
+        );
+      } else {
+        // No repeat → stop
+        await _player.stop();
+        emit(state.copyWith(currentSong: null, status: PlayBackStatus.stopped));
+      }
+      return;
+    }
+
+    // Play next song from queue (shuffle or normal)
+    final nextSong =
+        state.shuffle
+            ? (List<Song>.from(state.queue)..shuffle()).first
+            : state.queue.first;
+
+    final updatedQueue = List<Song>.from(state.queue)..remove(nextSong);
+
+    await _player.stop();
+    await _player.play(UrlSource(nextSong.audioUrl));
+
+    emit(
+      state.copyWith(
+        currentSong: nextSong,
+        queue: updatedQueue,
+        history: updatedHistory,
+        status: PlayBackStatus.playing,
+        position: Duration.zero,
+      ),
+    );
   }
 
   void _onPreviousSong(
@@ -177,11 +207,56 @@ class MusicPlayerBloc extends Bloc<MusicEvent, MusicPlayerState> {
   }
 
   void _onToggleShuffle(ToggleShuffle event, Emitter<MusicPlayerState> emit) {
-    emit(state.copyWith(shuffle: !state.shuffle));
+    if (!state.shuffle && state.queue.isNotEmpty) {
+      // Turning shuffle ON → shuffle the current queue
+      final shuffledQueue = List<Song>.from(state.queue)..shuffle();
+      emit(state.copyWith(shuffle: true, queue: shuffledQueue));
+    } else {
+      // Turning shuffle OFF → you may want to restore original order
+      // For now, just flip shuffle flag without touching queue
+      emit(state.copyWith(shuffle: false));
+    }
+  }
+
+  Future<void> _onShufflePlay(
+    ShufflePlay event,
+    Emitter<MusicPlayerState> emit,
+  ) async {
+    if (event.songs.isEmpty) return;
+
+    // Stop current playback
+    await _player.stop();
+
+    // Shuffle the list
+    final shuffled = List<Song>.from(event.songs)..shuffle();
+
+    // Play the first song
+    final firstSong = shuffled.first;
+    await _player.play(UrlSource(firstSong.audioUrl));
+
+    // Prepare the queue (rest of the shuffled songs)
+    final queue = shuffled.skip(1).toList();
+
+    emit(
+      state.copyWith(
+        currentSong: firstSong,
+        queue: queue,
+        history: [],
+        shuffle: true, // mark shuffle ON
+        status: PlayBackStatus.playing,
+        position: Duration.zero,
+        repeatMode: RepeatMode.off
+      ),
+    );
   }
 
   void _onToggleRepeat(ToggleRepeat event, Emitter<MusicPlayerState> emit) {
-    emit(state.copyWith(repeat: !state.repeat));
+    final nextMode = switch (state.repeatMode) {
+      RepeatMode.off => RepeatMode.all,
+      RepeatMode.all => RepeatMode.one,
+      RepeatMode.one => RepeatMode.off,
+    };
+    emit(state.copyWith(repeatMode: nextMode));
   }
 
   void _onReorderQueue(ReorderQueue event, Emitter<MusicPlayerState> emit) {
@@ -190,5 +265,29 @@ class MusicPlayerBloc extends Bloc<MusicEvent, MusicPlayerState> {
     final song = updatedQueue.removeAt(event.oldIndex);
     updatedQueue.insert(event.newIndex, song);
     emit(state.copyWith(queue: updatedQueue));
+  }
+
+  void _onPlayAList(PlayAList event, Emitter<MusicPlayerState> emit) async {
+    if (event.songs.isEmpty) return;
+
+    // Stop any current playback
+    await _player.stop();
+
+    // Play the first song in the list
+    final firstSong = event.songs.first;
+    await _player.play(UrlSource(firstSong.audioUrl));
+
+    // Prepare the queue (excluding the first song)
+    final queue = event.songs.skip(1).toList();
+
+    emit(
+      state.copyWith(
+        currentSong: firstSong,
+        queue: queue,
+        history: [],
+        status: PlayBackStatus.playing,
+        position: Duration.zero,
+      ),
+    );
   }
 }

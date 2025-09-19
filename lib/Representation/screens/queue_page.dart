@@ -51,7 +51,7 @@ class _QueuePageState extends State<QueuePage> {
                   child: ReorderableListView.builder(
                     itemBuilder: (context, index) {
                       return Container(
-                        key: ValueKey(songs[index]),
+                        key: UniqueKey(),
                         child: Customsongcard(song: songs[index],queue: false,),
                       );
                     },
