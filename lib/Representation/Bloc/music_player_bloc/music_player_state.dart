@@ -1,6 +1,10 @@
 import 'package:sonique/Data/models/playback_status.dart';
 import 'package:sonique/Domain/entities/song.dart';
-
+enum RepeatMode{
+  off,
+  all,
+  one
+}
 class MusicPlayerState {
   final List<Song> queue;
   final List<Song> history;
@@ -8,7 +12,7 @@ class MusicPlayerState {
   final PlayBackStatus status;
   final Duration position;
   final bool shuffle;
-  final bool repeat;
+  final RepeatMode repeatMode;
   const MusicPlayerState({
     this.queue = const [],
     this.history = const [],
@@ -16,7 +20,7 @@ class MusicPlayerState {
     this.status = PlayBackStatus.stopped,
     this.position = Duration.zero,
     this.shuffle = false,
-    this.repeat = false,
+    this.repeatMode = RepeatMode.off,
   });
 
   MusicPlayerState copyWith({
@@ -26,7 +30,7 @@ class MusicPlayerState {
     PlayBackStatus? status,
     Duration? position,
     bool? shuffle,
-    bool? repeat,
+    RepeatMode? repeatMode,
   }) {
     return MusicPlayerState(
       queue: queue ?? this.queue,
@@ -35,7 +39,7 @@ class MusicPlayerState {
       status: status ?? this.status,
       position: position ?? this.position,
       shuffle: shuffle ?? this.shuffle,
-      repeat: repeat ?? this.repeat,
+      repeatMode: repeatMode ?? this.repeatMode
     );
   }
 
@@ -46,7 +50,7 @@ class MusicPlayerState {
       status: PlayBackStatus.stopped,
       position: Duration.zero,
       shuffle: false,
-      repeat: false,
+      repeatMode: RepeatMode.off,
     );
   }
 }

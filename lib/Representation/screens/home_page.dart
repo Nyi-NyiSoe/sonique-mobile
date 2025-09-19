@@ -23,7 +23,8 @@ class _HomePageState extends State<HomePage> {
       if (_scrollController.position.pixels >=
           _scrollController.position.maxScrollExtent) {
         final currentState = context.read<SongDataBloc>().state;
-        if (currentState.fetchStatus == SongDataStatus.success && currentState.hasMore) {
+        if (currentState.fetchStatus == SongDataStatus.success &&
+            currentState.hasMore) {
           context.read<SongDataBloc>().add(FetchMoreSongEvent());
         }
       }
@@ -33,9 +34,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Home Page'),
-        actions: [
+      appBar: AppBar(title: const Text('Home Page'), actions: [
          
         ],
       ),
@@ -52,17 +51,16 @@ class _HomePageState extends State<HomePage> {
             if (state.fetchStatus == SongDataStatus.loading) {
               return const Center(child: CircularProgressIndicator());
             } else if (state.fetchStatus == SongDataStatus.success) {
+              
               return ListView.builder(
+                key: const PageStorageKey('homePageList'),
                 controller: _scrollController,
                 physics: const BouncingScrollPhysics(),
                 itemCount: state.songs.length + (state.hasMore ? 1 : 0),
                 itemBuilder: (context, index) {
                   if (index < state.songs.length) {
                     final song = state.songs[index];
-                    return Customsongcard(
-                      song: song,
-                      queue: true,
-                    );
+                    return Customsongcard(song: song, queue: true);
                   } else {
                     return const Center(child: CircularProgressIndicator());
                   }
