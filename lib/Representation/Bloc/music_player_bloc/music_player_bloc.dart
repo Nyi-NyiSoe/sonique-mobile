@@ -287,6 +287,7 @@ class MusicPlayerBloc extends Bloc<MusicEvent, MusicPlayerState> {
         history: [],
         status: PlayBackStatus.playing,
         position: Duration.zero,
+        shuffle: false
       ),
     );
   }
