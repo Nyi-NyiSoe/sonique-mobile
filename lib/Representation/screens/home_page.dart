@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sonique/Data/models/song_data_status.dart';
+import 'package:sonique/Representation/Bloc/album_bloc/album_list_bloc/album_list_bloc.dart';
+import 'package:sonique/Representation/Bloc/album_bloc/album_list_bloc/album_list_event.dart';
+import 'package:sonique/Representation/Bloc/album_bloc/album_list_bloc/album_list_state.dart';
 import 'package:sonique/Representation/Bloc/song_data_bloc/song_data_bloc.dart';
 import 'package:sonique/Representation/Bloc/song_data_bloc/song_data_event.dart';
 import 'package:sonique/Representation/Bloc/song_data_bloc/song_data_state.dart';
@@ -16,10 +19,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final ScrollController _scrollController = ScrollController();
-  final List<String> albums = List.generate(
-    5,
-    (i) => 'assets/images/splash.jpeg',
-  );
+ 
   final List<String> artists = List.generate(
     5,
     (i) => 'assets/images/splash.jpeg',
@@ -28,6 +28,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    context.read<AlbumListBloc>().add(FetchAlbumsEvent());
     _scrollController.addListener(() {
       if (_scrollController.position.pixels >=
           _scrollController.position.maxScrollExtent) {
@@ -61,7 +62,10 @@ class _HomePageState extends State<HomePage> {
                       'Albums',
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
-                    Text('Show all',style: Theme.of(context).textTheme.titleLarge,)
+                    Text(
+                      'Show all',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
                   ],
                 ),
               ),
@@ -71,14 +75,28 @@ class _HomePageState extends State<HomePage> {
             SliverToBoxAdapter(
               child: SizedBox(
                 height: screenHeight * 0.25, // 25% of screen height
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: albums.length,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  itemBuilder: (context, index) {
-                    return CustomAlbumCard(
-                      imageUrl: 'assets/images/splash.jpeg',
-                    );
+                child: BlocBuilder<AlbumListBloc, AlbumListState>(
+                  builder: (context, state) {
+                    if (state is AlbumListLoading) {
+                      return Center(child: CircularProgressIndicator());
+                    } else if (state is AlbumListError) {
+                      return Center(child: Text(state.error));
+                    } else if(state is AlbumListLoaded){
+                      final albums = state.albums;
+                      return ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: albums.length,
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        itemBuilder: (context, index) {
+                          return CustomAlbumCard(
+                            albumId: albums[index].id!,
+                            imageUrl: albums[index].coverImageUrl!,
+                          );
+                        },
+                      );
+                    }else{
+                      return SizedBox.shrink();
+                    }
                   },
                 ),
               ),
@@ -96,7 +114,10 @@ class _HomePageState extends State<HomePage> {
                       'Artists',
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
-                    Text('Show all',style: Theme.of(context).textTheme.titleLarge,)
+                    Text(
+                      'Show all',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
                   ],
                 ),
               ),
@@ -115,7 +136,6 @@ class _HomePageState extends State<HomePage> {
                       child: CircleAvatar(
                         radius: screenHeight * 0.08,
                         backgroundImage: AssetImage(artists[index]),
-                        
                       ),
                     );
                   },

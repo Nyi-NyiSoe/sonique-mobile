@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sonique/Representation/Bloc/auth_bloc/auth_bloc.dart';
 import 'package:sonique/Representation/Bloc/auth_bloc/auth_state.dart';
+import 'package:sonique/Representation/screens/album_detail_page.dart';
 import 'package:sonique/Representation/screens/home_page.dart';
 import 'package:sonique/Representation/screens/library_page.dart';
 import 'package:sonique/Representation/screens/like_song_page.dart';
@@ -82,6 +83,14 @@ class RoutingService {
               GoRoute(
                 path: Routes.home,
                 builder: (context, state) =>  HomePage(),
+                routes: [
+                  GoRoute(
+                    path: Routes.albumDetailPage,
+                    builder: (context, state) {
+                      return AlbumDetailPage();
+                    },
+                  )
+                ]
               ),
             ],
           ),
