@@ -54,9 +54,15 @@ class _HomePageState extends State<HomePage> {
                   horizontal: 16,
                   vertical: 8,
                 ),
-                child: Text(
-                  'Albums',
-                  style: Theme.of(context).textTheme.titleLarge,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Albums',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    Text('Show all',style: Theme.of(context).textTheme.titleLarge,)
+                  ],
                 ),
               ),
             ),
@@ -83,9 +89,15 @@ class _HomePageState extends State<HomePage> {
                   horizontal: 16,
                   vertical: 8,
                 ),
-                child: Text(
-                  'Artists',
-                  style: Theme.of(context).textTheme.titleLarge,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Artists',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    Text('Show all',style: Theme.of(context).textTheme.titleLarge,)
+                  ],
                 ),
               ),
             ),
