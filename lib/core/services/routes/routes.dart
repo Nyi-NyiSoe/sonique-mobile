@@ -7,4 +7,6 @@ class Routes {
   static const String upload = '/upload';
   static const String profile = '/profile';
   static const String likedSongPage = 'likedSong';
+  static const String albumDetailPage = 'albumDetail';
+  
 }

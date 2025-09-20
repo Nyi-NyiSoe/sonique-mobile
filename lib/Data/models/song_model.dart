@@ -17,8 +17,10 @@ class SongModel extends Song {
 
   factory SongModel.fromJson(Map<String, dynamic> json) {
     return SongModel(
-      artist: ArtistModel.fromJson(json['artist']) ,
-      audioUrl: json['audioUrl'] ?? "",
+      artist: ArtistModel.fromJson(
+        json['artist'] ?? json['artistId'] ?? 0
+      ),
+      audioUrl: json['audioUrl'] ?? json['fileUrl'] ?? "",
       coverImageUrl: json['coverImageUrl'] ?? "",
       created_at: json['created_at'] ?? "",
       duration: json['duration'] ?? 0.0,
