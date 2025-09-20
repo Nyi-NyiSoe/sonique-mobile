@@ -81,7 +81,7 @@ class RoutingService {
             routes: [
               GoRoute(
                 path: Routes.home,
-                builder: (context, state) => const HomePage(),
+                builder: (context, state) =>  HomePage(),
               ),
             ],
           ),

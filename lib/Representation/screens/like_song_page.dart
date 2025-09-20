@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:sonique/Data/models/liked_song_model.dart';
 import 'package:sonique/Data/models/song_data_status.dart';
 import 'package:sonique/Domain/entities/song.dart';
@@ -56,7 +57,20 @@ class _LikeSongPageState extends State<LikeSongPage> {
                     .toList();
 
             if (songs.isEmpty) {
-              return Center(child: Text("No liked songs yet."));
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  IconButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    icon: Icon(FontAwesomeIcons.angleLeft),
+                  ),
+                  Center(child: Text("No liked songs yet.")),
+                  SizedBox.shrink()
+                ],
+              );
             }
 
             return CustomPlayList(songs: songs);
@@ -68,4 +82,3 @@ class _LikeSongPageState extends State<LikeSongPage> {
     );
   }
 }
-
