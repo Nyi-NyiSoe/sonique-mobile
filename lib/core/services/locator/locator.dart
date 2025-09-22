@@ -3,19 +3,24 @@ import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sonique/Data/repository/album_data_repo_impl/album_data_repository_impl.dart';
+import 'package:sonique/Data/repository/artist_data_repo_impl/artist_data_repository_impl.dart';
 import 'package:sonique/Data/repository/auth_repo_impl/auth_repository_impl.dart';
 import 'package:sonique/Data/repository/song_data_repo_impl/song_data_repository_impl.dart';
 import 'package:sonique/Data/repository/user_data_repo_impl/user_data_repository_impl.dart';
 import 'package:sonique/Data/services/song_service.dart';
 import 'package:sonique/Data/source/album_data_repo/album_remote_data.dart';
+import 'package:sonique/Data/source/artist_data_repo/artist_remote_data.dart';
 import 'package:sonique/Data/source/auth_repo/auth_local_data_source.dart';
 import 'package:sonique/Data/source/auth_repo/auth_remote_data_source.dart';
 import 'package:sonique/Data/source/song_data_repo/song_remote_data.dart';
 import 'package:sonique/Data/source/user_data_repo/user_remote_data.dart';
 import 'package:sonique/Domain/repository/album_repository.dart';
+import 'package:sonique/Domain/repository/artist_repository.dart';
 import 'package:sonique/Domain/repository/auth_repository.dart';
 import 'package:sonique/Domain/repository/song_data_repository.dart';
 import 'package:sonique/Domain/repository/user_data_repository.dart';
+import 'package:sonique/Domain/usecases/add_songs_to_album_usecase.dart';
+import 'package:sonique/Domain/usecases/create_album_usecase.dart';
 import 'package:sonique/Domain/usecases/login_usecase.dart';
 import 'package:sonique/Domain/usecases/logout_usecase.dart';
 import 'package:sonique/Domain/usecases/register_usecase.dart';
@@ -25,6 +30,7 @@ import 'package:sonique/Representation/Bloc/album_bloc/album_crud_bloc/album_by_
 import 'package:sonique/Representation/Bloc/album_bloc/album_crud_bloc/album_operations_bloc/album_operations_bloc.dart';
 import 'package:sonique/Representation/Bloc/album_bloc/album_detail_bloc/album_detail_bloc.dart';
 import 'package:sonique/Representation/Bloc/album_bloc/album_list_bloc/album_list_bloc.dart';
+import 'package:sonique/Representation/Bloc/artist_bloc/artist_bloc.dart';
 import 'package:sonique/Representation/Bloc/auth_bloc/auth_bloc.dart';
 import 'package:sonique/Representation/Bloc/like_song_bloc/like_song_bloc.dart';
 import 'package:sonique/Representation/Bloc/music_player_bloc/music_player_bloc.dart';
@@ -89,7 +95,15 @@ Future<void> setupLocator() async {
   );
 
   locator.registerLazySingleton<AlbumOperationsBloc>(
-    () => AlbumOperationsBloc(albumRepository: locator<AlbumRepository>()),
+    () => AlbumOperationsBloc(
+      albumRepository: locator<AlbumRepository>(),
+      createAlbumUsecase: locator<CreateAlbumUsecase>(),
+      addSongsToAlbumUsecase: locator<AddSongsToAlbumUsecase>(),
+    ),
+  );
+
+  locator.registerLazySingleton<ArtistBloc>(
+    () => ArtistBloc(artistRepository: locator<ArtistRepository>()),
   );
 
   //GoRouter
@@ -126,6 +140,13 @@ Future<void> setupLocator() async {
     ),
   );
 
+  locator.registerLazySingleton<ArtistRemoteData>(
+    () => ArtistRemoteData(
+      client: locator<http.Client>(),
+      authLocalDataSource: locator<AuthLocalDataSource>(),
+    ),
+  );
+
   //Register repositories
   locator.registerLazySingleton<AuthRepository>(
     () => AuthRepositoryImpl(
@@ -145,6 +166,9 @@ Future<void> setupLocator() async {
   locator.registerLazySingleton<AlbumRepository>(
     () => AlbumDataRepositoryImpl(albumRemoteData: locator<AlbumRemoteData>()),
   );
+   locator.registerLazySingleton<ArtistRepository>(
+    () => ArtistDataRepositoryImpl(artistRemoteData: locator<ArtistRemoteData>()),
+  );
 
   //Usecases
   locator.registerLazySingleton<LoginUsecase>(
@@ -163,5 +187,12 @@ Future<void> setupLocator() async {
 
   locator.registerLazySingleton<UserDataUsecase>(
     () => UserDataUsecase(locator<UserDataRepository>()),
+  );
+  locator.registerLazySingleton<CreateAlbumUsecase>(
+    () => CreateAlbumUsecase(locator<AlbumRepository>()),
+  );
+
+  locator.registerLazySingleton<AddSongsToAlbumUsecase>(
+    () => AddSongsToAlbumUsecase(locator<AlbumRepository>()),
   );
 }
