@@ -10,6 +10,7 @@ class AlbumOperationsBloc
   AlbumOperationsBloc({required this.albumRepository})
     : super(AlbumOperationInitial()) {
     on<CreateAlbumEvent>(_onCreateAlbum);
+    on<AddSongsToAlbumEvent>(_onAddSongsToAlbum);
   }
 
   Future<void> _onCreateAlbum(
@@ -18,9 +19,28 @@ class AlbumOperationsBloc
   ) async {
     emit(AlbumOperationLoading());
     try {
-      await albumRepository.createAlbum(event.name, event.coverImage,event.description);
+      await albumRepository.createAlbum(
+        event.name,
+        event.coverImage,
+        event.description,
+      );
 
       print('Album created successfully');
+      emit(AlbumOperationSuccess('success'));
+    } catch (e) {
+      print('[AlbumOperationBloc] Error fetching album detail: $e');
+      emit(AlbumOperationError(e.toString()));
+    }
+  }
+
+  Future<void> _onAddSongsToAlbum(
+    AddSongsToAlbumEvent event,
+    Emitter<AlbumOperationsState> emit,
+  ) async {
+    emit(AlbumOperationLoading());
+    try {
+      await albumRepository.addSongsToAlbum(event.songIds, event.albumId);
+      emit(AlbumOperationSuccess('success'));
     } catch (e) {
       print('[AlbumOperationBloc] Error fetching album detail: $e');
       emit(AlbumOperationError(e.toString()));

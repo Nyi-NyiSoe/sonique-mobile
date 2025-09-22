@@ -9,4 +9,5 @@ abstract class AlbumRepository {
   Future<List<AlbumModel>> getAlbumByArtistId(int artistId);
 
   Future<void> createAlbum(String name,XFile coverImage,String description);
+  Future<void> addSongsToAlbum(Set<String> songIds,int albumId);
 }
