@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sonique/Representation/Bloc/album_bloc/album_crud_bloc/album_by_artist_bloc/album_by_artist_bloc.dart';
+import 'package:sonique/Representation/Bloc/album_bloc/album_crud_bloc/album_by_artist_bloc/album_by_artist_event.dart';
 import 'package:sonique/Representation/Bloc/user_data_bloc/user_data_bloc.dart';
 import 'package:sonique/Representation/Bloc/user_data_bloc/user_data_state.dart';
 import 'package:sonique/core/services/routes/routes.dart';
@@ -40,7 +42,7 @@ class LibraryPage extends StatelessWidget {
                     child: Icon(Icons.album),
                     label: 'Upload Album',
                     onTap: () {
-                      context.push(Routes.upload);
+                      context.push(Routes.uploadAlbum);
                     },
                   ),
                 ],
@@ -86,6 +88,45 @@ class LibraryPage extends StatelessWidget {
                 title: Text('Liked Songs'),
                 subtitle: Text('1 song'),
               ),
+            ),
+            BlocBuilder<UserDataBloc, UserDataState>(
+              builder: (context, state) {
+                if (state is UserDataFetchedState) {
+                  final isArtist = state.user.isArtist;
+                  if (isArtist) {
+                    return InkWell(
+                      onTap: () {
+                        context.read<AlbumByArtistBloc>().add(
+                          FetchAlbumByArtistIdEvent(state.user.userId),
+                        );
+                        context.go('/library/albumByArtist'); // works fine
+                      },
+                      borderRadius: BorderRadius.circular(12),
+                      splashColor: Colors.grey.withOpacity(0.2),
+                      highlightColor: Colors.grey.withOpacity(0.1),
+                      child: ListTile(
+                        leading: Container(
+                          width:
+                              50, // Set a fixed width to fit the leading space
+                          height: 50,
+                          decoration: BoxDecoration(shape: BoxShape.rectangle),
+                          padding: EdgeInsets.all(8),
+                          child: Icon(
+                            FontAwesomeIcons.folder,
+                            color: Colors.white,
+                          ),
+                        ),
+                        title: Text('Your Albums'),
+                        subtitle: Text('1 song'),
+                      ),
+                    );
+                  } else {
+                    return SizedBox.shrink();
+                  }
+                } else {
+                  return SizedBox.shrink();
+                }
+              },
             ),
           ],
         ),

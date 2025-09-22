@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sonique/Representation/Bloc/auth_bloc/auth_bloc.dart';
 import 'package:sonique/Representation/Bloc/auth_bloc/auth_state.dart';
+import 'package:sonique/Representation/screens/album_by_artist_page.dart';
 import 'package:sonique/Representation/screens/album_detail_page.dart';
 import 'package:sonique/Representation/screens/home_page.dart';
 import 'package:sonique/Representation/screens/library_page.dart';
@@ -13,6 +14,7 @@ import 'package:sonique/Representation/screens/login_page.dart';
 import 'package:sonique/Representation/screens/profile_page.dart';
 import 'package:sonique/Representation/screens/root_page.dart';
 import 'package:sonique/Representation/screens/signup_page.dart';
+import 'package:sonique/Representation/screens/upload_album_page.dart';
 import 'package:sonique/Representation/screens/upload_song_page.dart';
 import 'package:sonique/core/services/routes/routes.dart';
 
@@ -72,6 +74,12 @@ class RoutingService {
           return UploadSongPage();
         },
       ),
+       GoRoute(
+        path: Routes.uploadAlbum,
+        builder: (context, state) {
+          return UploadAlbumPage();
+        },
+      ),
 
       StatefulShellRoute.indexedStack(
         builder:
@@ -82,15 +90,15 @@ class RoutingService {
             routes: [
               GoRoute(
                 path: Routes.home,
-                builder: (context, state) =>  HomePage(),
+                builder: (context, state) => HomePage(),
                 routes: [
                   GoRoute(
                     path: Routes.albumDetailPage,
                     builder: (context, state) {
                       return AlbumDetailPage();
                     },
-                  )
-                ]
+                  ),
+                ],
               ),
             ],
           ),
@@ -105,6 +113,20 @@ class RoutingService {
                     builder: (context, state) {
                       return LikeSongPage();
                     },
+                  ),
+                  GoRoute(
+                    path: Routes.albumByArtist,
+                    builder: (context, state) {
+                      return AlbumByArtistPage();
+                    },
+                    routes: [
+                      GoRoute(
+                        path: Routes.albumDetailPage,
+                        builder: (context, state) {
+                          return AlbumDetailPage();
+                        },
+                      ),
+                    ],
                   ),
                 ],
               ),
