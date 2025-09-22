@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sonique/Data/repository/album_data_repo_impl/album_data_repository_impl.dart';
 import 'package:sonique/Data/repository/artist_data_repo_impl/artist_data_repository_impl.dart';
 import 'package:sonique/Data/repository/auth_repo_impl/auth_repository_impl.dart';
+import 'package:sonique/Data/repository/playlist_data_repo_impl/playlist_repository_impl.dart';
 import 'package:sonique/Data/repository/song_data_repo_impl/song_data_repository_impl.dart';
 import 'package:sonique/Data/repository/user_data_repo_impl/user_data_repository_impl.dart';
 import 'package:sonique/Data/services/song_service.dart';
@@ -12,18 +13,23 @@ import 'package:sonique/Data/source/album_data_repo/album_remote_data.dart';
 import 'package:sonique/Data/source/artist_data_repo/artist_remote_data.dart';
 import 'package:sonique/Data/source/auth_repo/auth_local_data_source.dart';
 import 'package:sonique/Data/source/auth_repo/auth_remote_data_source.dart';
+import 'package:sonique/Data/source/playlist_data_repo/playlist_remote_data.dart';
 import 'package:sonique/Data/source/song_data_repo/song_remote_data.dart';
 import 'package:sonique/Data/source/user_data_repo/user_remote_data.dart';
 import 'package:sonique/Domain/repository/album_repository.dart';
 import 'package:sonique/Domain/repository/artist_repository.dart';
 import 'package:sonique/Domain/repository/auth_repository.dart';
+import 'package:sonique/Domain/repository/playlist_repository.dart';
 import 'package:sonique/Domain/repository/song_data_repository.dart';
 import 'package:sonique/Domain/repository/user_data_repository.dart';
+import 'package:sonique/Domain/usecases/add_song_to_playlist_usecase.dart';
 import 'package:sonique/Domain/usecases/add_songs_to_album_usecase.dart';
 import 'package:sonique/Domain/usecases/create_album_usecase.dart';
+import 'package:sonique/Domain/usecases/create_playlist_usecase.dart';
 import 'package:sonique/Domain/usecases/login_usecase.dart';
 import 'package:sonique/Domain/usecases/logout_usecase.dart';
 import 'package:sonique/Domain/usecases/register_usecase.dart';
+import 'package:sonique/Domain/usecases/remove_song_from_playlist_usecase.dart';
 import 'package:sonique/Domain/usecases/song_data_usecase.dart';
 import 'package:sonique/Domain/usecases/user_data_usecase.dart';
 import 'package:sonique/Representation/Bloc/album_bloc/album_crud_bloc/album_by_artist_bloc/album_by_artist_bloc.dart';
@@ -34,6 +40,7 @@ import 'package:sonique/Representation/Bloc/artist_bloc/artist_bloc.dart';
 import 'package:sonique/Representation/Bloc/auth_bloc/auth_bloc.dart';
 import 'package:sonique/Representation/Bloc/like_song_bloc/like_song_bloc.dart';
 import 'package:sonique/Representation/Bloc/music_player_bloc/music_player_bloc.dart';
+import 'package:sonique/Representation/Bloc/playlist_bloc/playlist_bloc.dart';
 import 'package:sonique/Representation/Bloc/song_data_bloc/song_data_bloc.dart';
 import 'package:sonique/Representation/Bloc/user_data_bloc/user_data_bloc.dart';
 import 'package:sonique/core/services/routes/routing_service.dart';
@@ -106,6 +113,15 @@ Future<void> setupLocator() async {
     () => ArtistBloc(artistRepository: locator<ArtistRepository>()),
   );
 
+  locator.registerLazySingleton<PlaylistBloc>(
+    () => PlaylistBloc(
+      playlistRepository: locator<PlaylistRepository>(),
+      createPlaylistUsecase: locator<CreatePlaylistUsecase>(),
+      addSongToPlaylistUsecase: locator<AddSongToPlaylistUsecase>(),
+      removeSongFromPlaylistUsecase: locator<RemoveSongFromPlaylistUsecase>(),
+    ),
+  );
+
   //GoRouter
   locator.registerLazySingleton<GoRouter>(
     () => RoutingService(locator<AuthBloc>()).router,
@@ -147,6 +163,13 @@ Future<void> setupLocator() async {
     ),
   );
 
+  locator.registerLazySingleton<PlaylistRemoteData>(
+    () => PlaylistRemoteData(
+      client: locator<http.Client>(),
+      authLocalDataSource: locator<AuthLocalDataSource>(),
+    ),
+  );
+
   //Register repositories
   locator.registerLazySingleton<AuthRepository>(
     () => AuthRepositoryImpl(
@@ -166,8 +189,14 @@ Future<void> setupLocator() async {
   locator.registerLazySingleton<AlbumRepository>(
     () => AlbumDataRepositoryImpl(albumRemoteData: locator<AlbumRemoteData>()),
   );
-   locator.registerLazySingleton<ArtistRepository>(
-    () => ArtistDataRepositoryImpl(artistRemoteData: locator<ArtistRemoteData>()),
+  locator.registerLazySingleton<ArtistRepository>(
+    () =>
+        ArtistDataRepositoryImpl(artistRemoteData: locator<ArtistRemoteData>()),
+  );
+  locator.registerLazySingleton<PlaylistRepository>(
+    () => PlaylistRepositoryImpl(
+      playlistRemoteData: locator<PlaylistRemoteData>(),
+    ),
   );
 
   //Usecases
@@ -194,5 +223,17 @@ Future<void> setupLocator() async {
 
   locator.registerLazySingleton<AddSongsToAlbumUsecase>(
     () => AddSongsToAlbumUsecase(locator<AlbumRepository>()),
+  );
+
+  locator.registerLazySingleton<CreatePlaylistUsecase>(
+    () => CreatePlaylistUsecase(locator<PlaylistRepository>()),
+  );
+
+  locator.registerLazySingleton<AddSongToPlaylistUsecase>(
+    () => AddSongToPlaylistUsecase(locator<PlaylistRepository>()),
+  );
+
+  locator.registerLazySingleton<RemoveSongFromPlaylistUsecase>(
+    () => RemoveSongFromPlaylistUsecase(locator<PlaylistRepository>()),
   );
 }

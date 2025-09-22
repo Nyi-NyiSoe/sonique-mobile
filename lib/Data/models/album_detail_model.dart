@@ -1,10 +1,9 @@
 import 'package:sonique/Data/models/artist_model.dart';
 import 'package:sonique/Data/models/song_model.dart';
 import 'package:sonique/Domain/entities/album.dart';
-import 'package:sonique/Domain/entities/song.dart';
 
 class AlbumDetailModel extends Album {
-  final List<Song> songs;
+  final List<SongModel> songs;
 
   AlbumDetailModel({
     required super.artistId,

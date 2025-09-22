@@ -1,7 +1,7 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sonique/Data/models/playback_status.dart';
-import 'package:sonique/Domain/entities/song.dart';
+import 'package:sonique/Data/models/song_model.dart';
 import 'package:sonique/Representation/Bloc/music_player_bloc/music_player_event.dart';
 import 'package:sonique/Representation/Bloc/music_player_bloc/music_player_state.dart';
 
@@ -65,7 +65,7 @@ class MusicPlayerBloc extends Bloc<MusicEvent, MusicPlayerState> {
   }
 
   void _onAddToQueue(AddToQueue event, Emitter<MusicPlayerState> emit) {
-    final newQueue = List<Song>.from(state.queue)..add(event.song);
+    final newQueue = List<SongModel>.from(state.queue)..add(event.song);
     emit(state.copyWith(queue: newQueue));
   }
 
@@ -90,7 +90,7 @@ class MusicPlayerBloc extends Bloc<MusicEvent, MusicPlayerState> {
   ) async {
     if (state.currentSong == null) return;
 
-    final updatedHistory = List<Song>.from(state.history)
+    final updatedHistory = List<SongModel>.from(state.history)
       ..add(state.currentSong!);
 
     if (state.repeatMode == RepeatMode.one) {
@@ -137,10 +137,10 @@ class MusicPlayerBloc extends Bloc<MusicEvent, MusicPlayerState> {
     // Play next song from queue (shuffle or normal)
     final nextSong =
         state.shuffle
-            ? (List<Song>.from(state.queue)..shuffle()).first
+            ? (List<SongModel>.from(state.queue)..shuffle()).first
             : state.queue.first;
 
-    final updatedQueue = List<Song>.from(state.queue)..remove(nextSong);
+    final updatedQueue = List<SongModel>.from(state.queue)..remove(nextSong);
 
     await _player.stop();
     await _player.play(UrlSource(nextSong.audioUrl));
@@ -175,7 +175,7 @@ class MusicPlayerBloc extends Bloc<MusicEvent, MusicPlayerState> {
     }
 
     final prevSong = state.history.last;
-    final updatedHistory = List<Song>.from(state.history)..removeLast();
+    final updatedHistory = List<SongModel>.from(state.history)..removeLast();
 
     await _player.stop();
     await _player.play(UrlSource(prevSong.audioUrl));
@@ -209,7 +209,7 @@ class MusicPlayerBloc extends Bloc<MusicEvent, MusicPlayerState> {
   void _onToggleShuffle(ToggleShuffle event, Emitter<MusicPlayerState> emit) {
     if (!state.shuffle && state.queue.isNotEmpty) {
       // Turning shuffle ON → shuffle the current queue
-      final shuffledQueue = List<Song>.from(state.queue)..shuffle();
+      final shuffledQueue = List<SongModel>.from(state.queue)..shuffle();
       emit(state.copyWith(shuffle: true, queue: shuffledQueue));
     } else {
       // Turning shuffle OFF → you may want to restore original order
@@ -228,7 +228,7 @@ class MusicPlayerBloc extends Bloc<MusicEvent, MusicPlayerState> {
     await _player.stop();
 
     // Shuffle the list
-    final shuffled = List<Song>.from(event.songs)..shuffle();
+    final shuffled = List<SongModel>.from(event.songs)..shuffle();
 
     // Play the first song
     final firstSong = shuffled.first;
@@ -260,7 +260,7 @@ class MusicPlayerBloc extends Bloc<MusicEvent, MusicPlayerState> {
   }
 
   void _onReorderQueue(ReorderQueue event, Emitter<MusicPlayerState> emit) {
-    final updatedQueue = List<Song>.from(state.queue);
+    final updatedQueue = List<SongModel>.from(state.queue);
 
     final song = updatedQueue.removeAt(event.oldIndex);
     updatedQueue.insert(event.newIndex, song);

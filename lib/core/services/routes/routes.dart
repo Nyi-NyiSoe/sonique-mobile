@@ -11,4 +11,6 @@ class Routes {
   static const String albumByArtist = 'albumByArtist';
   static const String uploadAlbum = '/uploadAlbum';
   static const String artistDetail = '/artistDetail/:id';
+  static const String playlistPage = '/playlistPage';
+
 }

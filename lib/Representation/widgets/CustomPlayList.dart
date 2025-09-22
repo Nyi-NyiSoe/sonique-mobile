@@ -2,20 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
-import 'package:sonique/Domain/entities/song.dart';
+import 'package:sonique/Data/models/song_model.dart';
 import 'package:sonique/Representation/Bloc/music_player_bloc/music_player_bloc.dart';
 import 'package:sonique/Representation/Bloc/music_player_bloc/music_player_event.dart';
 import 'package:sonique/Representation/Bloc/music_player_bloc/music_player_state.dart';
+import 'package:sonique/Representation/Bloc/playlist_bloc/playlist_bloc.dart';
+import 'package:sonique/Representation/Bloc/playlist_bloc/playlist_event.dart';
 import 'package:sonique/Representation/widgets/CustomButton.dart';
 import 'package:sonique/Representation/widgets/CustomSongCard.dart';
 
 class CustomPlayList extends StatelessWidget {
-  const CustomPlayList({super.key, required this.songs});
+  const CustomPlayList({super.key, required this.songs, this.playlistId});
 
-  final List<Song> songs;
+  final List<SongModel> songs;
+  final int? playlistId;
 
   @override
   Widget build(BuildContext context) {
+    final currentRoute = GoRouter.of(context).state.uri;
+
     return Column(
       children: [
         Expanded(
@@ -46,7 +51,6 @@ class CustomPlayList extends StatelessWidget {
                     ),
                   ],
                 ),
-
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Row(
@@ -55,10 +59,8 @@ class CustomPlayList extends StatelessWidget {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.center,
-
                         children: [Text("${songs.length} songs")],
                       ),
-
                       Row(
                         children: [
                           BlocSelector<MusicPlayerBloc, MusicPlayerState, bool>(
@@ -85,7 +87,6 @@ class CustomPlayList extends StatelessWidget {
                               );
                             },
                           ),
-
                           Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: CustomElevatedButton(
@@ -114,11 +115,43 @@ class CustomPlayList extends StatelessWidget {
           flex: 2,
           child: Container(
             padding: EdgeInsets.all(10),
-
             child: ListView.builder(
               itemCount: songs.length,
               itemBuilder: (context, index) {
-                return Customsongcard(song: songs[index], queue: true);
+                final song = songs[index];
+
+                if (currentRoute.toString().startsWith(
+                  "/library/playlistPage",
+                )) {
+                  return Dismissible(
+                    key: ValueKey(UniqueKey()),
+                    direction: DismissDirection.endToStart,
+                    background: Container(
+                      color: Colors.red,
+                      alignment: Alignment.centerRight,
+                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      child: Icon(Icons.delete, color: Colors.white),
+                    ),
+                    onDismissed: (direction) {
+                      context.read<PlaylistBloc>().add(
+                        RemoveFromPlaylistEvent(
+                          playlistId: playlistId!,
+                          songId: song.id,
+                        ),
+                      );
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text("${song.title} removed from playlist"),
+                        ),
+                      );
+                    },
+                    child: Customsongcard(song: song, queue: true),
+                  );
+                } else {
+                  // Normal card (no swipe-to-delete)
+                  return Customsongcard(song: song, queue: true);
+                }
               },
             ),
           ),
