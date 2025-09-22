@@ -54,12 +54,9 @@ class CustomPlayList extends StatelessWidget {
                     children: [
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
 
-                        children: [
-                          Text('PLAY LIST'),
-                          Text('LIKED SONGS'),
-                          Text("${songs.length} songs"),
-                        ],
+                        children: [Text("${songs.length} songs")],
                       ),
 
                       Row(

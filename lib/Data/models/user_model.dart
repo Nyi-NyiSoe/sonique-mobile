@@ -25,7 +25,7 @@ class UserModel extends User {
   }) {
     try {
       return UserModel(
-        userId: json['userId'] ?? 0, // Handle null values
+        userId: json['userId'] ?? json['id'] ?? 0, // Handle both 'userId' and 'id'
         firstName: json['firstName'] ?? "",
         lastName: json['lastName'] ?? "",
         email: json['email'] ?? "",

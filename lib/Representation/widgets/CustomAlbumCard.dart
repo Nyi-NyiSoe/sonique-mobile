@@ -5,7 +5,11 @@ import 'package:sonique/Representation/Bloc/album_bloc/album_detail_bloc/album_d
 import 'package:sonique/Representation/Bloc/album_bloc/album_detail_bloc/album_detail_event.dart';
 
 class CustomAlbumCard extends StatelessWidget {
-  const CustomAlbumCard({super.key, required this.imageUrl,required this.albumId});
+  const CustomAlbumCard({
+    super.key,
+    required this.imageUrl,
+    required this.albumId,
+  });
   final String imageUrl;
   final int albumId;
 
@@ -14,16 +18,19 @@ class CustomAlbumCard extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         context.read<AlbumDetailBloc>().add(FetchAlbumDetailEvent(albumId));
-         context.go('/home/albumDetail'); 
+        final currentRoute = GoRouter.of(context).state.uri;
+          if (currentRoute.toString().startsWith('/home')) {
+          context.go('/home/albumDetail');
+        } else {
+          context.go('/library/albumByArtist/albumDetail');
+        }
       },
       child: Container(
-        width: MediaQuery.sizeOf(context).width * 0.5,
-        margin: const EdgeInsets.only(right: 12),
+        margin: EdgeInsets.all(12),
         decoration: BoxDecoration(borderRadius: BorderRadius.circular(12)),
         child: ClipRRect(
-          
           borderRadius: BorderRadius.circular(12),
-          child: Image.network(imageUrl),
+          child: Image.network(imageUrl,fit: BoxFit.cover,),
         ),
       ),
     );

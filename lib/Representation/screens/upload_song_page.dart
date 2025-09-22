@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -182,16 +183,22 @@ class _UploadSongPageState extends State<UploadSongPage> {
                   SizedBox(height: 20),
                   GestureDetector(
                     onTap: () async {
+                      final result = await FilePicker.platform.pickFiles(
+                        type: FileType.audio,
+                      );
                       final hasPermission = await requestGalleryPermission();
                       if (!hasPermission) return;
-                      final XFile? audioFile = await picker.pickMedia();
+                      if (result != null && result.files.isNotEmpty) {
+                        final XFile? audioFile = XFile(
+                          result.files.first.path!,
+                        );
+                        if (audioFile != null) {
+                          setState(() {
+                            _audioFile = audioFile;
+                          });
 
-                      if (audioFile != null) {
-                        setState(() {
-                          _audioFile = audioFile;
-                        });
-
-                        log(_audioFile!.name.toString());
+                          log(_audioFile!.name.toString());
+                        }
                       }
                     },
                     child: Padding(
