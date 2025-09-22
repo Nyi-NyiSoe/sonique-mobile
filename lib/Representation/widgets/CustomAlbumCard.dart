@@ -21,7 +21,9 @@ class CustomAlbumCard extends StatelessWidget {
         final currentRoute = GoRouter.of(context).state.uri;
           if (currentRoute.toString().startsWith('/home')) {
           context.go('/home/albumDetail');
-        } else {
+        } else if(currentRoute.toString().startsWith('/home/artistDetail')){
+          context.go('/home/artistDetail/albumDetail');
+        }else {
           context.go('/library/albumByArtist/albumDetail');
         }
       },
