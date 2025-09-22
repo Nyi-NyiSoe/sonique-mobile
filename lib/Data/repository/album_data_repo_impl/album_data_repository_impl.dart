@@ -46,4 +46,14 @@ class AlbumDataRepositoryImpl implements AlbumRepository {
       throw Exception('Failed to get album details!');
     }
   }
+
+  @override
+  Future<void> addSongsToAlbum(Set<String> songIds,int albumId)async{
+    try{
+      await albumRemoteData.addSongsToAlbum(songIds, albumId);
+
+    }catch(e){
+      throw Exception('Failed to add songs to album!');
+    }
+  }
 }
