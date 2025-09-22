@@ -1,14 +1,14 @@
 import 'package:sonique/Data/models/playback_status.dart';
-import 'package:sonique/Domain/entities/song.dart';
+import 'package:sonique/Data/models/song_model.dart';
 enum RepeatMode{
   off,
   all,
   one
 }
 class MusicPlayerState {
-  final List<Song> queue;
-  final List<Song> history;
-  final Song? currentSong;
+  final List<SongModel> queue;
+  final List<SongModel> history;
+  final SongModel? currentSong;
   final PlayBackStatus status;
   final Duration position;
   final bool shuffle;
@@ -24,9 +24,9 @@ class MusicPlayerState {
   });
 
   MusicPlayerState copyWith({
-    List<Song>? queue,
-    List<Song>? history,
-    Song? currentSong,
+    List<SongModel>? queue,
+    List<SongModel>? history,
+    SongModel? currentSong,
     PlayBackStatus? status,
     Duration? position,
     bool? shuffle,

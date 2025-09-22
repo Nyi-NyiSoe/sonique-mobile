@@ -1,13 +1,11 @@
-
-
 class Album {
-  int? artistId;
-  String? coverImageUrl;
-  String? created_at;
-  String? description;
-  int? id;
-  String? name;
-  String? updated_at;
+  final int? artistId;
+  final String? coverImageUrl;
+  final String? created_at;
+  final String? description;
+  final int? id;
+  final String? name;
+  final String? updated_at;
 
   Album({
     required this.artistId,

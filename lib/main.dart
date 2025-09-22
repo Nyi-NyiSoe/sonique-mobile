@@ -19,6 +19,8 @@ import 'package:sonique/Representation/Bloc/like_song_bloc/like_song_bloc.dart';
 import 'package:sonique/Representation/Bloc/like_song_bloc/like_song_event.dart';
 import 'package:sonique/Representation/Bloc/music_player_bloc/music_player_bloc.dart';
 import 'package:sonique/Representation/Bloc/music_player_bloc/music_player_event.dart';
+import 'package:sonique/Representation/Bloc/playlist_bloc/playlist_bloc.dart';
+import 'package:sonique/Representation/Bloc/playlist_bloc/playlist_event.dart';
 import 'package:sonique/Representation/Bloc/song_data_bloc/song_data_bloc.dart';
 import 'package:sonique/Representation/Bloc/song_data_bloc/song_data_event.dart';
 import 'package:sonique/Representation/Bloc/user_data_bloc/user_data_bloc.dart';
@@ -119,11 +121,18 @@ class MyApp extends StatelessWidget {
             return albumOperation;
           },
         ),
-         BlocProvider<ArtistBloc>(
+        BlocProvider<ArtistBloc>(
           create: (context) {
             final artistBloc = locator<ArtistBloc>();
-              artistBloc.add(FetchArtistsEvent());
+            artistBloc.add(FetchArtistsEvent());
             return artistBloc;
+          },
+        ),
+        BlocProvider<PlaylistBloc>(
+          create: (context) {
+            final playlistBloc = locator<PlaylistBloc>();
+            playlistBloc.add(FetchUserPlaylistEvent());
+            return playlistBloc;
           },
         ),
       ],

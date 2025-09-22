@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:sonique/Data/models/liked_song_model.dart';
 import 'package:sonique/Data/models/song_data_status.dart';
-import 'package:sonique/Domain/entities/song.dart';
+import 'package:sonique/Data/models/song_model.dart';
 import 'package:sonique/Representation/Bloc/like_song_bloc/like_song_bloc.dart';
 import 'package:sonique/Representation/Bloc/like_song_bloc/like_song_event.dart';
 import 'package:sonique/Representation/Bloc/like_song_bloc/like_song_state.dart';
@@ -40,10 +40,10 @@ class _LikeSongPageState extends State<LikeSongPage> {
               }
             }
 
-            final List<Song> songs =
+            final List<SongModel> songs =
                 uniqueSongs
                     .map(
-                      (songModel) => Song(
+                      (songModel) => SongModel(
                         artist: songModel.artist,
                         audioUrl: songModel.fileUrl,
                         coverImageUrl: songModel.coverImageUrl,

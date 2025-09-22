@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sonique/Data/models/song_data_status.dart';
-import 'package:sonique/Domain/entities/song.dart';
+import 'package:sonique/Data/models/song_model.dart';
 import 'package:sonique/Representation/Bloc/album_bloc/album_crud_bloc/album_by_artist_bloc/album_by_artist_bloc.dart';
 import 'package:sonique/Representation/Bloc/album_bloc/album_crud_bloc/album_by_artist_bloc/album_by_artist_state.dart';
 import 'package:sonique/Representation/Bloc/artist_bloc/artist_bloc.dart';
@@ -162,7 +162,7 @@ class ArtistDetailPage extends StatelessWidget {
                 if (state.fetchStatus == SongDataStatus.loading) {
                   return Center(child: CircularProgressIndicator());
                 } else if (state.fetchStatus == SongDataStatus.success) {
-                  final List<Song> filteredSongs =
+                  final List<SongModel> filteredSongs =
                       state.songs
                           .where((song) => song.artist.artistId == artistId)
                           .toList();
