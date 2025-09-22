@@ -7,6 +7,7 @@ import 'package:sonique/Representation/Bloc/auth_bloc/auth_bloc.dart';
 import 'package:sonique/Representation/Bloc/auth_bloc/auth_state.dart';
 import 'package:sonique/Representation/screens/album_by_artist_page.dart';
 import 'package:sonique/Representation/screens/album_detail_page.dart';
+import 'package:sonique/Representation/screens/artist_detail_page.dart';
 import 'package:sonique/Representation/screens/home_page.dart';
 import 'package:sonique/Representation/screens/library_page.dart';
 import 'package:sonique/Representation/screens/like_song_page.dart';
@@ -97,6 +98,21 @@ class RoutingService {
                     builder: (context, state) {
                       return AlbumDetailPage();
                     },
+                  ),
+                  GoRoute(
+                    path: Routes.artistDetail,
+                    builder: (context, state) {
+                      final artistId = int.parse(state.pathParameters['id']!);
+                      return ArtistDetailPage(artistId: artistId,);
+                    },
+                    routes: [
+                       GoRoute(
+                    path: Routes.albumDetailPage,
+                    builder: (context, state) {
+                      return AlbumDetailPage();
+                    },
+                  ),
+                    ]
                   ),
                 ],
               ),
