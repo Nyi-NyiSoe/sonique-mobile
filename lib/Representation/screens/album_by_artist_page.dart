@@ -11,7 +11,7 @@ class AlbumByArtistPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
+     
       body: BlocBuilder<AlbumByArtistBloc, AlbumByArtistState>(
         builder: (context, state) {
           if (state is AlbumByArtistLoading) {
@@ -29,7 +29,7 @@ class AlbumByArtistPage extends StatelessWidget {
                     },
                     icon: Icon(FontAwesomeIcons.angleLeft),
                   ),
-                  Center(child: Text("No songs in album yet.")),
+                  Center(child: Text("No albums yet.")),
                   SizedBox.shrink(),
                 ],
               );
