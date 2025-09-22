@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:sonique/Data/models/song_data_status.dart';
+import 'package:sonique/Representation/Bloc/album_bloc/album_crud_bloc/album_by_artist_bloc/album_by_artist_bloc.dart';
+import 'package:sonique/Representation/Bloc/album_bloc/album_crud_bloc/album_by_artist_bloc/album_by_artist_event.dart';
 import 'package:sonique/Representation/Bloc/album_bloc/album_list_bloc/album_list_bloc.dart';
 import 'package:sonique/Representation/Bloc/album_bloc/album_list_bloc/album_list_event.dart';
 import 'package:sonique/Representation/Bloc/album_bloc/album_list_bloc/album_list_state.dart';
+import 'package:sonique/Representation/Bloc/artist_bloc/artist_bloc.dart';
+import 'package:sonique/Representation/Bloc/artist_bloc/artist_state.dart';
 import 'package:sonique/Representation/Bloc/song_data_bloc/song_data_bloc.dart';
 import 'package:sonique/Representation/Bloc/song_data_bloc/song_data_event.dart';
 import 'package:sonique/Representation/Bloc/song_data_bloc/song_data_state.dart';
@@ -19,11 +24,6 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final ScrollController _scrollController = ScrollController();
- 
-  final List<String> artists = List.generate(
-    5,
-    (i) => 'assets/images/splash.jpeg',
-  );
 
   @override
   void initState() {
@@ -56,13 +56,11 @@ class _HomePageState extends State<HomePage> {
                   vertical: 8,
                 ),
                 child: Row(
-                
                   children: [
                     Text(
                       'Latest',
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
-                    
                   ],
                 ),
               ),
@@ -78,7 +76,7 @@ class _HomePageState extends State<HomePage> {
                       return Center(child: CircularProgressIndicator());
                     } else if (state is AlbumListError) {
                       return Center(child: Text(state.error));
-                    } else if(state is AlbumListLoaded){
+                    } else if (state is AlbumListLoaded) {
                       final albums = state.albums;
                       return ListView.builder(
                         scrollDirection: Axis.horizontal,
@@ -91,7 +89,7 @@ class _HomePageState extends State<HomePage> {
                           );
                         },
                       );
-                    }else{
+                    } else {
                       return SizedBox.shrink();
                     }
                   },
@@ -105,13 +103,11 @@ class _HomePageState extends State<HomePage> {
                   vertical: 8,
                 ),
                 child: Row(
-                 
                   children: [
                     Text(
                       'Artists',
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
-                    
                   ],
                 ),
               ),
@@ -120,18 +116,37 @@ class _HomePageState extends State<HomePage> {
             SliverToBoxAdapter(
               child: SizedBox(
                 height: screenHeight * 0.15, // slightly smaller than albums
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: artists.length,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  itemBuilder: (context, index) {
-                    return Padding(
-                      padding: const EdgeInsets.all(5.0),
-                      child: CircleAvatar(
-                        radius: screenHeight * 0.08,
-                        backgroundImage: AssetImage(artists[index]),
-                      ),
-                    );
+                child: BlocBuilder<ArtistBloc, ArtistState>(
+                  builder: (context, state) {
+                    if (state is ArtistLoading) {
+                      return Center(child: CircularProgressIndicator());
+                    } else if (state is ArtistLoaded) {
+                      final artists = state.artists;
+                      return ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: artists.length,
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        itemBuilder: (context, index) {
+                          return GestureDetector(
+                            onTap: (){
+                              context.read<AlbumByArtistBloc>().add(FetchAlbumByArtistIdEvent(artists[index].artistId));
+                              context.go('/home/artistDetail/${artists[index].artistId}');
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.all(5.0),
+                              child: CircleAvatar(
+                                radius: screenHeight * 0.08,
+                                backgroundImage: NetworkImage(artists[index].profile_image!),
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    } else if (state is ArtistError) {
+                      return Center(child: Text(state.error));
+                    } else {
+                      return SizedBox.shrink();
+                    }
                   },
                 ),
               ),

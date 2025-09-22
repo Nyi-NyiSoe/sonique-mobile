@@ -17,39 +17,42 @@ class AlbumDetailPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButton: BlocBuilder<UserDataBloc, UserDataState>(
-        builder: (context, state) {
-          if (state is UserDataFetchedState) {
-            final isArtist = state.user.isArtist;
-            if (isArtist) {
-              return FloatingActionButton(
-                onPressed: () {
-                  showModalBottomSheet(
-                    isScrollControlled: true,
-                    //backgroundColor: Colors.transparent, // no black background
-                    context: context,
-                    builder: (context) {
-                      final albumDetailState = context.read<AlbumDetailBloc>().state;
-                      int? albumId = null;
-                      if (albumDetailState is AlbumDetailLoaded) {
-                      albumId = albumDetailState.album.id;
-                      }
-                      return UploadSongsAlbumPage(
-                      userId: state.user.userId,
-                      albumId: albumId!,
-                      );
-                    },
-                  );
-                },
-                child: Icon(Icons.upload),
-              );
-            } else {
-              return SizedBox.shrink();
-            }
+        builder: (context, userState) {
+          if (userState is UserDataFetchedState) {
+            return BlocBuilder<AlbumDetailBloc, AlbumDetailState>(
+              builder: (context, albumState) {
+                if (albumState is AlbumDetailLoaded) {
+                  final isOwner =
+                      albumState.album.artistId == userState.user.userId;
+                  final isArtist = userState.user.isArtist;
+
+                  if (isArtist && isOwner) {
+                    return FloatingActionButton(
+                      onPressed: () {
+                        showModalBottomSheet(
+                          isScrollControlled: true,
+                          context: context,
+                          builder: (context) {
+                            return UploadSongsAlbumPage(
+                              userId: userState.user.userId,
+                              albumId: albumState.album.id!,
+                            );
+                          },
+                        );
+                      },
+                      child: const Icon(Icons.upload),
+                    );
+                  }
+                }
+                return const SizedBox.shrink();
+              },
+            );
           } else {
-            return SizedBox.shrink();
+            return const SizedBox.shrink();
           }
         },
       ),
+
       body: BlocBuilder<AlbumDetailBloc, AlbumDetailState>(
         builder: (context, state) {
           if (state is AlbumDetailLoading) {
