@@ -49,9 +49,6 @@ class _ProfilePageState extends State<ProfilePage> {
 
               context.read<AuthBloc>().add(LogoutEvent());
               context.read<MusicPlayerBloc>().add(ResetPlayer());
-
-             
-
             },
           ),
         ],

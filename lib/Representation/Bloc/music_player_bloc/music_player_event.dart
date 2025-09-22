@@ -1,19 +1,19 @@
-import 'package:sonique/Domain/entities/song.dart';
+import 'package:sonique/Data/models/song_model.dart';
 
 abstract class MusicEvent {}
 
 class PlaySong extends MusicEvent {
-  final Song song;
+  final SongModel song;
   PlaySong(this.song);
 }
 
 class AddToQueue extends MusicEvent {
-  final Song song;
+  final SongModel song;
   AddToQueue(this.song);
 }
 
 class PlayAList extends MusicEvent{
-  final List<Song> songs;
+  final List<SongModel> songs;
   PlayAList(this.songs);
 }
 
@@ -32,7 +32,7 @@ class ToggleShuffle extends MusicEvent {
 class ToggleRepeat extends MusicEvent {}
 
 class ShufflePlay extends MusicEvent{
-  final List<Song> songs;
+  final List<SongModel> songs;
   ShufflePlay(this.songs);
 }
 

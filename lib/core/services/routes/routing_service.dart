@@ -12,6 +12,7 @@ import 'package:sonique/Representation/screens/home_page.dart';
 import 'package:sonique/Representation/screens/library_page.dart';
 import 'package:sonique/Representation/screens/like_song_page.dart';
 import 'package:sonique/Representation/screens/login_page.dart';
+import 'package:sonique/Representation/screens/playlist_page.dart';
 import 'package:sonique/Representation/screens/profile_page.dart';
 import 'package:sonique/Representation/screens/root_page.dart';
 import 'package:sonique/Representation/screens/signup_page.dart';
@@ -128,6 +129,12 @@ class RoutingService {
                     path: Routes.likedSongPage,
                     builder: (context, state) {
                       return LikeSongPage();
+                    },
+                  ),
+                  GoRoute(
+                    path: Routes.playlistPage,
+                    builder: (context, state) {
+                      return PlaylistPage();
                     },
                   ),
                   GoRoute(
