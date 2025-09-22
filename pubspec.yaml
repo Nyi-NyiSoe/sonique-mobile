@@ -43,10 +43,12 @@ dependencies:
   flutter_bloc:
   image_picker:
   permission_handler:
-  file_picker: ^10.1.9
+  file_picker: ^10.3.3
   audioplayers: ^6.5.0
   font_awesome_flutter: ^10.9.0
   flutter_speed_dial: ^7.0.0
+  image: ^4.5.4
+  http_parser: ^4.1.2
 
 dev_dependencies:
   flutter_test:

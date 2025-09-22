@@ -8,5 +8,7 @@ class Routes {
   static const String profile = '/profile';
   static const String likedSongPage = 'likedSong';
   static const String albumDetailPage = 'albumDetail';
+  static const String albumByArtist= 'albumByArtist';
+   static const String uploadAlbum = '/uploadAlbum';
   
 }

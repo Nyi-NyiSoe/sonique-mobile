@@ -21,6 +21,8 @@ import 'package:sonique/Domain/usecases/logout_usecase.dart';
 import 'package:sonique/Domain/usecases/register_usecase.dart';
 import 'package:sonique/Domain/usecases/song_data_usecase.dart';
 import 'package:sonique/Domain/usecases/user_data_usecase.dart';
+import 'package:sonique/Representation/Bloc/album_bloc/album_crud_bloc/album_by_artist_bloc/album_by_artist_bloc.dart';
+import 'package:sonique/Representation/Bloc/album_bloc/album_crud_bloc/album_operations_bloc/album_operations_bloc.dart';
 import 'package:sonique/Representation/Bloc/album_bloc/album_detail_bloc/album_detail_bloc.dart';
 import 'package:sonique/Representation/Bloc/album_bloc/album_list_bloc/album_list_bloc.dart';
 import 'package:sonique/Representation/Bloc/auth_bloc/auth_bloc.dart';
@@ -82,8 +84,13 @@ Future<void> setupLocator() async {
   locator.registerLazySingleton<AlbumDetailBloc>(
     () => AlbumDetailBloc(albumRepository: locator<AlbumRepository>()),
   );
+  locator.registerLazySingleton<AlbumByArtistBloc>(
+    () => AlbumByArtistBloc(albumRepository: locator<AlbumRepository>()),
+  );
 
-
+  locator.registerLazySingleton<AlbumOperationsBloc>(
+    () => AlbumOperationsBloc(albumRepository: locator<AlbumRepository>()),
+  );
 
   //GoRouter
   locator.registerLazySingleton<GoRouter>(
