@@ -1,10 +1,6 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:sonique/Data/models/user_model.dart';
 import 'package:sonique/Representation/Bloc/auth_bloc/auth_bloc.dart';
 import 'package:sonique/Representation/Bloc/auth_bloc/auth_event.dart';
@@ -14,8 +10,10 @@ import 'package:sonique/Representation/Bloc/music_player_bloc/music_player_event
 import 'package:sonique/Representation/Bloc/user_data_bloc/user_data_bloc.dart';
 import 'package:sonique/Representation/Bloc/user_data_bloc/user_data_event.dart';
 import 'package:sonique/Representation/Bloc/user_data_bloc/user_data_state.dart';
-import 'package:sonique/Representation/widgets/CustomButton.dart';
-import 'package:sonique/Representation/widgets/CustomTextFormField.dart';
+import 'package:sonique/Representation/widgets/ImageUpdateModal.dart';
+import 'package:sonique/Representation/widgets/MusicStats.dart';
+import 'package:sonique/Representation/widgets/UserDetailCard.dart';
+import 'package:sonique/Representation/widgets/UserDetailModal.dart';
 import 'package:sonique/core/services/routes/routes.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -27,12 +25,10 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   UserModel? user;
-  XFile? temp_image; // Declare temp_image as a state variable
 
   @override
   void initState() {
     super.initState();
-    // Fetch user data when the widget is initialized
     context.read<UserDataBloc>().add(FetchUserDataEvent());
   }
 
@@ -45,15 +41,12 @@ class _ProfilePageState extends State<ProfilePage> {
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () {
-              // Handle settings action
-
               context.read<AuthBloc>().add(LogoutEvent());
               context.read<MusicPlayerBloc>().add(ResetPlayer());
             },
           ),
         ],
       ),
-
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is AuthLoadingState) {
@@ -69,7 +62,7 @@ class _ProfilePageState extends State<ProfilePage> {
               return const Center(child: CircularProgressIndicator());
             } else if (state is UserDataFetchedState) {
               user = state.user;
-              return Center(
+              return SingleChildScrollView(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -80,10 +73,9 @@ class _ProfilePageState extends State<ProfilePage> {
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             mainAxisAlignment: MainAxisAlignment.center,
-
                             children: [
                               GestureDetector(
-                                onTap: () => updateImageModal(context),
+                                onTap: () => _showImageUpdateModal(context),
                                 child: CircleAvatar(
                                   radius: 50,
                                   backgroundImage: NetworkImage(
@@ -95,7 +87,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               ),
                               const SizedBox(width: 20),
                               GestureDetector(
-                                onTap: () => updateUserDetailsModal(context),
+                                onTap: () => _showUserDetailsModal(context),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
@@ -119,10 +111,9 @@ class _ProfilePageState extends State<ProfilePage> {
                               ),
                             ],
                           ),
-
                           const SizedBox(height: 20),
                           GestureDetector(
-                            onTap: () => updateUserDetailsModal(context),
+                            onTap: () => _showUserDetailsModal(context),
                             child: Text(
                               user!.bio == ""
                                   ? "'Add a bio'"
@@ -134,6 +125,8 @@ class _ProfilePageState extends State<ProfilePage> {
                         ],
                       ),
                     ),
+                    UserDetailCard(user: user!),
+                    MusicStats(user: user!,)
                   ],
                 ),
               );
@@ -148,213 +141,20 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Future<dynamic> updateUserDetailsModal(BuildContext context) {
-    final TextEditingController _firstNameController = TextEditingController(
-      text: user!.firstName,
-    );
-    final TextEditingController _lastNameController = TextEditingController(
-      text: user!.lastName,
-    );
-
-    final TextEditingController _bioController = TextEditingController(
-      text: user!.bio,
-    );
-    final TextEditingController _usernameController = TextEditingController(
-      text: user!.username,
-    );
-
-    return showModalBottomSheet(
+  void _showUserDetailsModal(BuildContext context) {
+    showModalBottomSheet(
       useRootNavigator: true,
       isScrollControlled: true,
       context: context,
-      builder: (context) {
-        return DraggableScrollableSheet(
-          initialChildSize: 0.5,
-          minChildSize: 0.5,
-          maxChildSize: 0.9,
-          expand: false,
-          builder: (context, scrollController) {
-            return SingleChildScrollView(
-              controller: scrollController,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  const SizedBox(height: 20),
-                  Text("Edit profile"),
-                  const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Expanded(
-                        child: CustomTextFormField(
-                          label: "First Name",
-                          hintText: "First Name",
-                          controller: _firstNameController,
-
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your first name';
-                            }
-                            return null;
-                          },
-                        ),
-                      ),
-                      SizedBox(width: 10),
-                      Expanded(
-                        child: CustomTextFormField(
-                          label: "Last Name",
-                          hintText: "Last Name",
-                          controller: _lastNameController,
-
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your first name';
-                            }
-                            return null;
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  CustomTextFormField(
-                    label: "Username",
-
-                    controller: _usernameController,
-
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter your first name';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                  CustomTextFormField(label: "Bio", controller: _bioController),
-                  const SizedBox(height: 20),
-                  CustomElevatedButton(
-                    width: 200,
-                    child: Text('Save'),
-                    onPressed: () {
-                      // Handle save action
-                      try {
-                        context.read<UserDataBloc>().add(
-                          UpdateUserDetailEvent(
-                            firstName: _firstNameController.text,
-                            lastName: _lastNameController.text,
-                            username: _usernameController.text,
-                            bio: _bioController.text,
-                          ),
-                        );
-
-                        Navigator.pop(context);
-                      } catch (e) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Error: ${e.toString()}')),
-                        );
-                      }
-                    },
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
+      builder: (context) => UserDetailsModal(user: user!),
     );
   }
 
-  Future<dynamic> updateImageModal(BuildContext context) {
-    final ImagePicker picker = ImagePicker();
-
-    return showModalBottomSheet(
+  void _showImageUpdateModal(BuildContext context) {
+    showModalBottomSheet(
       useRootNavigator: true,
       context: context,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setModalState) {
-            return Container(
-              width: double.infinity,
-              child: Column(
-                children: [
-                  const SizedBox(height: 20),
-                  Text("Edit profile"),
-                  const SizedBox(height: 20),
-                  Stack(
-                    children: [
-                      CircleAvatar(
-                        radius: 50,
-                        backgroundImage:
-                            temp_image == null
-                                ? NetworkImage(user!.profile_image!)
-                                    as ImageProvider
-                                : FileImage(File(temp_image!.path))
-                                    as ImageProvider,
-                      ),
-
-                      Positioned(
-                        bottom: 0,
-                        right: 0,
-                        child: IconButton(
-                          icon: const Icon(Icons.camera_alt),
-                          onPressed: () async {
-                            final hasPermission =
-                                await requestGalleryPermission();
-                            if (!hasPermission) return;
-                            final XFile? image = await picker.pickImage(
-                              source: ImageSource.gallery,
-                            );
-                            if (image != null) {
-                              // Update both parent state and modal state
-                              setState(() {
-                                temp_image = image;
-                              });
-                              setModalState(() {
-                                // This forces the modal to rebuild
-                              });
-                            }
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  CustomElevatedButton(
-                    width: 200,
-                    child: Text('Save'),
-                    onPressed: () async {
-                      if (temp_image != null) {
-                        context.read<UserDataBloc>().add(
-                          UserImageUpdateEvent(profile_image: temp_image),
-                        );
-                      }
-
-                      setState(() {
-                        temp_image = null;
-                      });
-
-                      setModalState(() {
-                        // This forces the modal to rebuild
-                      });
-                      Navigator.pop(context);
-                    },
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
+      builder: (context) => ImageUpdateModal(user: user!),
     );
   }
-}
-
-Future<bool> requestGalleryPermission() async {
-  var status = await Permission.photos.request(); // iOS
-  if (status.isGranted) return true;
-
-  status = await Permission.storage.request(); // Android
-  return status.isGranted;
 }
