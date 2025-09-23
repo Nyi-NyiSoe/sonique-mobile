@@ -30,6 +30,7 @@ import 'package:sonique/Domain/usecases/login_usecase.dart';
 import 'package:sonique/Domain/usecases/logout_usecase.dart';
 import 'package:sonique/Domain/usecases/register_usecase.dart';
 import 'package:sonique/Domain/usecases/remove_song_from_playlist_usecase.dart';
+import 'package:sonique/Domain/usecases/remove_songs_from_album_usecase.dart';
 import 'package:sonique/Domain/usecases/song_data_usecase.dart';
 import 'package:sonique/Domain/usecases/user_data_usecase.dart';
 import 'package:sonique/Representation/Bloc/album_bloc/album_crud_bloc/album_by_artist_bloc/album_by_artist_bloc.dart';
@@ -106,6 +107,7 @@ Future<void> setupLocator() async {
       albumRepository: locator<AlbumRepository>(),
       createAlbumUsecase: locator<CreateAlbumUsecase>(),
       addSongsToAlbumUsecase: locator<AddSongsToAlbumUsecase>(),
+      removeSongsFromAlbumUsecase: locator<RemoveSongsFromAlbumUsecase>()
     ),
   );
 
@@ -223,6 +225,10 @@ Future<void> setupLocator() async {
 
   locator.registerLazySingleton<AddSongsToAlbumUsecase>(
     () => AddSongsToAlbumUsecase(locator<AlbumRepository>()),
+  );
+
+  locator.registerLazySingleton<RemoveSongsFromAlbumUsecase>(
+    () => RemoveSongsFromAlbumUsecase(locator<AlbumRepository>()),
   );
 
   locator.registerLazySingleton<CreatePlaylistUsecase>(

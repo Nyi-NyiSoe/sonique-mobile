@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sonique/Data/models/song_data_status.dart';
+import 'package:sonique/Representation/Bloc/album_bloc/album_crud_bloc/album_by_artist_bloc/album_by_artist_bloc.dart';
+import 'package:sonique/Representation/Bloc/album_bloc/album_crud_bloc/album_by_artist_bloc/album_by_artist_event.dart';
 import 'package:sonique/Representation/Bloc/album_bloc/album_crud_bloc/album_operations_bloc/album_operations_bloc.dart';
 import 'package:sonique/Representation/Bloc/album_bloc/album_crud_bloc/album_operations_bloc/album_operations_event.dart';
 import 'package:sonique/Representation/Bloc/album_bloc/album_detail_bloc/album_detail_bloc.dart';
@@ -95,8 +97,13 @@ class _UploadSongsAlbumPageState extends State<UploadSongsAlbumPage> {
                     context.read<AlbumOperationsBloc>().add(
                       AddSongsToAlbumEvent(selectedSongIds, widget.albumId),
                     );
+                    context.read<AlbumByArtistBloc>().add(
+                      FetchAlbumByArtistIdEvent(widget.userId),
+                    );
 
-                    context.read<AlbumDetailBloc>().add(FetchAlbumDetailEvent(widget.albumId));
+                    context.read<AlbumDetailBloc>().add(
+                      FetchAlbumDetailEvent(widget.albumId),
+                    );
                     context.pop();
                   } catch (e) {
                     ScaffoldMessenger.of(context).showSnackBar(

@@ -56,4 +56,14 @@ class AlbumDataRepositoryImpl implements AlbumRepository {
       throw Exception('Failed to add songs to album!');
     }
   }
+
+   @override
+  Future<void> removeSongsFromAlbum(String songIds,int albumId)async{
+    try{
+      await albumRemoteData.removeSongFromAlbum(songIds, albumId);
+
+    }catch(e){
+      throw Exception('Failed to remove songs from album!');
+    }
+  }
 }

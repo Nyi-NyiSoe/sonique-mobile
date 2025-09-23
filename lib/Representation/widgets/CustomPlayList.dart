@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sonique/Data/models/song_model.dart';
+import 'package:sonique/Representation/Bloc/album_bloc/album_crud_bloc/album_operations_bloc/album_operations_bloc.dart';
+import 'package:sonique/Representation/Bloc/album_bloc/album_crud_bloc/album_operations_bloc/album_operations_event.dart';
 import 'package:sonique/Representation/Bloc/music_player_bloc/music_player_bloc.dart';
 import 'package:sonique/Representation/Bloc/music_player_bloc/music_player_event.dart';
 import 'package:sonique/Representation/Bloc/music_player_bloc/music_player_state.dart';
@@ -12,10 +14,16 @@ import 'package:sonique/Representation/widgets/CustomButton.dart';
 import 'package:sonique/Representation/widgets/CustomSongCard.dart';
 
 class CustomPlayList extends StatelessWidget {
-  const CustomPlayList({super.key, required this.songs, this.playlistId});
+  const CustomPlayList({
+    super.key,
+    required this.songs,
+    this.playlistId,
+    this.albumId,
+  });
 
   final List<SongModel> songs;
   final int? playlistId;
+  final int? albumId;
 
   @override
   Widget build(BuildContext context) {
@@ -143,6 +151,31 @@ class CustomPlayList extends StatelessWidget {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text("${song.title} removed from playlist"),
+                        ),
+                      );
+                    },
+                    child: Customsongcard(song: song, queue: true),
+                  );
+                } else if (currentRoute.toString().startsWith(
+                  "/library/albumByArtist/albumDetail",
+                )) {
+                  return Dismissible(
+                    key: ValueKey(UniqueKey()),
+                    direction: DismissDirection.endToStart,
+                    background: Container(
+                      color: Colors.red,
+                      alignment: Alignment.centerRight,
+                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      child: Icon(Icons.delete, color: Colors.white),
+                    ),
+                    onDismissed: (direction) {
+                      context.read<AlbumOperationsBloc>().add(
+                        RemoveSongsFromAlbumEvent(song.id, albumId!),
+                      );
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text("${song.title} removed from album"),
                         ),
                       );
                     },
