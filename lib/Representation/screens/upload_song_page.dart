@@ -272,9 +272,9 @@ class _UploadSongPageState extends State<UploadSongPage> {
                               _audioFile != null &&
                               _coverImage != null) {
                             // Check if audio file is mp3
-                            if (_audioFile!.name.toLowerCase().endsWith(
-                              '.mp3',
-                            )) {
+                            final name = _audioFile!.name.toLowerCase();
+                            if ((name.endsWith('.mp3')) ||
+                                _audioFile!.mimeType == 'audio/mpeg') {
                               try {
                                 context.read<SongDataBloc>().add(
                                   UploadSongEvent(
