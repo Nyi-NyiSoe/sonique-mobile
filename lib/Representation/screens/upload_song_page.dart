@@ -33,12 +33,6 @@ class _UploadSongPageState extends State<UploadSongPage> {
   final ImagePicker picker = ImagePicker();
   final _formKey = GlobalKey<FormState>();
 
-  String sanitizeFileName(String input) {
-    return input
-        .replaceAll(RegExp(r'[^a-zA-Z0-9-_\.]'), '-') // replace invalid chars
-        .replaceAll(RegExp(r'-+'), '-'); // collapse multiple dashes
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -278,29 +272,41 @@ class _UploadSongPageState extends State<UploadSongPage> {
                               _audioFile != null &&
                               _coverImage != null) {
                             // Check if audio file is mp3
-                            try {
-                              final safeTitle = sanitizeFileName(
-                                _titleController.text,
-                              );
-                              context.read<SongDataBloc>().add(
-                                UploadSongEvent(
-                                  audioFile: _audioFile!,
-                                  coverImage: _coverImage!,
-                                  genreId: _genre!.id.toString(),
-                                  title: safeTitle,
-                                ),
-                              );
+                            final name = _audioFile!.name.toLowerCase();
+                            if ((name.endsWith('.mp3')) ||
+                                _audioFile!.mimeType == 'audio/mpeg') {
+                              try {
+                                context.read<SongDataBloc>().add(
+                                  UploadSongEvent(
+                                    audioFile: _audioFile!,
+                                    coverImage: _coverImage!,
+                                    genreId: _genre!.id.toString(),
+                                    title: _titleController.text,
+                                  ),
+                                );
 
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      'Uploaded song successfully!',
+                                    ),
+                                  ),
+                                );
+
+                                context.pop();
+                              } catch (e) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text(e.toString())),
+                                );
+                              }
+                              // Proceed with upload logic here
+                            } else {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  content: Text('Uploaded song successfully!'),
+                                  content: Text(
+                                    'Please select an MP3 audio file',
+                                  ),
                                 ),
-                              );
-
-                              context.pop();
-                            } catch (e) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text(e.toString())),
                               );
                             }
                           }
