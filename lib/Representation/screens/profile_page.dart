@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -5,8 +6,12 @@ import 'package:sonique/Data/models/user_model.dart';
 import 'package:sonique/Representation/Bloc/auth_bloc/auth_bloc.dart';
 import 'package:sonique/Representation/Bloc/auth_bloc/auth_event.dart';
 import 'package:sonique/Representation/Bloc/auth_bloc/auth_state.dart';
+import 'package:sonique/Representation/Bloc/like_song_bloc/like_song_bloc.dart';
+import 'package:sonique/Representation/Bloc/like_song_bloc/like_song_event.dart';
 import 'package:sonique/Representation/Bloc/music_player_bloc/music_player_bloc.dart';
 import 'package:sonique/Representation/Bloc/music_player_bloc/music_player_event.dart';
+import 'package:sonique/Representation/Bloc/playlist_bloc/playlist_bloc.dart';
+import 'package:sonique/Representation/Bloc/playlist_bloc/playlist_event.dart';
 import 'package:sonique/Representation/Bloc/user_data_bloc/user_data_bloc.dart';
 import 'package:sonique/Representation/Bloc/user_data_bloc/user_data_event.dart';
 import 'package:sonique/Representation/Bloc/user_data_bloc/user_data_state.dart';
@@ -43,6 +48,8 @@ class _ProfilePageState extends State<ProfilePage> {
             onPressed: () {
               context.read<AuthBloc>().add(LogoutEvent());
               context.read<MusicPlayerBloc>().add(ResetPlayer());
+              context.read<LikesBloc>().add(ResetBlocEvent());
+              context.read<PlaylistBloc>().add(ResetLikeBlocEvent());
             },
           ),
         ],
@@ -78,10 +85,30 @@ class _ProfilePageState extends State<ProfilePage> {
                                 onTap: () => _showImageUpdateModal(context),
                                 child: CircleAvatar(
                                   radius: 50,
-                                  backgroundImage: NetworkImage(
-                                    user!.profile_image == ""
-                                        ? 'https://i.imgur.com/BoN9kdC.png'
-                                        : user!.profile_image!,
+                                  backgroundColor:
+                                      Colors.grey[300], // fallback background
+                                  child: ClipOval(
+                                    child: CachedNetworkImage(
+                                      imageUrl:
+                                          user!.profile_image == ""
+                                              ? 'https://i.imgur.com/BoN9kdC.png'
+                                              : user!.profile_image!,
+                                      width: 100, // 2 * radius
+                                      height: 100,
+                                      fit: BoxFit.cover,
+                                      placeholder:
+                                          (context, url) => const Center(
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                            ),
+                                          ),
+                                      errorWidget:
+                                          (context, url, error) => const Icon(
+                                            Icons.person,
+                                            size: 50,
+                                            color: Colors.grey,
+                                          ),
+                                    ),
                                   ),
                                 ),
                               ),
@@ -126,7 +153,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                     ),
                     UserDetailCard(user: user!),
-                    MusicStats(user: user!,)
+                    MusicStats(user: user!),
                   ],
                 ),
               );

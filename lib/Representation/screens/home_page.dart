@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -128,15 +129,39 @@ class _HomePageState extends State<HomePage> {
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         itemBuilder: (context, index) {
                           return GestureDetector(
-                            onTap: (){
-                              context.read<AlbumByArtistBloc>().add(FetchAlbumByArtistIdEvent(artists[index].artistId));
-                              context.go('/home/artistDetail/${artists[index].artistId}');
+                            onTap: () {
+                              context.read<AlbumByArtistBloc>().add(
+                                FetchAlbumByArtistIdEvent(
+                                  artists[index].artistId,
+                                ),
+                              );
+                              context.go(
+                                '/home/artistDetail/${artists[index].artistId}',
+                              );
                             },
                             child: Padding(
                               padding: const EdgeInsets.all(5.0),
                               child: CircleAvatar(
                                 radius: screenHeight * 0.08,
-                                backgroundImage: NetworkImage(artists[index].profile_image!),
+                                backgroundColor:
+                                    Colors.transparent, // no green flash
+                                backgroundImage: null, // avoid double rendering
+                                child: ClipOval(
+                                  child: CachedNetworkImage(
+                                    imageUrl: artists[index].profile_image!,
+                                    width: screenHeight * 0.16,
+                                    height: screenHeight * 0.16,
+                                    fit: BoxFit.cover,
+                                    placeholder:
+                                        (context, url) =>
+                                            const CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                            ),
+                                    errorWidget:
+                                        (context, url, error) =>
+                                            const Icon(Icons.person, size: 40),
+                                  ),
+                                ),
                               ),
                             ),
                           );

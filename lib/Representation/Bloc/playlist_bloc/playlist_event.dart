@@ -23,3 +23,5 @@ class RemoveFromPlaylistEvent extends PlaylistEvent {
   final String songId;
   RemoveFromPlaylistEvent({required this.playlistId, required this.songId});
 }
+
+class ResetLikeBlocEvent extends PlaylistEvent {}
