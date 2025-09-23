@@ -66,6 +66,15 @@ class SongDataRepositoryImpl implements SongDataRepository {
     }
   }
 
+   @override
+  Future<void> unLikeASong(String songId)async{
+    try{
+      return await songRemoteData.unLikeASong(songId);
+    }catch(e){
+      throw Exception('Failed to upload Song: $e');
+    }
+  }
+
   @override 
   Future<List<LikedSongModel>> loadLikedSongs()async{
     try{

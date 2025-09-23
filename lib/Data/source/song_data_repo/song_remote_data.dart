@@ -19,6 +19,7 @@ class SongRemoteData {
   final String uploadSongUrl;
   final String likeSongUrl;
   final String loadLikedSongsUrl;
+  final String unLikeASongUrl;
 
   SongRemoteData({required this.client, required this.authLocalDataSource})
     : getSongUrl = dotenv.env['GET_ALL_SONGS_URL'] ?? '',
@@ -26,7 +27,8 @@ class SongRemoteData {
       uploadGenreUrl = dotenv.env['UPLOAD_SONG_GENRE_URL'] ?? '',
       uploadSongUrl = dotenv.env['UPLOAD_SONG_URL'] ?? '',
       likeSongUrl = dotenv.env['LIKE_SONG_URL'] ?? '',
-      loadLikedSongsUrl = dotenv.env['LOAD_LIKED_SONGS_URL'] ?? '' {
+      loadLikedSongsUrl = dotenv.env['LOAD_LIKED_SONGS_URL'] ?? '',
+      unLikeASongUrl = dotenv.env['UNLIKE_SONG_URL'] ?? '' {
     if (getSongUrl.isEmpty) {
       throw Exception('GET_ALL_SONGS_URL is not set in .env file');
     }
@@ -38,6 +40,10 @@ class SongRemoteData {
     }
     if (loadLikedSongsUrl.isEmpty) {
       throw Exception('LOAD_LIKED_SONG_URL is not set in .env file');
+    }
+
+    if (unLikeASongUrl.isEmpty) {
+      throw Exception('UNLIKE_SONG_URL is not set in .env file');
     }
   }
 
@@ -208,6 +214,30 @@ class SongRemoteData {
     }
   }
 
+  Future<void> unLikeASong(String songId) async {
+    final currentUser = await authLocalDataSource.getUser();
+    final headers = await _getHeaders();
+    final body = jsonEncode({"songId": songId, "userId": currentUser.userId});
+    try {
+      final response = await client.delete(
+        Uri.parse(likeSongUrl),
+        headers: headers,
+        body: body,
+      );
+      if (response.statusCode == 200) {
+        if (response.statusCode != 200 && response.statusCode != 201) {
+          throw Exception(
+            'Failed to like song, status: ${response.statusCode}',
+          );
+        }
+
+        log('unliked song successfully');
+      }
+    } catch (e) {
+      throw Exception('liking failed: $e');
+    }
+  }
+
   Future<List<LikedSongModel>> loadLikedSongs() async {
     final currentUser = await authLocalDataSource.getUser();
     final headers = await _getHeaders();
@@ -218,7 +248,6 @@ class SongRemoteData {
       final res = await client.get(url, headers: headers);
       log(res.body);
       if (res.statusCode == 200) {
-      
         return (jsonDecode(res.body)['data'] as List)
             .map((json) => LikedSongModel.fromJson(json))
             .toList();

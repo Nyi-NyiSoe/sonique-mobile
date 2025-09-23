@@ -168,9 +168,15 @@ class Songdetailcard extends StatelessWidget {
                                             isLiked ? Colors.red : Colors.grey,
                                       ),
                                       onPressed: () {
-                                        context.read<LikesBloc>().add(
-                                          LikeSong(currentSong!.id),
-                                        );
+                                        if (isLiked) {
+                                          context.read<LikesBloc>().add(
+                                            UnlikeSong(currentSong!.id),
+                                          );
+                                        } else {
+                                          context.read<LikesBloc>().add(
+                                            LikeSong(currentSong!.id),
+                                          );
+                                        }
                                       },
                                     );
                                   },

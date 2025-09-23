@@ -12,3 +12,7 @@ class UnlikeSong extends LikeSongEvent {
 
 class LoadLikedSongs extends LikeSongEvent {
 }
+
+class ResetBlocEvent extends LikeSongEvent{
+  
+}

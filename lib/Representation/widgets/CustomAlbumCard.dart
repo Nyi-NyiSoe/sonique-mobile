@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -19,11 +20,11 @@ class CustomAlbumCard extends StatelessWidget {
       onTap: () {
         context.read<AlbumDetailBloc>().add(FetchAlbumDetailEvent(albumId));
         final currentRoute = GoRouter.of(context).state.uri;
-          if (currentRoute.toString().startsWith('/home')) {
+        if (currentRoute.toString().startsWith('/home')) {
           context.go('/home/albumDetail');
-        } else if(currentRoute.toString().startsWith('/home/artistDetail')){
+        } else if (currentRoute.toString().startsWith('/home/artistDetail')) {
           context.go('/home/artistDetail/albumDetail');
-        }else {
+        } else {
           context.go('/library/albumByArtist/albumDetail');
         }
       },
@@ -32,7 +33,28 @@ class CustomAlbumCard extends StatelessWidget {
         decoration: BoxDecoration(borderRadius: BorderRadius.circular(12)),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(12),
-          child: Image.network(imageUrl,fit: BoxFit.cover,),
+          child: CachedNetworkImage(
+            imageUrl: imageUrl,
+            fit: BoxFit.cover,
+            width: 120, // 👈 give width
+            height: 120, // 👈 and height
+            placeholder:
+                (context, url) => Container(
+                  width: 120, // 👈 same size as image
+                  height: 120,
+                  color: Colors.grey[300],
+                  child: const Center(
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                ),
+            errorWidget:
+                (context, url, error) => Container(
+                  width: 120,
+                  height: 120,
+                  color: Colors.grey[300],
+                  child: const Icon(Icons.broken_image, size: 40),
+                ),
+          ),
         ),
       ),
     );

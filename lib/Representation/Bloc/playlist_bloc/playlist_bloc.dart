@@ -22,6 +22,15 @@ class PlaylistBloc extends Bloc<PlaylistEvent, PlaylistState> {
     on<CreatePlaylistEvent>(_onCreatePlaylist);
     on<AddToPlaylistEvent>(_onAddToPlaylist);
     on<RemoveFromPlaylistEvent>(_onRemoveFromPlaylist);
+    on<ResetLikeBlocEvent>(
+      (event, emit) => emit(
+        state.copyWith(
+          playlists: [],
+          selectedPlaylist: null,
+          status: PlaylistStatus.initial,
+        ),
+      ),
+    );
   }
 
   Future<void> _onFetchUserPlaylist(

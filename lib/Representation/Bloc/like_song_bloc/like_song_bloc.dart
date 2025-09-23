@@ -15,6 +15,7 @@ class LikesBloc extends Bloc<LikeSongEvent, LikeSongState> {
     on<LoadLikedSongs>(_onLoadLikedSongs);
     on<LikeSong>(_onLikeSong);
     on<UnlikeSong>(_onUnlikeSong);
+    on<ResetBlocEvent>(_onResetBloc);
   }
 
   Future<void> _onLoadLikedSongs(
@@ -56,9 +57,21 @@ class LikesBloc extends Bloc<LikeSongEvent, LikeSongState> {
     }
   }
 
-  void _onUnlikeSong(UnlikeSong event, Emitter<LikeSongState> emit) {
-    final updated =
-        state.likedSongs.where((s) => s.id != event.songId).toList();
-    emit(state.copyWith(likedSongs: updated));
+  void _onUnlikeSong(UnlikeSong event, Emitter<LikeSongState> emit) async {
+    try {
+      emit(state.copyWith(status: SongDataStatus.loading));
+      // Like the song via service
+      await songService.unLikeASong(event.songId);
+      // Add to liked songs if not already present
+      add(LoadLikedSongs());
+
+      emit(state.copyWith(status: SongDataStatus.success));
+    } catch (e) {
+      emit(state.copyWith(status: SongDataStatus.failure, error: e.toString()));
+    }
+  }
+
+  void _onResetBloc(ResetBlocEvent event, Emitter<LikeSongState> emit) async {
+    emit(state.copyWith(likedSongs: [], status: SongDataStatus.initial));
   }
 }

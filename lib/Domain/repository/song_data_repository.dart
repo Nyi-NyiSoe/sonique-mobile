@@ -12,5 +12,6 @@ abstract class SongDataRepository {
   Future<void> uploadGenre(String genreName);
   Future<void> uploadSong(XFile audioFile,XFile coverImage,String genreId,String title);
   Future<void> likeASong(String songId);
+  Future<void> unLikeASong(String songId);
   Future<List<LikedSongModel>> loadLikedSongs();
 }
