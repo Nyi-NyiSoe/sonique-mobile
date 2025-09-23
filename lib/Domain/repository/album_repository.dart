@@ -10,4 +10,5 @@ abstract class AlbumRepository {
 
   Future<void> createAlbum(String name,XFile coverImage,String description);
   Future<void> addSongsToAlbum(Set<String> songIds,int albumId);
+  Future<void> removeSongsFromAlbum(String songIds,int albumId);
 }
