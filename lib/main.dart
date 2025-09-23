@@ -2,10 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sonique/Data/services/song_service.dart';
 import 'package:sonique/Data/source/auth_repo/auth_local_data_source.dart';
+import 'package:sonique/Domain/repository/album_repository.dart';
+import 'package:sonique/Domain/repository/playlist_repository.dart';
+import 'package:sonique/Domain/usecases/add_song_to_playlist_usecase.dart';
+import 'package:sonique/Domain/usecases/add_songs_to_album_usecase.dart';
+import 'package:sonique/Domain/usecases/create_album_usecase.dart';
+import 'package:sonique/Domain/usecases/create_playlist_usecase.dart';
 import 'package:sonique/Domain/usecases/login_usecase.dart';
 import 'package:sonique/Domain/usecases/logout_usecase.dart';
 import 'package:sonique/Domain/usecases/register_usecase.dart';
+import 'package:sonique/Domain/usecases/remove_song_from_playlist_usecase.dart';
+import 'package:sonique/Domain/usecases/song_data_usecase.dart';
+import 'package:sonique/Domain/usecases/user_data_usecase.dart';
 import 'package:sonique/Representation/Bloc/album_bloc/album_crud_bloc/album_by_artist_bloc/album_by_artist_bloc.dart';
 import 'package:sonique/Representation/Bloc/album_bloc/album_crud_bloc/album_operations_bloc/album_operations_bloc.dart';
 import 'package:sonique/Representation/Bloc/album_bloc/album_detail_bloc/album_detail_bloc.dart';
@@ -72,7 +82,7 @@ class MyApp extends StatelessWidget {
 
         BlocProvider<UserDataBloc>(
           create: (context) {
-            final userDataBloc = locator<UserDataBloc>();
+            final userDataBloc = UserDataBloc(locator<UserDataUsecase>());
             userDataBloc.add(FetchUserDataEvent());
             return userDataBloc;
           },
@@ -88,8 +98,11 @@ class MyApp extends StatelessWidget {
 
         BlocProvider<LikesBloc>(
           create: (context) {
-            final likeSongBloc = locator<LikesBloc>();
-            likeSongBloc.add(LoadLikedSongs());
+            final likeSongBloc = LikesBloc(
+              songDataUsecase: locator<SongDataUsecase>(),
+              songService: locator<SongService>(),
+            )..add(LoadLikedSongs());
+            
             return likeSongBloc;
           },
         ),
@@ -116,7 +129,11 @@ class MyApp extends StatelessWidget {
         ),
         BlocProvider<AlbumOperationsBloc>(
           create: (context) {
-            final albumOperation = locator<AlbumOperationsBloc>();
+            final albumOperation = AlbumOperationsBloc(
+              addSongsToAlbumUsecase: locator<AddSongsToAlbumUsecase>(),
+              albumRepository: locator<AlbumRepository>(),
+              createAlbumUsecase: locator<CreateAlbumUsecase>(),
+            );
 
             return albumOperation;
           },
@@ -130,7 +147,13 @@ class MyApp extends StatelessWidget {
         ),
         BlocProvider<PlaylistBloc>(
           create: (context) {
-            final playlistBloc = locator<PlaylistBloc>();
+            final playlistBloc = PlaylistBloc(
+              playlistRepository: locator<PlaylistRepository>(),
+              createPlaylistUsecase: locator<CreatePlaylistUsecase>(),
+              addSongToPlaylistUsecase: locator<AddSongToPlaylistUsecase>(),
+              removeSongFromPlaylistUsecase:
+                  locator<RemoveSongFromPlaylistUsecase>(),
+            );
             playlistBloc.add(FetchUserPlaylistEvent());
             return playlistBloc;
           },

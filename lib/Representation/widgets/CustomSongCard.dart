@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -5,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:sonique/Data/models/song_model.dart';
 import 'package:sonique/Representation/Bloc/like_song_bloc/like_song_bloc.dart';
 import 'package:sonique/Representation/Bloc/like_song_bloc/like_song_event.dart';
+import 'package:sonique/Representation/Bloc/like_song_bloc/like_song_state.dart';
 import 'package:sonique/Representation/Bloc/music_player_bloc/music_player_bloc.dart';
 import 'package:sonique/Representation/Bloc/music_player_bloc/music_player_event.dart';
 import 'package:sonique/Representation/Bloc/playlist_bloc/playlist_bloc.dart';
@@ -29,13 +31,25 @@ class Customsongcard extends StatelessWidget {
             children: [
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Image.network(
-                  song.coverImageUrl,
+                child: CachedNetworkImage(
+                  imageUrl: song.coverImageUrl,
                   width: 80,
                   height: 80,
                   fit: BoxFit.cover,
+                  placeholder:
+                      (context, url) => const SizedBox(
+                        width: 80,
+                        height: 80,
+                        child: Center(
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      ),
+                  errorWidget:
+                      (context, url, error) =>
+                          const Icon(Icons.music_note, size: 40),
                 ),
               ),
+
               const SizedBox(width: 10),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -62,8 +76,7 @@ class Customsongcard extends StatelessWidget {
                         context: context,
                         builder: (context) {
                           return Container(
-                            height: 200,
-
+                            height: MediaQuery.sizeOf(context).height * 0.4,
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: [
@@ -80,35 +93,54 @@ class Customsongcard extends StatelessWidget {
                                     title: Text('Play'),
                                   ),
                                 ),
-                                GestureDetector(
-                                  onTap: () {
-                                    try {
-                                      context.read<LikesBloc>().add(
-                                        LikeSong(song.id),
-                                      );
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
-                                        SnackBar(content: Text('Liked Song')),
-                                      );
-                                    } catch (e) {
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
-                                        SnackBar(
-                                          content: Text(
-                                            'Failed to like the song',
-                                          ),
+                                BlocBuilder<LikesBloc, LikeSongState>(
+                                  builder: (context, state) {
+                                    final isLiked = state.likedSongs.any(
+                                      (s) => s.id == song.id,
+                                    );
+
+                                    return GestureDetector(
+                                      onTap: () {
+                                        if (isLiked) {
+                                          context.read<LikesBloc>().add(
+                                            UnlikeSong(song.id),
+                                          );
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            const SnackBar(
+                                              content: Text('Unliked Song'),
+                                            ),
+                                          );
+                                        } else {
+                                          context.read<LikesBloc>().add(
+                                            LikeSong(song.id),
+                                          );
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            const SnackBar(
+                                              content: Text('Liked Song'),
+                                            ),
+                                          );
+                                        }
+                                        context.pop();
+                                      },
+                                      child: ListTile(
+                                        leading: Icon(
+                                          isLiked
+                                              ? FontAwesomeIcons.solidHeart
+                                              : FontAwesomeIcons.heart,
+                                          color: isLiked ? Colors.red : null,
                                         ),
-                                      );
-                                    }
-                                    context.pop();
+                                        title: Text(
+                                          isLiked ? 'Unlike Song' : 'Like Song',
+                                        ),
+                                      ),
+                                    );
                                   },
-                                  child: ListTile(
-                                    leading: Icon(FontAwesomeIcons.heart),
-                                    title: Text('Like Song'),
-                                  ),
                                 ),
+
                                 GestureDetector(
                                   onTap: () {
                                     try {
@@ -146,7 +178,6 @@ class Customsongcard extends StatelessWidget {
                                       context: context,
                                       builder: (context) {
                                         return SizedBox(
-                                          height: 300,
                                           child: BlocBuilder<
                                             PlaylistBloc,
                                             PlaylistState
@@ -166,28 +197,38 @@ class Customsongcard extends StatelessWidget {
                                                       playlists[index].name!,
                                                     ),
                                                     onTap: () {
-
-                                                      try{
-                                                        context.read<PlaylistBloc>().add(AddToPlaylistEvent(playlistId: playlists[index].id!, songId: song.id));
+                                                      try {
+                                                        context
+                                                            .read<
+                                                              PlaylistBloc
+                                                            >()
+                                                            .add(
+                                                              AddToPlaylistEvent(
+                                                                playlistId:
+                                                                    playlists[index]
+                                                                        .id!,
+                                                                songId: song.id,
+                                                              ),
+                                                            );
                                                         ScaffoldMessenger.of(
-                                                        context,
-                                                      ).showSnackBar(
-                                                        SnackBar(
-                                                          content: Text(
-                                                            'Added to ${playlist.name}',
+                                                          context,
+                                                        ).showSnackBar(
+                                                          SnackBar(
+                                                            content: Text(
+                                                              'Added to ${playlist.name}',
+                                                            ),
                                                           ),
-                                                        ),
-                                                      );
-                                                      }catch(e){
-                                                         ScaffoldMessenger.of(
-                                                        context,
-                                                      ).showSnackBar(
-                                                        SnackBar(
-                                                          content: Text(
-                                                            'Failed to add to ${playlist.name}',
+                                                        );
+                                                      } catch (e) {
+                                                        ScaffoldMessenger.of(
+                                                          context,
+                                                        ).showSnackBar(
+                                                          SnackBar(
+                                                            content: Text(
+                                                              'Failed to add to ${playlist.name}',
+                                                            ),
                                                           ),
-                                                        ),
-                                                      );
+                                                        );
                                                       }
                                                       Navigator.pop(
                                                         context,
