@@ -146,7 +146,7 @@ Consult package docs for the exact keys and configuration.
 
 ## License
 
-This project’s license is not specified. If you intend to open source it, consider adding a LICENSE file (e.g., MIT, Apache-2.0).
+This project’s license is not specified.
 
 ## Acknowledgements
 
