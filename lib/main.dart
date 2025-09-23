@@ -17,6 +17,7 @@ import 'package:sonique/Domain/usecases/remove_song_from_playlist_usecase.dart';
 import 'package:sonique/Domain/usecases/song_data_usecase.dart';
 import 'package:sonique/Domain/usecases/user_data_usecase.dart';
 import 'package:sonique/Representation/Bloc/album_bloc/album_crud_bloc/album_by_artist_bloc/album_by_artist_bloc.dart';
+import 'package:sonique/Representation/Bloc/album_bloc/album_crud_bloc/album_by_artist_bloc/album_by_artist_event.dart';
 import 'package:sonique/Representation/Bloc/album_bloc/album_crud_bloc/album_operations_bloc/album_operations_bloc.dart';
 import 'package:sonique/Representation/Bloc/album_bloc/album_detail_bloc/album_detail_bloc.dart';
 import 'package:sonique/Representation/Bloc/album_bloc/album_list_bloc/album_list_bloc.dart';
@@ -102,7 +103,7 @@ class MyApp extends StatelessWidget {
               songDataUsecase: locator<SongDataUsecase>(),
               songService: locator<SongService>(),
             )..add(LoadLikedSongs());
-            
+
             return likeSongBloc;
           },
         ),
@@ -122,7 +123,9 @@ class MyApp extends StatelessWidget {
         ),
         BlocProvider<AlbumByArtistBloc>(
           create: (context) {
-            final albumByArtist = locator<AlbumByArtistBloc>();
+            final albumByArtist = AlbumByArtistBloc(
+              albumRepository: locator<AlbumRepository>(),
+            )..add(FetchAlbumByArtistIdEvent(null));
 
             return albumByArtist;
           },

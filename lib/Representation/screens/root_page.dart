@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sonique/Data/models/playback_status.dart';
+import 'package:sonique/Representation/Bloc/album_bloc/album_crud_bloc/album_by_artist_bloc/album_by_artist_bloc.dart';
+import 'package:sonique/Representation/Bloc/album_bloc/album_crud_bloc/album_by_artist_bloc/album_by_artist_event.dart';
 import 'package:sonique/Representation/Bloc/like_song_bloc/like_song_bloc.dart';
 import 'package:sonique/Representation/Bloc/like_song_bloc/like_song_event.dart';
 import 'package:sonique/Representation/Bloc/music_player_bloc/music_player_bloc.dart';
@@ -36,6 +38,7 @@ class _RootPageState extends State<RootPage> {
       context.read<PlaylistBloc>().add(FetchUserPlaylistEvent());
       context.read<LikesBloc>().add(LoadLikedSongs());
       context.read<UserDataBloc>().add(FetchUserDataEvent());
+      context.read<AlbumByArtistBloc>().add(FetchAlbumByArtistIdEvent(null));
     }
   }
 

@@ -162,20 +162,24 @@ class AlbumRemoteData {
     }
   }
 
-  Future<List<AlbumModel>> getAlbumByArtistId(int artistId) async {
+  Future<List<AlbumModel>> getAlbumByArtistId(int? artistId) async {
     try {
       // 1️⃣ Check base URL
       if (getAlbumByArtistIdUrl.isEmpty) {
         throw Exception('GET_ALBUM_DETAIL_URL is not set in .env');
       }
+      
 
       // 2️⃣ Prepare headers
       final headers = await _getHeaders();
       print('📡 Fetching album detail for ID: $artistId');
       print('🔑 Headers: $headers');
+       final currentUser = await authLocalDataSource.getUser();
+       final defaultId = currentUser.userId;
 
       // 3️⃣ Construct URL safely
-      final url = Uri.parse(getAlbumByArtistIdUrl).resolve(artistId.toString());
+      final url = Uri.parse(getAlbumByArtistIdUrl)
+          .resolve((artistId ?? defaultId).toString());
       print('🌐 Request URL: $url');
 
       // 4️⃣ Make HTTP GET request
