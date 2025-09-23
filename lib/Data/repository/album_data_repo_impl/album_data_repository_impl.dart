@@ -29,7 +29,7 @@ class AlbumDataRepositoryImpl implements AlbumRepository {
   }
 
   @override
-  Future<List<AlbumModel>> getAlbumByArtistId(int artistId) async {
+  Future<List<AlbumModel>> getAlbumByArtistId(int? artistId) async {
     try {
       final res = await albumRemoteData.getAlbumByArtistId(artistId);
       return res;
