@@ -49,6 +49,7 @@ dependencies:
   flutter_speed_dial: ^7.0.0
   image: ^4.5.4
   http_parser: ^4.1.2
+  cached_network_image: ^3.4.1
 
 dev_dependencies:
   flutter_test:

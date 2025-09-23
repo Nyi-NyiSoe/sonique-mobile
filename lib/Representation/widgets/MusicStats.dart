@@ -55,29 +55,32 @@ class MusicStats extends StatelessWidget {
                   bloc: context.read<SongDataBloc>(),
                   getCount: (state) {
                     if (state.fetchStatus == SongDataStatus.success) {
-                      final songs = state.songs.map(
+                      final userSongs = state.songs.where(
                         (e) => user.userId == e.artist.artistId,
                       );
-                      return songs.length.toString();
+                      return userSongs.length.toString();
                     }
                     return '0';
                   },
                 ),
-                 _buildStatItem<LikesBloc,LikeSongState>(
+                _buildStatItem<LikesBloc, LikeSongState>(
                   'Favorites',
-                
+
                   Icons.favorite,
                   Colors.red,
                   context,
                   bloc: context.read<LikesBloc>(),
                   getCount: (state) {
-                    if(state.status == SongDataStatus.success){
-                      return state.likedSongs.length.toString();
+                    if (state.status == SongDataStatus.success) {
+                      return state.likedSongs
+                          .map((song) => song.id) // extract the song ID
+                          .toSet() // remove duplicates
+                          .length
+                          .toString();
                     }
                     return '0';
                   },
                 ),
-                
               ],
             ),
           ],

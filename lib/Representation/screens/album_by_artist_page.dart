@@ -11,7 +11,7 @@ class AlbumByArtistPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-     
+     appBar: AppBar(),
       body: BlocBuilder<AlbumByArtistBloc, AlbumByArtistState>(
         builder: (context, state) {
           if (state is AlbumByArtistLoading) {

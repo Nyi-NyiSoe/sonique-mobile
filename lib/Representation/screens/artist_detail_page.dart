@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sonique/Data/models/song_data_status.dart';
@@ -45,8 +46,32 @@ class ArtistDetailPage extends StatelessWidget {
                       children: [
                         CircleAvatar(
                           radius: 40,
-                          backgroundImage: NetworkImage(
-                            artist.profile_image ?? '',
+                          backgroundColor:
+                              Colors.grey[300], // fallback background
+                          child: ClipOval(
+                            child: CachedNetworkImage(
+                              imageUrl:
+                                  artist.profile_image?.isNotEmpty == true
+                                      ? artist.profile_image!
+                                      : 'https://i.imgur.com/BoN9kdC.png', // default avatar
+                              width: 80, // 2 * radius
+                              height: 80,
+                              fit: BoxFit.cover,
+                              placeholder:
+                                  (context, url) => Container(
+                                    color: Colors.grey[300],
+                                    child: const Center(
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
+                                    ),
+                                  ),
+                              errorWidget:
+                                  (context, url, error) => Container(
+                                    color: Colors.grey[300],
+                                    child: const Icon(Icons.person, size: 40),
+                                  ),
+                            ),
                           ),
                         ),
                         const SizedBox(width: 16),

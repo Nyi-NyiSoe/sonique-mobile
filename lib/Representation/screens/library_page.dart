@@ -131,7 +131,11 @@ class LibraryPage extends StatelessWidget {
                 title: Text('Liked Songs'),
                 subtitle: BlocBuilder<LikesBloc, LikeSongState>(
                   builder: (context, state) {
-                    final likedSongsCount = state.likedSongs.length;
+                    final likedSongsCount =
+                        state.likedSongs
+                            .map((song) => song.id) // take only IDs
+                            .toSet() // remove duplicates
+                            .length;
                     return Text("$likedSongsCount songs");
                   },
                 ),

@@ -13,6 +13,8 @@ class SongService {
    Future<List<GenreModel>> getGenre()=> repository.getGenre();
    Future<void> uploadSong(XFile audioFile,XFile coverImage,String genreId,String title)=> repository.uploadSong(audioFile, coverImage, genreId, title);
   Future<void> likeASong(String songId)=> repository.likeASong(songId);
+  Future<void> unLikeASong(String songId)=> repository.unLikeASong(songId);
   Future<List<LikedSongModel>> loadLikedSongs()=> repository.loadLikedSongs();
+  
 }
 
