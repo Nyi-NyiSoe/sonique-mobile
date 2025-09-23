@@ -18,13 +18,15 @@ class AlbumRemoteData {
   final String getAlbumByArtistIdUrl;
   final String createAlbumUrl;
   final String addSongsToAlbumUrl;
+  final String removeSongFromAlbumUrl;
 
   AlbumRemoteData({required this.client, required this.authLocalDataSource})
     : getAllAlbumsUrl = dotenv.env['GET_ALL_ALBUMS_URL'] ?? '',
       getAlbumDetailUrl = dotenv.env['GET_ALBUM_DETAIL_URL'] ?? '',
       getAlbumByArtistIdUrl = dotenv.env['GET_ALBUM_ARTISTID_URL'] ?? '',
       createAlbumUrl = dotenv.env['CREATE_ALBUM_URL'] ?? '',
-      addSongsToAlbumUrl = dotenv.env['ADD_SONGS_TO_ALBUM_URL'] ?? '' {
+      addSongsToAlbumUrl = dotenv.env['ADD_SONGS_TO_ALBUM_URL'] ?? '',
+      removeSongFromAlbumUrl = dotenv.env['REMOVE_SONGS_FROM_ALBUM_URL'] ?? '' {
     if (getAllAlbumsUrl.isEmpty) {
       throw Exception('GET_ALL_ALBUMS_URL is not set in .env file');
     }
@@ -39,6 +41,9 @@ class AlbumRemoteData {
     }
     if (addSongsToAlbumUrl.isEmpty) {
       throw Exception('ADD_SONGS_TO_ALBUM_URL is not set in .env file');
+    }
+    if (removeSongFromAlbumUrl.isEmpty) {
+      throw Exception('REMOVE_SONGS_FROM_ALBUM_URL is not set in .env file');
     }
   }
 
@@ -168,18 +173,18 @@ class AlbumRemoteData {
       if (getAlbumByArtistIdUrl.isEmpty) {
         throw Exception('GET_ALBUM_DETAIL_URL is not set in .env');
       }
-      
 
       // 2️⃣ Prepare headers
       final headers = await _getHeaders();
       print('📡 Fetching album detail for ID: $artistId');
       print('🔑 Headers: $headers');
-       final currentUser = await authLocalDataSource.getUser();
-       final defaultId = currentUser.userId;
+      final currentUser = await authLocalDataSource.getUser();
+      final defaultId = currentUser.userId;
 
       // 3️⃣ Construct URL safely
-      final url = Uri.parse(getAlbumByArtistIdUrl)
-          .resolve((artistId ?? defaultId).toString());
+      final url = Uri.parse(
+        getAlbumByArtistIdUrl,
+      ).resolve((artistId ?? defaultId).toString());
       print('🌐 Request URL: $url');
 
       // 4️⃣ Make HTTP GET request
@@ -336,6 +341,41 @@ class AlbumRemoteData {
       log('✅ Songs added successfully');
     } catch (e, stack) {
       log('💥 Error adding songs to album: $e');
+      log('📜 Stack trace: $stack');
+      rethrow; // propagate to Bloc
+    }
+  }
+
+  Future<void> removeSongFromAlbum(String songIds, int albumId) async {
+    try {
+      // 1️⃣ Check URLs
+      if (removeSongFromAlbumUrl.isEmpty) {
+        throw Exception('REMOVE_SONGS_FROM_ALBUM_URL is not set in .env');
+      }
+
+      // 3️⃣ Prepare headers (EXCLUDE Content-Type for Multipart)
+      final headers = await _getHeaders();
+
+      log('Headers: $headers');
+      final body = jsonEncode({
+        "albumId": albumId,
+        "songIds": [songIds], 
+      });
+
+      final response = await client.delete(
+        Uri.parse(removeSongFromAlbumUrl),
+        headers: headers,
+        body: body,
+      );
+
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        throw Exception(
+          'Failed to remove songs to album, status: ${response.statusCode}, body: ${response.body}',
+        );
+      }
+      log('✅ Songs remove successfully');
+    } catch (e, stack) {
+      log('💥 Error remove songs from album: $e');
       log('📜 Stack trace: $stack');
       rethrow; // propagate to Bloc
     }

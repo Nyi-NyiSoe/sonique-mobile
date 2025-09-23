@@ -14,6 +14,7 @@ import 'package:sonique/Domain/usecases/login_usecase.dart';
 import 'package:sonique/Domain/usecases/logout_usecase.dart';
 import 'package:sonique/Domain/usecases/register_usecase.dart';
 import 'package:sonique/Domain/usecases/remove_song_from_playlist_usecase.dart';
+import 'package:sonique/Domain/usecases/remove_songs_from_album_usecase.dart';
 import 'package:sonique/Domain/usecases/song_data_usecase.dart';
 import 'package:sonique/Domain/usecases/user_data_usecase.dart';
 import 'package:sonique/Representation/Bloc/album_bloc/album_crud_bloc/album_by_artist_bloc/album_by_artist_bloc.dart';
@@ -136,6 +137,7 @@ class MyApp extends StatelessWidget {
               addSongsToAlbumUsecase: locator<AddSongsToAlbumUsecase>(),
               albumRepository: locator<AlbumRepository>(),
               createAlbumUsecase: locator<CreateAlbumUsecase>(),
+              removeSongsFromAlbumUsecase: locator<RemoveSongsFromAlbumUsecase>()
             );
 
             return albumOperation;
@@ -163,7 +165,7 @@ class MyApp extends StatelessWidget {
         ),
       ],
       child: MaterialApp.router(
-        title: 'Flutter Demo',
+        title: 'Sonique',
         theme: AppTheme().darkTheme,
         debugShowCheckedModeBanner: false,
         routerDelegate: router.routerDelegate,
