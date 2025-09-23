@@ -6,30 +6,45 @@ import 'package:sonique/Representation/Bloc/user_data_bloc/user_data_event.dart'
 import 'package:sonique/Representation/widgets/CustomButton.dart';
 import 'package:sonique/Representation/widgets/CustomTextFormField.dart';
 
-class UserDetailsModal extends StatelessWidget {
+class UserDetailsModal extends StatefulWidget {
   final UserModel user;
 
   const UserDetailsModal({super.key, required this.user});
 
   @override
-  Widget build(BuildContext context) {
-    final TextEditingController firstNameController = TextEditingController(
-      text: user.firstName,
-    );
-    final TextEditingController lastNameController = TextEditingController(
-      text: user.lastName,
-    );
-    final TextEditingController bioController = TextEditingController(
-      text: user.bio,
-    );
-    final TextEditingController usernameController = TextEditingController(
-      text: user.username,
-    );
+  State<UserDetailsModal> createState() => _UserDetailsModalState();
+}
 
+class _UserDetailsModalState extends State<UserDetailsModal> {
+  late final TextEditingController firstNameController;
+  late final TextEditingController lastNameController;
+  late final TextEditingController bioController;
+  late final TextEditingController usernameController;
+
+  @override
+  void initState() {
+    super.initState();
+    firstNameController = TextEditingController(text: widget.user.firstName);
+    lastNameController = TextEditingController(text: widget.user.lastName);
+    bioController = TextEditingController(text: widget.user.bio);
+    usernameController = TextEditingController(text: widget.user.username);
+  }
+
+  @override
+  void dispose() {
+    firstNameController.dispose();
+    lastNameController.dispose();
+    bioController.dispose();
+    usernameController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return DraggableScrollableSheet(
-      initialChildSize: 0.5,
+      initialChildSize: 1,
       minChildSize: 0.5,
-      maxChildSize: 0.9,
+      maxChildSize: 1,
       expand: false,
       builder: (context, scrollController) {
         return SingleChildScrollView(
@@ -39,61 +54,56 @@ class UserDetailsModal extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const SizedBox(height: 20),
-              Text("Edit profile"),
+              const Text("Edit profile"),
               const SizedBox(height: 20),
+
+              // First + Last name row
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Expanded(
                     child: CustomTextFormField(
                       label: "First Name",
                       hintText: "First Name",
                       controller: firstNameController,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter your first name';
-                        }
-                        return null;
-                      },
+                      validator: (value) =>
+                          value == null || value.isEmpty
+                              ? 'Please enter your first name'
+                              : null,
                     ),
                   ),
-                  SizedBox(width: 10),
+                  const SizedBox(width: 10),
                   Expanded(
                     child: CustomTextFormField(
                       label: "Last Name",
                       hintText: "Last Name",
                       controller: lastNameController,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter your last name';
-                        }
-                        return null;
-                      },
+                      validator: (value) =>
+                          value == null || value.isEmpty
+                              ? 'Please enter your last name'
+                              : null,
                     ),
                   ),
                 ],
               ),
+
               const SizedBox(height: 20),
               CustomTextFormField(
                 label: "Username",
                 controller: usernameController,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your username';
-                  }
-                  return null;
-                },
+                validator: (value) =>
+                    value == null || value.isEmpty
+                        ? 'Please enter your username'
+                        : null,
               ),
               const SizedBox(height: 20),
               CustomTextFormField(
-                label: "Bio", 
-                controller: bioController
+                label: "Bio",
+                controller: bioController,
               ),
               const SizedBox(height: 20),
               CustomElevatedButton(
                 width: 200,
-                child: Text('Save'),
+                child: const Text('Save'),
                 onPressed: () {
                   try {
                     context.read<UserDataBloc>().add(
