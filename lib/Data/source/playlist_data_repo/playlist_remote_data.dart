@@ -1,13 +1,13 @@
 import 'dart:convert';
 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:http/http.dart' as http;
+import 'package:sonique/Data/core/api_client.dart';
 import 'package:sonique/Data/models/playlist_detail_model.dart';
 import 'package:sonique/Data/models/playlist_model.dart';
 import 'package:sonique/Data/source/auth_repo/auth_local_data_source.dart';
 
 class PlaylistRemoteData {
-  final http.Client client;
+  final ApiClient client;
   final AuthLocalDataSource authLocalDataSource;
   final String getUserPlaylistUrl;
   final String getPlaylistDetailUrl;
@@ -18,9 +18,9 @@ class PlaylistRemoteData {
     : getUserPlaylistUrl = dotenv.env['GET_USER_PLAYLISTS_URL'] ?? '',
       getPlaylistDetailUrl = dotenv.env['GET_PLAYLIST_DETAIL_URL'] ?? '',
       createPlaylistUrl = dotenv.env['CREATE_PLAYLIST_URL'] ?? '',
-      addToPlaylistUrl = dotenv.env['ADD_SONGS_TO_PLAYLIST_URL'] ?? '' ,
-      removeFromPlaylistUrl = dotenv.env['REMOVE_SONGS_FROM_PLAYLIST_URL'] ?? ''
-      {
+      addToPlaylistUrl = dotenv.env['ADD_SONGS_TO_PLAYLIST_URL'] ?? '',
+      removeFromPlaylistUrl =
+          dotenv.env['REMOVE_SONGS_FROM_PLAYLIST_URL'] ?? '' {
     if (getUserPlaylistUrl.isEmpty) {
       throw Exception('GET_USER_PLAYLISTS_URL is not set in .env file');
     }
@@ -43,17 +43,8 @@ class PlaylistRemoteData {
 
   Future<Map<String, String>> _getHeaders() async {
     final currentUser = await authLocalDataSource.getUser();
-    final token = currentUser.token;
-    final refreshToken = currentUser.refreshToken;
 
-    if (token == null || refreshToken == null) {
-      throw Exception('Missing access token or refresh token');
-    }
-
-    return {
-      'Content-Type': 'application/json',
-      'Cookie': 'token=$token;refreshToken=$refreshToken',
-    };
+    return {'Content-Type': 'application/json'};
   }
 
   //get user's playlist
@@ -71,7 +62,7 @@ class PlaylistRemoteData {
       print('🔑 Headers: $headers');
 
       // 3️⃣ Construct URL safely
-      final url = Uri.parse(getUserPlaylistUrl).resolve(user.userId.toString());
+      final url = '$getUserPlaylistUrl/${user.userId}';
       print('🌐 Request URL: $url');
 
       // 4️⃣ Make HTTP GET request
@@ -131,9 +122,7 @@ class PlaylistRemoteData {
       print('🔑 Headers: $headers');
 
       // 3️⃣ Construct URL safely
-      final url = Uri.parse(
-        getPlaylistDetailUrl,
-      ).resolve(playlistId.toString());
+      final url = '$getPlaylistDetailUrl$playlistId';
       print('🌐 Request URL: $url');
 
       // 4️⃣ Make HTTP GET request
@@ -181,16 +170,16 @@ class PlaylistRemoteData {
 
       print('🔑 Headers: $headers');
 
-      // 3️⃣ Construct URL safely
-      final url = Uri.parse(createPlaylistUrl);
-      print('🌐 Request URL: $url');
-
       final currentUser = await authLocalDataSource.getUser();
 
       final body = jsonEncode({"userId": currentUser.userId, "name": name});
 
       // 4️⃣ Make HTTP POST request
-      final response = await client.post(url, headers: headers, body: body);
+      final response = await client.post(
+        createPlaylistUrl,
+        headers: headers,
+        body: body,
+      );
       print('📥 Response status: ${response.statusCode}');
       print('📥 Response body: ${response.body}');
 
@@ -231,7 +220,11 @@ class PlaylistRemoteData {
       });
 
       // 4️⃣ Make HTTP POST request
-      final response = await client.patch(url, headers: headers, body: body);
+      final response = await client.patch(
+        addToPlaylistUrl,
+        headers: headers,
+        body: body,
+      );
       print('📥 Response status: ${response.statusCode}');
       print('📥 Response body: ${response.body}');
 
@@ -272,7 +265,11 @@ class PlaylistRemoteData {
       });
 
       // 4️⃣ Make HTTP POST request
-      final response = await client.delete(url, headers: headers, body: body);
+      final response = await client.delete(
+        removeFromPlaylistUrl,
+        headers: headers,
+        body: body,
+      );
       print('📥 Response status: ${response.statusCode}');
       print('📥 Response body: ${response.body}');
 

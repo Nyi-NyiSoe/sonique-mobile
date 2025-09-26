@@ -6,12 +6,13 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:sonique/Data/core/api_client.dart';
 import 'package:sonique/Data/models/album_detail_model.dart';
 import 'package:sonique/Data/models/album_model.dart';
 import 'package:sonique/Data/source/auth_repo/auth_local_data_source.dart';
 
 class AlbumRemoteData {
-  final http.Client client;
+  final ApiClient client;
   final AuthLocalDataSource authLocalDataSource;
   final String getAllAlbumsUrl;
   final String getAlbumDetailUrl;
@@ -50,17 +51,8 @@ class AlbumRemoteData {
   /// 🔑 Helper: Build authenticated headers
   Future<Map<String, String>> _getHeaders() async {
     final currentUser = await authLocalDataSource.getUser();
-    final token = currentUser.token;
-    final refreshToken = currentUser.refreshToken;
 
-    if (token == null || refreshToken == null) {
-      throw Exception('Missing access token or refresh token');
-    }
-
-    return {
-      'Content-Type': 'application/json',
-      'Cookie': 'token=$token;refreshToken=$refreshToken',
-    };
+    return {'Content-Type': 'application/json'};
   }
 
   //get all albums
@@ -71,7 +63,7 @@ class AlbumRemoteData {
       print('🔑 Headers: $headers');
 
       final response = await client.get(
-        Uri.parse(getAllAlbumsUrl),
+       getAllAlbumsUrl,
         headers: headers,
       );
 
@@ -125,7 +117,7 @@ class AlbumRemoteData {
       print('🔑 Headers: $headers');
 
       // 3️⃣ Construct URL safely
-      final url = Uri.parse(getAlbumDetailUrl).resolve(albumId.toString());
+      final url = '$getAlbumDetailUrl/$albumId';
       print('🌐 Request URL: $url');
 
       // 4️⃣ Make HTTP GET request
@@ -182,9 +174,7 @@ class AlbumRemoteData {
       final defaultId = currentUser.userId;
 
       // 3️⃣ Construct URL safely
-      final url = Uri.parse(
-        getAlbumByArtistIdUrl,
-      ).resolve((artistId ?? defaultId).toString());
+      final url = '$getAlbumByArtistIdUrl/${artistId ?? defaultId}';
       print('🌐 Request URL: $url');
 
       // 4️⃣ Make HTTP GET request
@@ -328,7 +318,7 @@ class AlbumRemoteData {
       });
 
       final response = await client.patch(
-        Uri.parse(addSongsToAlbumUrl),
+        addSongsToAlbumUrl,
         headers: headers,
         body: body,
       );
@@ -359,11 +349,11 @@ class AlbumRemoteData {
       log('Headers: $headers');
       final body = jsonEncode({
         "albumId": albumId,
-        "songIds": [songIds], 
+        "songIds": [songIds],
       });
 
       final response = await client.delete(
-        Uri.parse(removeSongFromAlbumUrl),
+        removeSongFromAlbumUrl,
         headers: headers,
         body: body,
       );

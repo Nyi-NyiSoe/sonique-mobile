@@ -1,7 +1,9 @@
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sonique/Data/core/api_client.dart';
 import 'package:sonique/Data/repository/album_data_repo_impl/album_data_repository_impl.dart';
 import 'package:sonique/Data/repository/artist_data_repo_impl/artist_data_repository_impl.dart';
 import 'package:sonique/Data/repository/auth_repo_impl/auth_repository_impl.dart';
@@ -13,6 +15,7 @@ import 'package:sonique/Data/source/album_data_repo/album_remote_data.dart';
 import 'package:sonique/Data/source/artist_data_repo/artist_remote_data.dart';
 import 'package:sonique/Data/source/auth_repo/auth_local_data_source.dart';
 import 'package:sonique/Data/source/auth_repo/auth_remote_data_source.dart';
+import 'package:sonique/Data/source/auth_repo/auth_token_storage.dart';
 import 'package:sonique/Data/source/playlist_data_repo/playlist_remote_data.dart';
 import 'package:sonique/Data/source/song_data_repo/song_remote_data.dart';
 import 'package:sonique/Data/source/user_data_repo/user_remote_data.dart';
@@ -56,8 +59,17 @@ Future<void> setupLocator() async {
   final sharedPreferences = await SharedPreferences.getInstance();
   locator.registerSingleton<SharedPreferences>(sharedPreferences);
 
+  //token storage
+  locator.registerLazySingleton(() => AuthTokenStorage(FlutterSecureStorage()));
+
   //register http
   locator.registerLazySingleton(() => http.Client());
+  locator.registerLazySingleton(
+    () => ApiClient(
+      client: http.Client(),
+      tokenStorage: locator<AuthTokenStorage>(),
+    ),
+  );
 
   //register services
   locator.registerLazySingleton<SongService>(
@@ -107,7 +119,7 @@ Future<void> setupLocator() async {
       albumRepository: locator<AlbumRepository>(),
       createAlbumUsecase: locator<CreateAlbumUsecase>(),
       addSongsToAlbumUsecase: locator<AddSongsToAlbumUsecase>(),
-      removeSongsFromAlbumUsecase: locator<RemoveSongsFromAlbumUsecase>()
+      removeSongsFromAlbumUsecase: locator<RemoveSongsFromAlbumUsecase>(),
     ),
   );
 
@@ -134,19 +146,19 @@ Future<void> setupLocator() async {
     () => AuthLocalDataSource(sharedPreferences: locator<SharedPreferences>()),
   );
   locator.registerLazySingleton<AuthRemoteDataSource>(
-    () => AuthRemoteDataSource(client: locator<http.Client>()),
+    () => AuthRemoteDataSource(apiClient: locator<ApiClient>(),tokenStorage: locator<AuthTokenStorage>()),
   );
 
   locator.registerLazySingleton<SongRemoteData>(
     () => SongRemoteData(
-      client: locator<http.Client>(),
+      apiClient: locator<ApiClient>(),
       authLocalDataSource: locator<AuthLocalDataSource>(),
     ),
   );
 
   locator.registerLazySingleton<UserRemoteData>(
     () => UserRemoteData(
-      client: locator<http.Client>(),
+      apiClient: locator<ApiClient>(),
       authLocalDataSource: locator<AuthLocalDataSource>(),
     ),
   );
@@ -160,14 +172,14 @@ Future<void> setupLocator() async {
 
   locator.registerLazySingleton<ArtistRemoteData>(
     () => ArtistRemoteData(
-      client: locator<http.Client>(),
+      client: locator<ApiClient>(),
       authLocalDataSource: locator<AuthLocalDataSource>(),
     ),
   );
 
   locator.registerLazySingleton<PlaylistRemoteData>(
     () => PlaylistRemoteData(
-      client: locator<http.Client>(),
+      client: locator<ApiClient>(),
       authLocalDataSource: locator<AuthLocalDataSource>(),
     ),
   );

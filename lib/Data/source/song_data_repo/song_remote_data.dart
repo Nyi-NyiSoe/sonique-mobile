@@ -2,15 +2,15 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
+import 'package:sonique/Data/core/api_client.dart';
 import 'package:sonique/Data/models/genre_model.dart';
 import 'package:sonique/Data/models/liked_song_model.dart';
 import 'package:sonique/Data/models/song_response_model.dart';
 import 'package:sonique/Data/source/auth_repo/auth_local_data_source.dart';
 
 class SongRemoteData {
-  final http.Client client;
+  final ApiClient apiClient;
   final AuthLocalDataSource authLocalDataSource;
 
   final String getSongUrl;
@@ -21,7 +21,7 @@ class SongRemoteData {
   final String loadLikedSongsUrl;
   final String unLikeASongUrl;
 
-  SongRemoteData({required this.client, required this.authLocalDataSource})
+  SongRemoteData({required this.apiClient, required this.authLocalDataSource})
     : getSongUrl = dotenv.env['GET_ALL_SONGS_URL'] ?? '',
       getGenreUrl = dotenv.env['GET_SONG_GENRES_URL'] ?? '',
       uploadGenreUrl = dotenv.env['UPLOAD_SONG_GENRE_URL'] ?? '',
@@ -68,10 +68,7 @@ class SongRemoteData {
     final headers = await _getHeaders();
 
     try {
-      final response = await client.get(
-        Uri.parse(getSongUrl),
-        headers: headers,
-      );
+      final response = await apiClient.get(getSongUrl, headers: headers);
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body) as Map<String, dynamic>;
@@ -89,8 +86,8 @@ class SongRemoteData {
     final headers = await _getHeaders();
 
     try {
-      final response = await client.get(
-        Uri.parse('$getSongUrl&cursor=$cursor'),
+      final response = await apiClient.get(
+        '$getSongUrl&cursor=$cursor',
         headers: headers,
       );
 
@@ -110,10 +107,7 @@ class SongRemoteData {
     final headers = await _getHeaders();
 
     try {
-      final response = await client.get(
-        Uri.parse(getGenreUrl),
-        headers: headers,
-      );
+      final response = await apiClient.get(getGenreUrl, headers: headers);
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body) as Map<String, dynamic>;
@@ -133,8 +127,8 @@ class SongRemoteData {
     final body = jsonEncode({'name': genreName});
 
     try {
-      final response = await client.post(
-        Uri.parse(uploadGenreUrl),
+      final response = await apiClient.post(
+        uploadGenreUrl,
         headers: headers,
         body: body,
       );
@@ -159,24 +153,30 @@ class SongRemoteData {
     final headers = await _getHeaders();
 
     try {
-      final request =
-          http.MultipartRequest('POST', Uri.parse(uploadSongUrl))
-            ..headers.addAll(headers)
-            ..fields['genreId'] = genreId
-            ..fields['title'] = title;
+      //final request =
+      //   http.MultipartRequest('POST', Uri.parse(uploadSongUrl))
+      //    ..headers.addAll(headers)
+      //    ..fields['genreId'] = genreId
+      //    ..fields['title'] = title;
 
-      if (currentUser.isArtist) {
-        request.fields['artistId'] = currentUser.userId.toString();
-      }
+      //if (currentUser.isArtist) {
+      //request.fields['artistId'] = currentUser.userId.toString();
+      //}
 
-      request.files.add(
-        await http.MultipartFile.fromPath('audio', audioFile.path),
+      //request.files.add(
+      //  await http.MultipartFile.fromPath('audio', audioFile.path),
+      // );
+      //request.files.add(
+      //   await http.MultipartFile.fromPath('coverImage', coverImage.path),
+      // );
+
+      final response = await apiClient.sendMultipart(
+        endpoint: uploadSongUrl,
+        files: {'audio': audioFile.path, 'coverImage': coverImage.path},
+        fields: {'artistId': currentUser.userId.toString()},
+        headers: headers,
+        method: 'POST',
       );
-      request.files.add(
-        await http.MultipartFile.fromPath('coverImage', coverImage.path),
-      );
-
-      final response = await request.send();
 
       if (response.statusCode != 200 && response.statusCode != 201) {
         throw Exception(
@@ -195,8 +195,8 @@ class SongRemoteData {
     final headers = await _getHeaders();
     final body = jsonEncode({"songId": songId, "userId": currentUser.userId});
     try {
-      final response = await client.post(
-        Uri.parse(likeSongUrl),
+      final response = await apiClient.post(
+        likeSongUrl,
         headers: headers,
         body: body,
       );
@@ -219,8 +219,8 @@ class SongRemoteData {
     final headers = await _getHeaders();
     final body = jsonEncode({"songId": songId, "userId": currentUser.userId});
     try {
-      final response = await client.delete(
-        Uri.parse(likeSongUrl),
+      final response = await apiClient.delete(
+        likeSongUrl,
         headers: headers,
         body: body,
       );
@@ -241,11 +241,10 @@ class SongRemoteData {
   Future<List<LikedSongModel>> loadLikedSongs() async {
     final currentUser = await authLocalDataSource.getUser();
     final headers = await _getHeaders();
-    final url = Uri.parse(
-      loadLikedSongsUrl,
-    ).replace(queryParameters: {"userId": currentUser.userId.toString()});
+    final url = '$loadLikedSongsUrl?user=${currentUser.userId}';
+
     try {
-      final res = await client.get(url, headers: headers);
+      final res = await apiClient.get(url, headers: headers);
       log(res.body);
       if (res.statusCode == 200) {
         return (jsonDecode(res.body)['data'] as List)
