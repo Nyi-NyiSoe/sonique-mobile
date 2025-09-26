@@ -1,12 +1,12 @@
 import 'dart:convert';
 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:http/http.dart' as http;
+import 'package:sonique/Data/core/api_client.dart';
 import 'package:sonique/Data/models/display_artist_model.dart';
 import 'package:sonique/Data/source/auth_repo/auth_local_data_source.dart';
 
 class ArtistRemoteData {
-  final http.Client client;
+  final ApiClient client;
   final AuthLocalDataSource authLocalDataSource;
   final String getAllArtistUrl;
 
@@ -39,7 +39,7 @@ class ArtistRemoteData {
       print('🔑 Headers: $headers');
 
       final response = await client.get(
-        Uri.parse(getAllArtistUrl),
+       getAllArtistUrl,
         headers: headers,
       );
 
