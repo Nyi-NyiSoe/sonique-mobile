@@ -172,7 +172,7 @@ Future<void> setupLocator() async {
 
   locator.registerLazySingleton<ArtistRemoteData>(
     () => ArtistRemoteData(
-      client: locator<http.Client>(),
+      client: locator<ApiClient>(),
       authLocalDataSource: locator<AuthLocalDataSource>(),
     ),
   );

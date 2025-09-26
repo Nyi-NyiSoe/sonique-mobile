@@ -70,7 +70,7 @@ class UserRemoteData {
       // final response = await request.send();
       final response = await apiClient.sendMultipart(
         endpoint: "$updateUserUrl/$userId",
-        files: {'profile_image': profile_image!},
+        files: {'profile_image': profile_image.toString()},
         method: 'PATCH',
         headers: headers,
       );

@@ -1,7 +1,6 @@
 import 'dart:developer';
 
 import 'package:http/http.dart' as http;
-import 'package:image_picker/image_picker.dart';
 import 'package:sonique/Data/source/auth_repo/auth_token_storage.dart';
 
 /// A simple wrapper around http.Client for handling JWT + headers
@@ -91,7 +90,7 @@ class ApiClient {
 
   Future<http.StreamedResponse> sendMultipart({
     required String endpoint,
-    Map<String, XFile>? files, // multiple files, key = field name
+    Map<String, String>? files, // multiple files, key = field name
     Map<String, String>? fields, // additional form fields
     Map<String, String>? headers, // extra headers
     String method = 'POST', // HTTP method
@@ -116,7 +115,7 @@ class ApiClient {
     if (files != null) {
       for (final entry in files.entries) {
         request.files.add(
-          await http.MultipartFile.fromPath(entry.key, entry.value.path),
+          await http.MultipartFile.fromPath(entry.key, entry.value),
         );
       }
     }

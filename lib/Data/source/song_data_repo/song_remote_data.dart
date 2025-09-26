@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:sonique/Data/core/api_client.dart';
 import 'package:sonique/Data/models/genre_model.dart';
@@ -69,10 +68,7 @@ class SongRemoteData {
     final headers = await _getHeaders();
 
     try {
-      final response = await apiClient.get(
-        getSongUrl,
-        headers: headers,
-      );
+      final response = await apiClient.get(getSongUrl, headers: headers);
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body) as Map<String, dynamic>;
@@ -111,10 +107,7 @@ class SongRemoteData {
     final headers = await _getHeaders();
 
     try {
-      final response = await apiClient.get(
-        getGenreUrl,
-        headers: headers,
-      );
+      final response = await apiClient.get(getGenreUrl, headers: headers);
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body) as Map<String, dynamic>;
@@ -160,24 +153,30 @@ class SongRemoteData {
     final headers = await _getHeaders();
 
     try {
-      final request =
-          http.MultipartRequest('POST', Uri.parse(uploadSongUrl))
-            ..headers.addAll(headers)
-            ..fields['genreId'] = genreId
-            ..fields['title'] = title;
+      //final request =
+      //   http.MultipartRequest('POST', Uri.parse(uploadSongUrl))
+      //    ..headers.addAll(headers)
+      //    ..fields['genreId'] = genreId
+      //    ..fields['title'] = title;
 
-      if (currentUser.isArtist) {
-        request.fields['artistId'] = currentUser.userId.toString();
-      }
+      //if (currentUser.isArtist) {
+      //request.fields['artistId'] = currentUser.userId.toString();
+      //}
 
-      request.files.add(
-        await http.MultipartFile.fromPath('audio', audioFile.path),
+      //request.files.add(
+      //  await http.MultipartFile.fromPath('audio', audioFile.path),
+      // );
+      //request.files.add(
+      //   await http.MultipartFile.fromPath('coverImage', coverImage.path),
+      // );
+
+      final response = await apiClient.sendMultipart(
+        endpoint: uploadSongUrl,
+        files: {'audio': audioFile.path, 'coverImage': coverImage.path},
+        fields: {'artistId': currentUser.userId.toString()},
+        headers: headers,
+        method: 'POST',
       );
-      request.files.add(
-        await http.MultipartFile.fromPath('coverImage', coverImage.path),
-      );
-
-      final response = await request.send();
 
       if (response.statusCode != 200 && response.statusCode != 201) {
         throw Exception(
