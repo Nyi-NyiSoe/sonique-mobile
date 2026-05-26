@@ -10,7 +10,10 @@ class UserDataBloc extends Bloc<UserDataEvent, UserDataState> {
   UserDataBloc(this._userDataUsecase) : super(UserDataInitialState()) {
     on<UserDataEvent>((event, emit) async {
       if (event is FetchUserDataEvent) {
-        emit(UserDataLoadingState());
+        final shouldShowInitialLoader = state is! UserDataFetchedState;
+        if (shouldShowInitialLoader) {
+          emit(UserDataLoadingState());
+        }
         try {
           final user = await _userDataUsecase.fetchUserData();
 
@@ -49,8 +52,17 @@ class UserDataBloc extends Bloc<UserDataEvent, UserDataState> {
         } catch (e) {
           emit(UserDataErrorState(error: e.toString()));
         }
-      };
-    });
+      }
 
-  }   
+      if (event is ToggleArtistStatusEvent) {
+        emit(UserDataLoadingState());
+        try {
+          await _userDataUsecase.updateArtistStatus(event.isArtist);
+          add(FetchUserDataEvent());
+        } catch (e) {
+          emit(UserDataErrorState(error: e.toString()));
+        }
+      }
+    });
+  }
 }

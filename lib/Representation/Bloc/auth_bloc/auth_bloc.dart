@@ -26,13 +26,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<LogoutEvent>(_onLogout);
   }
 
-  Future<void> _onAppStarted(AppStartedEvent event, Emitter<AuthState> emit) async {
+  Future<void> _onAppStarted(
+    AppStartedEvent event,
+    Emitter<AuthState> emit,
+  ) async {
     emit(AuthLoadingState());
     try {
       final user = await authLocalDataSource.getUser();
       emit(AuthSuccessState(user: user));
     } catch (e) {
-      emit(AuthErrorState(error: e.toString()));
+      emit(UnAuthenticatedState());
     }
   }
 

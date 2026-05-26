@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image/image.dart' as img;
 import 'package:image_picker/image_picker.dart';
@@ -27,187 +26,343 @@ class UploadAlbumPage extends StatefulWidget {
 class _UploadAlbumPageState extends State<UploadAlbumPage> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _desController = TextEditingController();
+  final ImagePicker _picker = ImagePicker();
+  final _formKey = GlobalKey<FormState>();
 
   XFile? _coverImage;
 
-  final ImagePicker picker = ImagePicker();
-  final _formKey = GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Upload your album'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.of(context).pop();
+      backgroundColor: theme.scaffoldBackgroundColor,
+      body: SafeArea(
+        child: BlocBuilder<AlbumOperationsBloc, AlbumOperationsState>(
+          builder: (context, state) {
+            if (state is AlbumOperationLoading) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (state is AlbumOperationError) {
+              return _StateMessage(
+                icon: Icons.error_outline,
+                message: 'Error loading album form: ${state.error}',
+              );
+            } else if (state is AlbumOperationInitial) {
+              return Form(
+                key: _formKey,
+                child: ListView(
+                  padding: const EdgeInsets.fromLTRB(20, 18, 20, 28),
+                  children: [
+                    _UploadHeader(
+                      title: 'Upload Album',
+                      subtitle: 'Create a release with cover artwork',
+                      icon: Icons.album_outlined,
+                      onBack: () => Navigator.of(context).pop(),
+                    ),
+                    const SizedBox(height: 22),
+                    const _SectionTitle(title: 'Album Details'),
+                    CustomTextFormField(
+                      label: 'Album title',
+                      controller: _titleController,
+                      prefixIcon: const Icon(Icons.title),
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Please enter an album title';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    CustomTextFormField(
+                      label: 'Description',
+                      controller: _desController,
+                      prefixIcon: const Icon(Icons.notes_outlined),
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Please enter a description';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 24),
+                    const _SectionTitle(title: 'Artwork'),
+                    _CoverPicker(
+                      imagePath: _coverImage?.path,
+                      onTap: _pickCoverImage,
+                    ),
+                    const SizedBox(height: 26),
+                    CustomElevatedButton(
+                      onPressed: _uploadAlbum,
+                      backgroundColor: Colors.green,
+                      child: const Text('Upload Album'),
+                    ),
+                  ],
+                ),
+              );
+            }
+
+            log(state.toString());
+            return const _StateMessage(
+              icon: Icons.cloud_upload_outlined,
+              message: 'Upload form is not ready yet',
+            );
           },
         ),
       ),
-      body: BlocBuilder<AlbumOperationsBloc, AlbumOperationsState>(
-        builder: (context, state) {
-          if (state is AlbumOperationLoading) {
-            return Center(child: CircularProgressIndicator());
-          } else if (state is AlbumOperationError) {
-            return Center(child: Text('Error loading genre: ${state.error}'));
-          } else if (state is AlbumOperationInitial) {
-            return Form(
-              key: _formKey,
-              child: ListView(
-                children: [
-                  CustomTextFormField(
-                    label: 'Album title',
-                    controller: _titleController,
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Please enter a album title';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                  CustomTextFormField(
-                    label: 'Description',
-                    controller: _desController,
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Please enter description';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 20),
+    );
+  }
 
-                  GestureDetector(
-                    onTap: () async {
-                      // 1️⃣ Request gallery permission
-                      final hasPermission = await requestGalleryPermission();
-                      if (!hasPermission) return;
+  Future<void> _pickCoverImage() async {
+    final hasPermission = await requestGalleryPermission();
+    if (!hasPermission) return;
 
-                      // 2️⃣ Pick an image
-                      final XFile? pickedFile = await picker.pickImage(
-                        source: ImageSource.gallery,
-                      );
-                      if (pickedFile == null) return;
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile == null) return;
 
-                      // 3️⃣ Read bytes and decode
-                      final bytes = await pickedFile.readAsBytes();
-                      final decodedImage = img.decodeImage(bytes);
-                      if (decodedImage == null) {
-                        print('Failed to decode image');
-                        return;
-                      }
+    final bytes = await pickedFile.readAsBytes();
+    final decodedImage = img.decodeImage(bytes);
+    if (decodedImage == null) {
+      _showSnackBar('Failed to read selected image');
+      return;
+    }
 
-                      // 4️⃣ Encode as JPEG to ensure backend compatibility
-                      final jpgBytes = img.encodeJpg(decodedImage, quality: 90);
+    final jpgBytes = img.encodeJpg(decodedImage, quality: 90);
+    final tempDir = await getTemporaryDirectory();
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final tempPath = '${tempDir.path}/cover_$timestamp.jpg';
+    final tempFile = File(tempPath);
+    await tempFile.writeAsBytes(jpgBytes);
 
-                      // 5️⃣ Save to temporary file with timestamp for uniqueness
-                      final tempDir = await getTemporaryDirectory();
-                      final timestamp = DateTime.now().millisecondsSinceEpoch;
-                      final tempPath =
-                          '${tempDir.path}/cover_$timestamp.jpg'; // 🔥 Better naming
-                      final tempFile = File(tempPath);
-                      await tempFile.writeAsBytes(jpgBytes);
+    final fileExists = await tempFile.exists();
+    final fileSize = await tempFile.length();
+    log('Album cover exists: $fileExists, size: $fileSize bytes');
 
-                      // 6️⃣ Verify the file was written correctly
-                      final fileExists = await tempFile.exists();
-                      final fileSize = await tempFile.length();
-                      print('File exists: $fileExists, Size: $fileSize bytes');
+    setState(() => _coverImage = XFile(tempFile.path));
+  }
 
-                      // 7️⃣ Update state with valid XFile for upload
-                      setState(() {
-                        _coverImage = XFile(tempFile.path);
-                      });
+  void _uploadAlbum() {
+    if (!_formKey.currentState!.validate()) return;
 
-                      print(
-                        '✅ Cover image ready for upload: ${_coverImage!.path}',
-                      );
-                    },
+    if (_coverImage == null) {
+      _showSnackBar('Please select a cover photo');
+      return;
+    }
 
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Container(
-                        height: 150,
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: Colors.grey,
-                            style:
-                                BorderStyle
-                                    .solid, // Dotted not directly supported
-                            width: 1,
-                          ),
-                        ),
-                        child: Center(
-                          child:
-                              _coverImage != null
-                                  ? Image.file(File(_coverImage!.path))
-                                  : Icon(FontAwesomeIcons.photoFilm),
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 20),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Center(
-                      child: CustomElevatedButton(
-                        onPressed: () {
-                          if (_formKey.currentState!.validate() &&
-                              _coverImage != null) {
-                            try {
-                              print(
-                                'Selected cover image path: ${_coverImage?.path}',
-                              );
-                              context.read<AlbumOperationsBloc>().add(
-                                CreateAlbumEvent(
-                                  _titleController.text,
-                                  _coverImage!,
-                                  _desController.text,
-                                ),
-                              );
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text('Uploaded song successfully!'),
-                                ),
-                              );
-                              context.read<AlbumListBloc>().add(FetchAlbumsEvent());
+    try {
+      context.read<AlbumOperationsBloc>().add(
+        CreateAlbumEvent(
+          _titleController.text.trim(),
+          _coverImage!,
+          _desController.text.trim(),
+        ),
+      );
+      context.read<AlbumListBloc>().add(FetchAlbumsEvent());
+      _showSnackBar('Uploaded album successfully!');
+      context.pop();
+    } catch (e) {
+      _showSnackBar(e.toString());
+    }
+  }
 
-                              context.pop();
-                            } catch (e) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text(e.toString())),
-                              );
-                            }
-                            // Proceed with upload logic here
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('Please select a cover photo'),
-                              ),
-                            );
-                          }
-                        },
-                        child: const Text('Upload'),
-                      ),
-                    ),
-                  ),
-                ],
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _desController.dispose();
+    super.dispose();
+  }
+}
+
+class _UploadHeader extends StatelessWidget {
+  const _UploadHeader({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.onBack,
+  });
+
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final VoidCallback onBack;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Row(
+      children: [
+        IconButton(
+          tooltip: 'Back',
+          onPressed: onBack,
+          icon: const Icon(Icons.arrow_back),
+        ),
+        const SizedBox(width: 4),
+        Container(
+          width: 42,
+          height: 42,
+          decoration: BoxDecoration(
+            color: Colors.green.withValues(alpha: 0.16),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(icon, color: Colors.green),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: theme.textTheme.displaySmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
               ),
-            );
-          } else {
-            log(state.toString());
-            return Text('upload page');
-          }
-        },
+              const SizedBox(height: 2),
+              Text(
+                subtitle,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.textTheme.bodySmall?.color?.withValues(
+                    alpha: 0.68,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _SectionTitle extends StatelessWidget {
+  const _SectionTitle({required this.title});
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Text(
+        title,
+        style: Theme.of(
+          context,
+        ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+      ),
+    );
+  }
+}
+
+class _CoverPicker extends StatelessWidget {
+  const _CoverPicker({required this.imagePath, required this.onTap});
+
+  final String? imagePath;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Material(
+      color: theme.cardColor,
+      borderRadius: BorderRadius.circular(8),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Row(
+            children: [
+              Container(
+                width: 92,
+                height: 92,
+                decoration: BoxDecoration(
+                  color: Colors.green.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                clipBehavior: Clip.antiAlias,
+                child:
+                    imagePath == null
+                        ? const Icon(
+                          Icons.image_outlined,
+                          color: Colors.green,
+                          size: 34,
+                        )
+                        : Image.file(File(imagePath!), fit: BoxFit.cover),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Cover artwork',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      imagePath == null
+                          ? 'Choose an image from your gallery'
+                          : 'Artwork ready for upload',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.textTheme.bodySmall?.color?.withValues(
+                          alpha: 0.66,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                imagePath == null
+                    ? Icons.upload_file_outlined
+                    : Icons.check_circle,
+                color: imagePath == null ? null : Colors.green,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _StateMessage extends StatelessWidget {
+  const _StateMessage({required this.icon, required this.message});
+
+  final IconData icon;
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 34),
+            const SizedBox(height: 10),
+            Text(message, textAlign: TextAlign.center),
+          ],
+        ),
       ),
     );
   }
 }
 
 Future<bool> requestGalleryPermission() async {
-  var status = await Permission.photos.request(); // iOS
+  var status = await Permission.photos.request();
   if (status.isGranted) return true;
 
-  status = await Permission.storage.request(); // Android
+  status = await Permission.storage.request();
   return status.isGranted;
 }

@@ -25,7 +25,8 @@ class UserModel extends User {
   }) {
     try {
       return UserModel(
-        userId: json['userId'] ?? json['id'] ?? 0, // Handle both 'userId' and 'id'
+        userId:
+            json['userId'] ?? json['id'] ?? 0, // Handle both 'userId' and 'id'
         firstName: json['firstName'] ?? "",
         lastName: json['lastName'] ?? "",
         email: json['email'] ?? "",
@@ -33,8 +34,8 @@ class UserModel extends User {
         createdAt: json['createdAt'] ?? DateTime.now().toString(),
         isArtist: json['isArtist'] ?? false,
         total_songs: json['total_songs'] ?? 0,
-        token: token,
-        refreshToken: refreshToken,
+        token: token ?? json['token'],
+        refreshToken: refreshToken ?? json['refreshToken'],
         bio: json['bio'] ?? "",
         profile_image: json['profile_image'] ?? "",
       );

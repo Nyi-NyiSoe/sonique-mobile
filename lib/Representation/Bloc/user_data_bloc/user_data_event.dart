@@ -23,3 +23,9 @@ class UpdateUserDetailEvent extends UserDataEvent {
     required this.username,
   });
 }
+
+class ToggleArtistStatusEvent extends UserDataEvent {
+  final bool isArtist;
+
+  ToggleArtistStatusEvent({required this.isArtist});
+}

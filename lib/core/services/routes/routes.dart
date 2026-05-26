@@ -10,7 +10,7 @@ class Routes {
   static const String albumDetailPage = 'albumDetail';
   static const String albumByArtist = 'albumByArtist';
   static const String uploadAlbum = '/uploadAlbum';
+  static const String settings = '/settings';
   static const String artistDetail = '/artistDetail/:id';
   static const String playlistPage = '/playlistPage';
-
 }

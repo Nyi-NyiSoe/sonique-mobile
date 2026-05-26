@@ -39,21 +39,10 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Profile Page'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () {
-              context.read<AuthBloc>().add(LogoutEvent());
-              context.read<MusicPlayerBloc>().add(ResetPlayer());
-              context.read<LikesBloc>().add(ResetBlocEvent());
-              context.read<PlaylistBloc>().add(ResetLikeBlocEvent());
-            },
-          ),
-        ],
-      ),
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is AuthLoadingState) {
@@ -63,109 +52,66 @@ class _ProfilePageState extends State<ProfilePage> {
             context.go(Routes.login);
           }
         },
-        child: BlocBuilder<UserDataBloc, UserDataState>(
-          builder: (context, state) {
-            if (state is UserDataLoadingState) {
-              return const Center(child: CircularProgressIndicator());
-            } else if (state is UserDataFetchedState) {
-              user = state.user;
-              return SingleChildScrollView(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Container(
-                      child: Column(
-                        children: [
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              GestureDetector(
-                                onTap: () => _showImageUpdateModal(context),
-                                child: CircleAvatar(
-                                  radius: 50,
-                                  backgroundColor:
-                                      Colors.grey[300], // fallback background
-                                  child: ClipOval(
-                                    child: CachedNetworkImage(
-                                      imageUrl:
-                                          user!.profile_image == ""
-                                              ? 'https://i.imgur.com/BoN9kdC.png'
-                                              : user!.profile_image!,
-                                      width: 100, // 2 * radius
-                                      height: 100,
-                                      fit: BoxFit.cover,
-                                      placeholder:
-                                          (context, url) => const Center(
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 2,
-                                            ),
-                                          ),
-                                      errorWidget:
-                                          (context, url, error) => const Icon(
-                                            Icons.person,
-                                            size: 50,
-                                            color: Colors.grey,
-                                          ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 20),
-                              GestureDetector(
-                                onTap: () => _showUserDetailsModal(context),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      "${user!.firstName} ${user!.lastName}",
-                                      style:
-                                          Theme.of(
-                                            context,
-                                          ).textTheme.displayMedium!,
-                                    ),
-                                    const SizedBox(height: 10),
-                                    Text(
-                                      "@${user!.username}",
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .labelLarge!
-                                          .copyWith(color: Colors.grey),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 20),
-                          GestureDetector(
-                            onTap: () => _showUserDetailsModal(context),
-                            child: Text(
-                              user!.bio == ""
-                                  ? "'Add a bio'"
-                                  : "'${user!.bio}'",
-                              style: Theme.of(context).textTheme.labelLarge!
-                                  .copyWith(color: Colors.grey),
-                            ),
-                          ),
-                        ],
+        child: SafeArea(
+          child: BlocBuilder<UserDataBloc, UserDataState>(
+            builder: (context, state) {
+              if (state is UserDataLoadingState) {
+                return const Center(child: CircularProgressIndicator());
+              } else if (state is UserDataFetchedState) {
+                user = state.user;
+                return RefreshIndicator(
+                  onRefresh: () async {
+                    context.read<UserDataBloc>().add(FetchUserDataEvent());
+                  },
+                  child: ListView(
+                    padding: const EdgeInsets.fromLTRB(20, 18, 20, 28),
+                    children: [
+                      _ProfileHeader(
+                        user: state.user,
+                        onEditProfile: () => _showUserDetailsModal(context),
+                        onUpdateImage: () => _showImageUpdateModal(context),
+                        onLogout: () => _logout(context),
                       ),
-                    ),
-                    UserDetailCard(user: user!),
-                    MusicStats(user: user!),
-                  ],
-                ),
+                      const SizedBox(height: 16),
+                      _ArtistToggleCard(user: state.user),
+                      const SizedBox(height: 12),
+                      UserDetailCard(user: state.user),
+                      const SizedBox(height: 12),
+                      MusicStats(user: state.user),
+                    ],
+                  ),
+                );
+              } else if (state is UserDataErrorState) {
+                return _StateMessage(
+                  icon: Icons.error_outline,
+                  message: state.error,
+                  action: TextButton.icon(
+                    onPressed:
+                        () => context.read<UserDataBloc>().add(
+                          FetchUserDataEvent(),
+                        ),
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('Retry'),
+                  ),
+                );
+              }
+
+              return const _StateMessage(
+                icon: Icons.person_off_outlined,
+                message: 'Something went wrong',
               );
-            } else if (state is UserDataErrorState) {
-              return Center(child: Text(state.error));
-            } else {
-              return const Center(child: Text('Something went wrong!'));
-            }
-          },
+            },
+          ),
         ),
       ),
     );
+  }
+
+  void _logout(BuildContext context) {
+    context.read<AuthBloc>().add(LogoutEvent());
+    context.read<MusicPlayerBloc>().add(ResetPlayer());
+    context.read<LikesBloc>().add(ResetBlocEvent());
+    context.read<PlaylistBloc>().add(ResetLikeBlocEvent());
   }
 
   void _showUserDetailsModal(BuildContext context) {
@@ -182,6 +128,283 @@ class _ProfilePageState extends State<ProfilePage> {
       useRootNavigator: true,
       context: context,
       builder: (context) => ImageUpdateModal(user: user!),
+    );
+  }
+}
+
+class _ProfileHeader extends StatelessWidget {
+  const _ProfileHeader({
+    required this.user,
+    required this.onEditProfile,
+    required this.onUpdateImage,
+    required this.onLogout,
+  });
+
+  final UserModel user;
+  final VoidCallback onEditProfile;
+  final VoidCallback onUpdateImage;
+  final VoidCallback onLogout;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final imageUrl =
+        user.profile_image == null || user.profile_image!.isEmpty
+            ? 'https://i.imgur.com/BoN9kdC.png'
+            : user.profile_image!;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Container(
+              width: 42,
+              height: 42,
+              decoration: BoxDecoration(
+                color: Colors.green.withValues(alpha: 0.16),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(Icons.person_outline, color: Colors.green),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                'Profile',
+                style: theme.textTheme.displaySmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+            IconButton(
+              tooltip: 'Edit profile',
+              onPressed: onEditProfile,
+              icon: const Icon(Icons.edit_outlined),
+            ),
+            IconButton(
+              tooltip: 'Settings',
+              onPressed: () => context.push(Routes.settings),
+              icon: const Icon(Icons.settings_outlined),
+            ),
+            IconButton(
+              tooltip: 'Logout',
+              onPressed: onLogout,
+              icon: const Icon(Icons.logout),
+            ),
+          ],
+        ),
+        const SizedBox(height: 22),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            GestureDetector(
+              onTap: onUpdateImage,
+              child: Stack(
+                alignment: Alignment.bottomRight,
+                children: [
+                  Container(
+                    width: 104,
+                    height: 104,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: Colors.green.withValues(alpha: 0.45),
+                        width: 2,
+                      ),
+                    ),
+                    child: ClipOval(
+                      child: CachedNetworkImage(
+                        imageUrl: imageUrl,
+                        fit: BoxFit.cover,
+                        placeholder:
+                            (context, url) => const Center(
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                        errorWidget:
+                            (context, url, error) => const Icon(
+                              Icons.person,
+                              size: 48,
+                              color: Colors.grey,
+                            ),
+                      ),
+                    ),
+                  ),
+                  Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: Colors.green,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: theme.scaffoldBackgroundColor,
+                        width: 2,
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.camera_alt_outlined,
+                      size: 17,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 18),
+            Expanded(
+              child: GestureDetector(
+                onTap: onEditProfile,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${user.firstName} ${user.lastName}'.trim(),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.displayMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      '@${user.username}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.textTheme.bodyMedium?.color?.withValues(
+                          alpha: 0.62,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    _RoleBadge(isArtist: user.isArtist),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 18),
+        GestureDetector(
+          onTap: onEditProfile,
+          child: Text(
+            user.bio == null || user.bio!.isEmpty ? 'Add a bio' : user.bio!,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ArtistToggleCard extends StatelessWidget {
+  const _ArtistToggleCard({required this.user});
+
+  final UserModel user;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Material(
+      color: theme.cardColor,
+      borderRadius: BorderRadius.circular(8),
+      clipBehavior: Clip.antiAlias,
+      child: SwitchListTile(
+        value: user.isArtist,
+        activeThumbColor: Colors.green,
+        secondary: Container(
+          width: 46,
+          height: 46,
+          decoration: BoxDecoration(
+            color: Colors.green.withValues(alpha: 0.14),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: const Icon(
+            Icons.mic_external_on_outlined,
+            color: Colors.green,
+          ),
+        ),
+        title: Text(
+          'Artist Mode',
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        subtitle: Text(
+          user.isArtist
+              ? 'Upload music and manage artist releases'
+              : 'Turn this on to become an artist',
+        ),
+        onChanged: (value) {
+          context.read<UserDataBloc>().add(
+            ToggleArtistStatusEvent(isArtist: value),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _RoleBadge extends StatelessWidget {
+  const _RoleBadge({required this.isArtist});
+
+  final bool isArtist;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color:
+            isArtist
+                ? Colors.green.withValues(alpha: 0.16)
+                : Colors.blueGrey.withValues(alpha: 0.16),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        isArtist ? 'Artist' : 'Listener',
+        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+          color: isArtist ? Colors.green : Colors.blueGrey,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+  }
+}
+
+class _StateMessage extends StatelessWidget {
+  const _StateMessage({required this.icon, required this.message, this.action});
+
+  final IconData icon;
+  final String message;
+  final Widget? action;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 34,
+              color: theme.iconTheme.color?.withValues(alpha: 0.58),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodyMedium,
+            ),
+            if (action != null) ...[const SizedBox(height: 12), action!],
+          ],
+        ),
+      ),
     );
   }
 }

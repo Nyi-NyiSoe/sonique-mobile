@@ -12,6 +12,8 @@ class UserRemoteData {
   final ApiClient apiClient;
   late String getUserUrl;
   late String updateUserUrl;
+  late String activateArtistUrl;
+  late String deactivateArtistUrl;
   late String uploadGenreUrl;
   final AuthLocalDataSource authLocalDataSource;
   // This class is responsible for fetching user data from a remote source.
@@ -23,6 +25,8 @@ class UserRemoteData {
     updateUserUrl =
         dotenv.env['UPDATE_USER_DETAIL_URL'] ??
         ''; // Replace with your actual URL
+    activateArtistUrl = dotenv.env['ACTIVATE_ARTIST_URL'] ?? '';
+    deactivateArtistUrl = dotenv.env['DEACTIVATE_ARTIST_URL'] ?? '';
 
     if (getUserUrl.isEmpty || updateUserUrl.isEmpty) {
       throw Exception('API URL is not set in .env file');
