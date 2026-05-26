@@ -3,13 +3,16 @@ import 'dart:developer';
 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
+import 'package:sonique/Data/core/api_client.dart';
 import 'package:sonique/Data/models/user_model.dart';
+import 'package:sonique/Data/source/auth_repo/auth_token_storage.dart';
 
 class AuthRemoteDataSource {
-  final http.Client client;
+  final ApiClient apiClient;
   late String loginUrl;
   late String registerUrl;
-  AuthRemoteDataSource({required this.client}) {
+  final AuthTokenStorage tokenStorage;
+  AuthRemoteDataSource({required this.apiClient, required this.tokenStorage}) {
     loginUrl = dotenv.env['LOGIN_URL'] ?? '';
     registerUrl = dotenv.env['REGISTER_URL'] ?? '';
 
@@ -24,11 +27,7 @@ class AuthRemoteDataSource {
 
     late final http.Response response;
     try {
-      response = await client.post(
-        Uri.parse(loginUrl),
-        headers: headers,
-        body: body,
-      );
+      response = await apiClient.post(loginUrl, headers: headers, body: body);
 
       log(response.body);
     } catch (e) {
@@ -53,6 +52,7 @@ class AuthRemoteDataSource {
 
       log('Token: $token');
       log('Refresh Token: $refreshToken');
+      await tokenStorage.saveTokens(token!, refreshToken!);
 
       final data = jsonDecode(response.body);
       log('Login response: ${data['data']}');
@@ -85,8 +85,8 @@ class AuthRemoteDataSource {
 
     late final http.Response response;
     try {
-      response = await client.post(
-        Uri.parse(registerUrl),
+      response = await apiClient.post(
+        registerUrl,
         headers: headers,
         body: body,
       );
@@ -97,6 +97,24 @@ class AuthRemoteDataSource {
 
     log(response.statusCode.toString());
     if (response.statusCode == 201) {
+      String? token;
+      String? refreshToken;
+      String? cookies;
+      if (response.headers.containsKey('set-cookie')) {
+        cookies = response.headers['set-cookie']!;
+      }
+
+      if (cookies!.contains('token=')) {
+        token = _extractCookieValue(cookies, 'token');
+      }
+
+      if (cookies.contains('refreshToken=')) {
+        refreshToken = _extractCookieValue(cookies, 'refreshToken');
+      }
+
+      log('Token: $token');
+      log('Refresh Token: $refreshToken');
+      await tokenStorage.saveTokens(token!, refreshToken!);
       final data = jsonDecode(response.body);
       log('FULL JSON: $data'); // 👈 Add this
       log('user change: ${data['data']}');
