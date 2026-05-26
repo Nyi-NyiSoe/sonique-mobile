@@ -28,5 +28,7 @@ class UserDataUsecase {
     );
   }
 
- 
+  Future<void> updateArtistStatus(bool isArtist) {
+    return _userDataRepository.updateArtistStatus(isArtist);
+  }
 }

@@ -15,7 +15,7 @@ class UserDataRepositoryImpl implements UserDataRepository {
     }
   }
 
-  @override 
+  @override
   Future<String> updateUserImage(XFile? profile_image) async {
     try {
       return await userRemoteData.updateUserImage(profile_image);
@@ -42,5 +42,12 @@ class UserDataRepositoryImpl implements UserDataRepository {
     }
   }
 
-  
+  @override
+  Future<void> updateArtistStatus(bool isArtist) async {
+    try {
+      await userRemoteData.updateArtistStatus(isArtist);
+    } catch (e) {
+      throw Exception('Failed to update artist status: $e');
+    }
+  }
 }

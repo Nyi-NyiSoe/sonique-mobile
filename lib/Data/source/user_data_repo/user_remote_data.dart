@@ -11,6 +11,8 @@ class UserRemoteData {
   final http.Client client;
   late String getUserUrl;
   late String updateUserUrl;
+  late String activateArtistUrl;
+  late String deactivateArtistUrl;
   late String uploadGenreUrl;
   final AuthLocalDataSource authLocalDataSource;
   // This class is responsible for fetching user data from a remote source.
@@ -22,10 +24,13 @@ class UserRemoteData {
     updateUserUrl =
         dotenv.env['UPDATE_USER_DETAIL_URL'] ??
         ''; // Replace with your actual URL
+    activateArtistUrl = dotenv.env['ACTIVATE_ARTIST_URL'] ?? '';
+    deactivateArtistUrl = dotenv.env['DEACTIVATE_ARTIST_URL'] ?? '';
 
-   
-
-    if (getUserUrl.isEmpty || updateUserUrl.isEmpty ) {
+    if (getUserUrl.isEmpty ||
+        updateUserUrl.isEmpty ||
+        activateArtistUrl.isEmpty ||
+        deactivateArtistUrl.isEmpty) {
       throw Exception('API URL is not set in .env file');
     }
   }
@@ -122,6 +127,41 @@ class UserRemoteData {
     }
   }
 
- }
+  Future<void> updateArtistStatus(bool isArtist) async {
+    final currentUser = await authLocalDataSource.getUser();
+    final userId = currentUser.userId.toString();
+    final token = currentUser.token?.trim();
+    final refreshToken = currentUser.refreshToken?.trim();
+
+    if (token == null || token.isEmpty) {
+      throw Exception('Access token is missing');
+    }
+
+    final url =
+        isArtist
+            ? '$activateArtistUrl$userId'
+            : '$deactivateArtistUrl$userId';
+
+    try {
+      final response = await client.patch(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+          if (refreshToken != null && refreshToken.isNotEmpty)
+            'Cookie': 'token=$token;refreshToken=$refreshToken',
+        },
+      );
+
+      log('Update artist status response: ${response.body}');
+
+      if (response.statusCode != 200) {
+        throw Exception('Failed to update artist status: ${response.body}');
+      }
+    } catch (e) {
+      throw Exception('Error updating artist status: $e');
+    }
+  }
+}
 
 

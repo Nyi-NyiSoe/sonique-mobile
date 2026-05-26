@@ -1,10 +1,8 @@
 import 'package:sonique/Data/models/playback_status.dart';
 import 'package:sonique/Data/models/song_model.dart';
-enum RepeatMode{
-  off,
-  all,
-  one
-}
+
+enum RepeatMode { off, all, one }
+
 class MusicPlayerState {
   final List<SongModel> queue;
   final List<SongModel> history;
@@ -39,7 +37,7 @@ class MusicPlayerState {
       status: status ?? this.status,
       position: position ?? this.position,
       shuffle: shuffle ?? this.shuffle,
-      repeatMode: repeatMode ?? this.repeatMode
+      repeatMode: repeatMode ?? this.repeatMode,
     );
   }
 

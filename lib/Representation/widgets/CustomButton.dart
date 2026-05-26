@@ -17,18 +17,20 @@ class CustomElevatedButton extends StatelessWidget {
     this.textColor,
     this.width,
     this.height,
-    this.borderRadius = 12.0, // Default radius
+    this.borderRadius = 12.0,
   });
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return SizedBox(
-      width: width ?? double.infinity, // Default to full width
-      height: height ?? 60, // Default height
+      width: width ?? double.infinity,
+      height: height ?? 60,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: backgroundColor, // 👈 your custom color
-          foregroundColor: Colors.white, // text/icon color
+          backgroundColor: backgroundColor ?? theme.colorScheme.primary,
+          foregroundColor: textColor ?? theme.colorScheme.onPrimary,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(borderRadius),
           ),

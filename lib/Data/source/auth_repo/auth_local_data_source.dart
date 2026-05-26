@@ -11,7 +11,7 @@ class AuthLocalDataSource {
   // Save user
   Future<void> saveUser(UserModel user) async {
     final prefs = await SharedPreferences.getInstance();
-    final jsonString = jsonEncode(user.toJson());
+    final jsonString = jsonEncode(user.toMap());
     //print("✅ Saving user JSON: $jsonString");
     await prefs.setString(_userKey, jsonString);
   }

@@ -3,16 +3,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sonique/Data/services/song_service.dart';
-import 'package:sonique/Data/source/auth_repo/auth_local_data_source.dart';
 import 'package:sonique/Domain/repository/album_repository.dart';
 import 'package:sonique/Domain/repository/playlist_repository.dart';
 import 'package:sonique/Domain/usecases/add_song_to_playlist_usecase.dart';
 import 'package:sonique/Domain/usecases/add_songs_to_album_usecase.dart';
 import 'package:sonique/Domain/usecases/create_album_usecase.dart';
 import 'package:sonique/Domain/usecases/create_playlist_usecase.dart';
-import 'package:sonique/Domain/usecases/login_usecase.dart';
-import 'package:sonique/Domain/usecases/logout_usecase.dart';
-import 'package:sonique/Domain/usecases/register_usecase.dart';
 import 'package:sonique/Domain/usecases/remove_song_from_playlist_usecase.dart';
 import 'package:sonique/Domain/usecases/remove_songs_from_album_usecase.dart';
 import 'package:sonique/Domain/usecases/song_data_usecase.dart';
@@ -39,6 +35,7 @@ import 'package:sonique/Representation/Bloc/user_data_bloc/user_data_bloc.dart';
 import 'package:sonique/Representation/Bloc/user_data_bloc/user_data_event.dart';
 import 'package:sonique/core/services/locator/locator.dart';
 import 'package:sonique/core/theme/app_theme.dart';
+import 'package:sonique/core/theme/app_theme_controller.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -46,6 +43,7 @@ void main() async {
   await dotenv.load(fileName: ".env");
 
   await setupLocator();
+  await AppThemeController.instance.load();
 
   runApp(const MyApp());
 }
@@ -59,18 +57,8 @@ class MyApp extends StatelessWidget {
     final GoRouter router = locator<GoRouter>();
     return MultiBlocProvider(
       providers: [
-        BlocProvider<AuthBloc>(
-          create: (context) {
-            final authBloc = AuthBloc(
-              locator<AuthLocalDataSource>(),
-              locator<LoginUsecase>(),
-              locator<RegisterUsecase>(),
-              locator<LogoutUsecase>(),
-            );
-
-            authBloc.add(AppStartedEvent());
-            return authBloc;
-          },
+        BlocProvider<AuthBloc>.value(
+          value: locator<AuthBloc>()..add(AppStartedEvent()),
         ),
 
         BlocProvider<SongDataBloc>(
@@ -137,7 +125,8 @@ class MyApp extends StatelessWidget {
               addSongsToAlbumUsecase: locator<AddSongsToAlbumUsecase>(),
               albumRepository: locator<AlbumRepository>(),
               createAlbumUsecase: locator<CreateAlbumUsecase>(),
-              removeSongsFromAlbumUsecase: locator<RemoveSongsFromAlbumUsecase>()
+              removeSongsFromAlbumUsecase:
+                  locator<RemoveSongsFromAlbumUsecase>(),
             );
 
             return albumOperation;
@@ -164,13 +153,18 @@ class MyApp extends StatelessWidget {
           },
         ),
       ],
-      child: MaterialApp.router(
-        title: 'Sonique',
-        theme: AppTheme().darkTheme,
-        debugShowCheckedModeBanner: false,
-        routerDelegate: router.routerDelegate,
-        routeInformationParser: router.routeInformationParser,
-        routeInformationProvider: router.routeInformationProvider,
+      child: ValueListenableBuilder(
+        valueListenable: AppThemeController.instance,
+        builder: (context, selectedTheme, _) {
+          return MaterialApp.router(
+            title: 'Sonique',
+            theme: AppTheme().themeFor(selectedTheme),
+            debugShowCheckedModeBanner: false,
+            routerDelegate: router.routerDelegate,
+            routeInformationParser: router.routeInformationParser,
+            routeInformationProvider: router.routeInformationProvider,
+          );
+        },
       ),
     );
   }

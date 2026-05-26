@@ -1,172 +1,191 @@
 import 'package:flutter/material.dart';
-import 'package:sonique/core/theme/app_color.dart';
+
+enum SoniqueTheme {
+  studioDark,
+  studioLight,
+  midnight,
+}
+
+extension SoniqueThemeDetails on SoniqueTheme {
+  String get label {
+    return switch (this) {
+      SoniqueTheme.studioDark => 'Studio Dark',
+      SoniqueTheme.studioLight => 'Studio Light',
+      SoniqueTheme.midnight => 'Midnight',
+    };
+  }
+
+  String get description {
+    return switch (this) {
+      SoniqueTheme.studioDark => 'Dark, neutral, and focused',
+      SoniqueTheme.studioLight => 'Bright with soft surfaces',
+      SoniqueTheme.midnight => 'Deep contrast with cool accents',
+    };
+  }
+
+  Color get accent {
+    return switch (this) {
+      SoniqueTheme.studioDark => const Color(0xFF35D07F),
+      SoniqueTheme.studioLight => const Color(0xFF159957),
+      SoniqueTheme.midnight => const Color(0xFF64D2FF),
+    };
+  }
+}
 
 class AppTheme {
-  // Light Theme
-  final lightTheme = ThemeData(
-    useMaterial3: true,
-    brightness: Brightness.light,
-    colorScheme: ColorScheme.light(
-      primary: AppColor.primaryColor,
-      onPrimary: Colors.white,
-      surface: AppColor.primaryColor,
-    ),
-    scaffoldBackgroundColor: AppColor.lightBackgroundColor,
-    textTheme: const TextTheme(
-      displayLarge: TextStyle(
-        fontSize: 32,
-        fontWeight: FontWeight.bold,
-        color: AppColor.lightTextColor,
+  ThemeData themeFor(SoniqueTheme theme) {
+    return switch (theme) {
+      SoniqueTheme.studioDark => _buildTheme(
+        brightness: Brightness.dark,
+        seed: const Color(0xFF35D07F),
+        background: const Color(0xFF101211),
+        surface: const Color(0xFF191C1A),
+        text: Colors.white,
       ),
-      displayMedium: TextStyle(
-        fontSize: 24,
-        fontWeight: FontWeight.w600,
-        color: AppColor.lightTextColor,
+      SoniqueTheme.studioLight => _buildTheme(
+        brightness: Brightness.light,
+        seed: const Color(0xFF159957),
+        background: const Color(0xFFF7F8F5),
+        surface: Colors.white,
+        text: const Color(0xFF151A17),
       ),
-      displaySmall: TextStyle(
-        fontSize: 20,
-        fontWeight: FontWeight.w500,
-        color: AppColor.lightTextColor,
+      SoniqueTheme.midnight => _buildTheme(
+        brightness: Brightness.dark,
+        seed: const Color(0xFF64D2FF),
+        background: const Color(0xFF090D16),
+        surface: const Color(0xFF121827),
+        text: const Color(0xFFF3F7FF),
       ),
-      bodyLarge: TextStyle(
-        fontSize: 16,
-        fontWeight: FontWeight.normal,
-        color: AppColor.lightTextColor,
-      ),
-      bodyMedium: TextStyle(
-        fontSize: 16,
-        fontWeight: FontWeight.w500,
-        color: AppColor.lightTextColor,
-      ),
-      bodySmall: TextStyle(
-        fontSize: 14,
-        fontWeight: FontWeight.w400,
-        color: AppColor.lightTextColor,
-      ),
-      labelLarge: TextStyle(
-        fontSize: 14,
-        fontWeight: FontWeight.w500,
-        color: AppColor.lightTextColor,
-      ),
-      labelMedium: TextStyle(
-        fontSize: 12,
-        fontWeight: FontWeight.w400,
-        color: AppColor.lightTextColor,
-      ),
-      labelSmall: TextStyle(
-        fontSize: 10,
-        fontWeight: FontWeight.w400,
-        color: AppColor.lightTextColor,
-      ),
-      titleLarge: TextStyle(
-        fontSize: 20,
-        fontWeight: FontWeight.w600,
-        color: AppColor.lightTextColor,
-      ),
-      titleMedium: TextStyle(
-        fontSize: 18,
-        fontWeight: FontWeight.w500,
-        color: AppColor.lightTextColor,
-      ),
-      titleSmall: TextStyle(
-        fontSize: 16,
-        fontWeight: FontWeight.w400,
-        color: AppColor.lightTextColor,
-      ),
-    ),
-    elevatedButtonTheme: ElevatedButtonThemeData(
-      style: ButtonStyle(
-        backgroundColor: WidgetStateProperty.all(AppColor.primaryColor),
-        foregroundColor: WidgetStateProperty.all(Colors.white),
-        shape: WidgetStateProperty.all(
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
-        ),
-        padding: WidgetStateProperty.all(
-          const EdgeInsets.symmetric(vertical: 16.0),
-        ),
-      ),
-    ),
-  );
+    };
+  }
 
-  //dark theme
-  final darkTheme = ThemeData(
-    useMaterial3: true,
-    brightness: Brightness.dark,
-    colorScheme: ColorScheme.dark(primary: AppColor.primaryColor),
-    scaffoldBackgroundColor: AppColor.darkBackgroundColor,
-    textTheme: const TextTheme(
-      displayLarge: TextStyle(
-        fontSize: 32,
-        fontWeight: FontWeight.bold,
-        color: AppColor.darkTextColor,
+  ThemeData get darkTheme => themeFor(SoniqueTheme.studioDark);
+  ThemeData get lightTheme => themeFor(SoniqueTheme.studioLight);
+
+  ThemeData _buildTheme({
+    required Brightness brightness,
+    required Color seed,
+    required Color background,
+    required Color surface,
+    required Color text,
+  }) {
+    final colorScheme = ColorScheme.fromSeed(
+      seedColor: seed,
+      brightness: brightness,
+    ).copyWith(
+      primary: seed,
+      surface: surface,
+    );
+
+    return ThemeData(
+      useMaterial3: true,
+      brightness: brightness,
+      colorScheme: colorScheme,
+      scaffoldBackgroundColor: background,
+      cardColor: surface,
+      hintColor: text.withValues(alpha: 0.56),
+      appBarTheme: AppBarTheme(
+        backgroundColor: background,
+        foregroundColor: text,
+        elevation: 0,
+        centerTitle: false,
       ),
-      displayMedium: TextStyle(
-        fontSize: 24,
-        fontWeight: FontWeight.w600,
-        color: AppColor.darkTextColor,
-      ),
-      displaySmall: TextStyle(
-        fontSize: 20,
-        fontWeight: FontWeight.w500,
-        color: AppColor.darkTextColor,
-      ),
-      bodyLarge: TextStyle(
-        fontSize: 16,
-        fontWeight: FontWeight.normal,
-        color: AppColor.darkTextColor,
-      ),
-      bodyMedium: TextStyle(
-        fontSize: 16,
-        fontWeight: FontWeight.w500,
-        color: AppColor.darkTextColor,
-      ),
-      bodySmall: TextStyle(
-        fontSize: 14,
-        fontWeight: FontWeight.w400,
-        color: AppColor.darkTextColor,
-      ),
-      labelLarge: TextStyle(
-        fontSize: 14,
-        fontWeight: FontWeight.w500,
-        color: AppColor.darkTextColor,
-      ),
-      labelMedium: TextStyle(
-        fontSize: 12,
-        fontWeight: FontWeight.w400,
-        color: AppColor.darkTextColor,
-      ),
-      labelSmall: TextStyle(
-        fontSize: 10,
-        fontWeight: FontWeight.w400,
-        color: AppColor.darkTextColor,
-      ),
-      titleLarge: TextStyle(
-        fontSize: 20,
-        fontWeight: FontWeight.w600,
-        color: AppColor.darkTextColor,
-      ),
-      titleMedium: TextStyle(
-        fontSize: 18,
-        fontWeight: FontWeight.w500,
-        color: AppColor.darkTextColor,
-      ),
-      titleSmall: TextStyle(
-        fontSize: 16,
-        fontWeight: FontWeight.w400,
-        color: AppColor.darkTextColor,
-      ),
-    ),
-    elevatedButtonTheme: ElevatedButtonThemeData(
-      style: ButtonStyle(
-        backgroundColor: WidgetStateProperty.all(AppColor.primaryColor),
-        foregroundColor: WidgetStateProperty.all(Colors.white),
-        shape: WidgetStateProperty.all(
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
-        ),
-        padding: WidgetStateProperty.all(
-          const EdgeInsets.symmetric(vertical: 16.0),
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: surface,
+        indicatorColor: seed.withValues(alpha: 0.18),
+        labelTextStyle: WidgetStateProperty.resolveWith(
+          (states) => TextStyle(
+            fontSize: 12,
+            fontWeight:
+                states.contains(WidgetState.selected)
+                    ? FontWeight.w700
+                    : FontWeight.w500,
+          ),
         ),
       ),
-    ),
-  );
+      textTheme: TextTheme(
+        displayLarge: TextStyle(
+          fontSize: 32,
+          fontWeight: FontWeight.bold,
+          color: text,
+        ),
+        displayMedium: TextStyle(
+          fontSize: 24,
+          fontWeight: FontWeight.w600,
+          color: text,
+        ),
+        displaySmall: TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.w600,
+          color: text,
+        ),
+        bodyLarge: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.normal,
+          color: text,
+        ),
+        bodyMedium: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+          color: text,
+        ),
+        bodySmall: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w400,
+          color: text,
+        ),
+        labelLarge: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+          color: text,
+        ),
+        labelMedium: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w400,
+          color: text,
+        ),
+        labelSmall: TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.w400,
+          color: text,
+        ),
+        titleLarge: TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.w700,
+          color: text,
+        ),
+        titleMedium: TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.w600,
+          color: text,
+        ),
+        titleSmall: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+          color: text,
+        ),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: seed,
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          elevation: 0,
+          padding: const EdgeInsets.symmetric(vertical: 16),
+        ),
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          backgroundColor: seed,
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        ),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        focusedBorder: UnderlineInputBorder(
+          borderSide: BorderSide(color: seed, width: 2),
+        ),
+      ),
+    );
+  }
 }

@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sonique/Representation/Bloc/auth_bloc/auth_bloc.dart';
 import 'package:sonique/Representation/Bloc/auth_bloc/auth_state.dart';
@@ -15,6 +14,7 @@ import 'package:sonique/Representation/screens/login_page.dart';
 import 'package:sonique/Representation/screens/playlist_page.dart';
 import 'package:sonique/Representation/screens/profile_page.dart';
 import 'package:sonique/Representation/screens/root_page.dart';
+import 'package:sonique/Representation/screens/settings_page.dart';
 import 'package:sonique/Representation/screens/signup_page.dart';
 import 'package:sonique/Representation/screens/upload_album_page.dart';
 import 'package:sonique/Representation/screens/upload_song_page.dart';
@@ -26,33 +26,33 @@ class RoutingService {
   RoutingService(this.authBloc);
 
   late final GoRouter router = GoRouter(
+    initialLocation: Routes.home,
     refreshListenable: GoRouterRefreshStream(authBloc.stream),
 
     redirect: (context, state) async {
-      final authState = context.read<AuthBloc>().state;
+      final authState = authBloc.state;
+      final location = state.uri.toString();
 
       // Define auth pages that don't need redirection between them
-      final isAuthPage = [
-        Routes.login,
-        Routes.signUp,
-      ].contains(state.uri.toString());
+      final isAuthPage = [Routes.login, Routes.signUp].contains(location);
 
-      // IMPORTANT: For auth pages, allow free navigation between them
-      if (isAuthPage) {
-        return null; // Don't redirect between auth pages
+      if (authState is AuthLoadingState) {
+        return null;
       }
 
       // Handle states
-      if (authState is UnAuthenticatedState) {
-        // Only redirect to login if trying to access a protected route (not splash, login, or signup)
-        return ![Routes.login, Routes.signUp].contains(state.uri.toString())
-            ? Routes.login
-            : null;
-      } else if (authState is AuthSuccessState) {
+      if (authState is AuthSuccessState) {
         // Only redirect to home if trying to access auth pages
-        return [Routes.login, Routes.signUp].contains(state.uri.toString())
+        return isAuthPage
             ? Routes.home
-            : null; // ← This change allows navigation between tabs
+            : null; // This allows navigation between tabs
+      } else if (isAuthPage) {
+        return null; // Don't redirect between auth pages
+      } else if (authState is UnAuthenticatedState) {
+        // Only redirect to login if trying to access a protected route (not splash, login, or signup)
+        return !isAuthPage ? Routes.login : null;
+      } else if (authState is AuthErrorState) {
+        return !isAuthPage ? Routes.login : null;
       }
 
       return null;
@@ -76,10 +76,16 @@ class RoutingService {
           return UploadSongPage();
         },
       ),
-       GoRoute(
+      GoRoute(
         path: Routes.uploadAlbum,
         builder: (context, state) {
           return UploadAlbumPage();
+        },
+      ),
+      GoRoute(
+        path: Routes.settings,
+        builder: (context, state) {
+          return const SettingsPage();
         },
       ),
 
@@ -104,16 +110,16 @@ class RoutingService {
                     path: Routes.artistDetail,
                     builder: (context, state) {
                       final artistId = int.parse(state.pathParameters['id']!);
-                      return ArtistDetailPage(artistId: artistId,);
+                      return ArtistDetailPage(artistId: artistId);
                     },
                     routes: [
-                       GoRoute(
-                    path: Routes.albumDetailPage,
-                    builder: (context, state) {
-                      return AlbumDetailPage();
-                    },
-                  ),
-                    ]
+                      GoRoute(
+                        path: Routes.albumDetailPage,
+                        builder: (context, state) {
+                          return AlbumDetailPage();
+                        },
+                      ),
+                    ],
                   ),
                 ],
               ),

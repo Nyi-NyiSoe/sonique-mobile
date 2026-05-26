@@ -34,6 +34,8 @@ class CustomTextFormField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return TextFormField(
       controller: controller,
       keyboardType: keyboardType,
@@ -47,6 +49,14 @@ class CustomTextFormField extends StatelessWidget {
         fillColor: fillColor,
         prefixIcon: prefixIcon,
         suffixIcon: suffixIcon,
+        hintStyle: theme.textTheme.bodyMedium?.copyWith(
+          color: theme.hintColor.withValues(alpha: 0.62),
+          fontWeight: FontWeight.w400,
+        ),
+        labelStyle: theme.textTheme.bodyMedium?.copyWith(
+          color: theme.hintColor.withValues(alpha: 0.78),
+          fontWeight: FontWeight.w400,
+        ),
         border: UnderlineInputBorder(
           borderSide: BorderSide(color: borderColor, width: 1.5),
         ),
