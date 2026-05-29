@@ -7,10 +7,14 @@ import 'package:sonique/Representation/Bloc/playlist_bloc/playlist_event.dart';
 import 'package:sonique/Representation/Bloc/playlist_bloc/playlist_state.dart';
 
 class PlaylistBloc extends Bloc<PlaylistEvent, PlaylistState> {
+  static const Duration _cacheDuration = Duration(minutes: 3);
+
   final PlaylistRepository playlistRepository;
   final CreatePlaylistUsecase createPlaylistUsecase;
   final AddSongToPlaylistUsecase addSongToPlaylistUsecase;
   final RemoveSongFromPlaylistUsecase removeSongFromPlaylistUsecase;
+  DateTime? _lastFetchedAt;
+
   PlaylistBloc({
     required this.playlistRepository,
     required this.createPlaylistUsecase,
@@ -37,10 +41,22 @@ class PlaylistBloc extends Bloc<PlaylistEvent, PlaylistState> {
     FetchUserPlaylistEvent event,
     Emitter<PlaylistState> emit,
   ) async {
-    emit(state.copyWith(status: PlaylistStatus.loading));
+    final hasFreshCache =
+        state.status == PlaylistStatus.success &&
+        _lastFetchedAt != null &&
+        DateTime.now().difference(_lastFetchedAt!) < _cacheDuration;
+
+    if (hasFreshCache && !event.forceRefresh) {
+      return;
+    }
+
+    if (state.playlists.isEmpty) {
+      emit(state.copyWith(status: PlaylistStatus.loading));
+    }
 
     try {
       final res = await playlistRepository.getUserPlaylist();
+      _lastFetchedAt = DateTime.now();
       emit(state.copyWith(status: PlaylistStatus.success, playlists: res));
     } catch (e) {
       emit(state.copyWith(status: PlaylistStatus.error));
@@ -72,7 +88,7 @@ class PlaylistBloc extends Bloc<PlaylistEvent, PlaylistState> {
     try {
       await createPlaylistUsecase(event.name);
       emit(state.copyWith(status: PlaylistStatus.success));
-      add(FetchUserPlaylistEvent());
+      add(FetchUserPlaylistEvent(forceRefresh: true));
     } catch (e) {
       emit(state.copyWith(status: PlaylistStatus.error));
     }
@@ -87,7 +103,7 @@ class PlaylistBloc extends Bloc<PlaylistEvent, PlaylistState> {
     try {
       await addSongToPlaylistUsecase(event.playlistId, event.songId);
       emit(state.copyWith(status: PlaylistStatus.success));
-      add(FetchUserPlaylistEvent());
+      add(FetchUserPlaylistEvent(forceRefresh: true));
     } catch (e) {
       emit(state.copyWith(status: PlaylistStatus.error));
     }
@@ -102,7 +118,7 @@ class PlaylistBloc extends Bloc<PlaylistEvent, PlaylistState> {
     try {
       await removeSongFromPlaylistUsecase(event.playlistId, event.songId);
       emit(state.copyWith(status: PlaylistStatus.success));
-      add(FetchUserPlaylistEvent());
+      add(FetchUserPlaylistEvent(forceRefresh: true));
       add(FetchPlaylistDetailevent(playlistId: event.playlistId));
     } catch (e) {
       emit(state.copyWith(status: PlaylistStatus.error));

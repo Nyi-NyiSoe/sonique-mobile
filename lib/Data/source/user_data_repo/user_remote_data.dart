@@ -58,8 +58,18 @@ class UserRemoteData {
   Future<String> updateUserImage(XFile? profile_image) async {
     final currentUser = await authLocalDataSource.getUser();
     final userId = currentUser.userId.toString();
+    final token = currentUser.token?.trim();
+    final refreshToken = currentUser.refreshToken?.trim();
 
-    final headers = {'Content-Type': 'application/json'};
+    if (token == null || token.isEmpty) {
+      throw Exception('Access token is missing');
+    }
+
+    final headers = {
+      if (refreshToken != null && refreshToken.isNotEmpty)
+        'Cookie': 'token=$token;refreshToken=$refreshToken',
+      'Authorization': 'Bearer $token',
+    };
 
     try {
       //final request = http.MultipartRequest(
@@ -71,18 +81,18 @@ class UserRemoteData {
       //   await http.MultipartFile.fromPath('profile_image', profile_image!.path),
       // );
 
-      // final response = await request.send();
       final response = await apiClient.sendMultipart(
         endpoint: "$updateUserUrl/$userId",
-        files: {'profile_image': profile_image.toString()},
+        files: {'profile_image': profile_image!.path},
         method: 'PATCH',
         headers: headers,
       );
+      final responseBody = await response.stream.bytesToString();
 
       if (response.statusCode == 200) {
         return 'Profile image updated successfully';
       } else {
-        throw Exception('Failed to update profile image');
+        throw Exception('Failed to update profile image: $responseBody');
       }
     } catch (e) {
       throw Exception('Error updating profile image: $e');

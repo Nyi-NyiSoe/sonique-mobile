@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -8,6 +7,8 @@ import 'package:image/image.dart' as img;
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:sonique/Representation/Bloc/album_bloc/album_crud_bloc/album_by_artist_bloc/album_by_artist_bloc.dart';
+import 'package:sonique/Representation/Bloc/album_bloc/album_crud_bloc/album_by_artist_bloc/album_by_artist_event.dart';
 import 'package:sonique/Representation/Bloc/album_bloc/album_crud_bloc/album_operations_bloc/album_operations_bloc.dart';
 import 'package:sonique/Representation/Bloc/album_bloc/album_crud_bloc/album_operations_bloc/album_operations_event.dart';
 import 'package:sonique/Representation/Bloc/album_bloc/album_crud_bloc/album_operations_bloc/album_operations_state.dart';
@@ -38,74 +39,42 @@ class _UploadAlbumPageState extends State<UploadAlbumPage> {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
-        child: BlocBuilder<AlbumOperationsBloc, AlbumOperationsState>(
+        child: BlocConsumer<AlbumOperationsBloc, AlbumOperationsState>(
+          listener: (context, state) {
+            if (state is AlbumOperationSuccess) {
+              context.read<AlbumListBloc>().add(FetchAlbumsEvent());
+              context.read<AlbumByArtistBloc>().add(
+                FetchAlbumByArtistIdEvent(null, forceRefresh: true),
+              );
+              _showSnackBar('Uploaded album successfully!');
+              context.pop();
+            }
+          },
           builder: (context, state) {
             if (state is AlbumOperationLoading) {
               return const Center(child: CircularProgressIndicator());
             } else if (state is AlbumOperationError) {
-              return _StateMessage(
-                icon: Icons.error_outline,
-                message: 'Error loading album form: ${state.error}',
+              return _AlbumForm(
+                formKey: _formKey,
+                titleController: _titleController,
+                descriptionController: _desController,
+                coverImagePath: _coverImage?.path,
+                errorMessage: state.error,
+                onBack: () => Navigator.of(context).pop(),
+                onPickCoverImage: _pickCoverImage,
+                onUploadAlbum: _uploadAlbum,
               );
-            } else if (state is AlbumOperationInitial) {
-              return Form(
-                key: _formKey,
-                child: ListView(
-                  padding: const EdgeInsets.fromLTRB(20, 18, 20, 28),
-                  children: [
-                    _UploadHeader(
-                      title: 'Upload Album',
-                      subtitle: 'Create a release with cover artwork',
-                      icon: Icons.album_outlined,
-                      onBack: () => Navigator.of(context).pop(),
-                    ),
-                    const SizedBox(height: 22),
-                    const _SectionTitle(title: 'Album Details'),
-                    CustomTextFormField(
-                      label: 'Album title',
-                      controller: _titleController,
-                      prefixIcon: const Icon(Icons.title),
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'Please enter an album title';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    CustomTextFormField(
-                      label: 'Description',
-                      controller: _desController,
-                      prefixIcon: const Icon(Icons.notes_outlined),
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'Please enter a description';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 24),
-                    const _SectionTitle(title: 'Artwork'),
-                    _CoverPicker(
-                      imagePath: _coverImage?.path,
-                      onTap: _pickCoverImage,
-                    ),
-                    const SizedBox(height: 26),
-                    CustomElevatedButton(
-                      onPressed: _uploadAlbum,
-                      backgroundColor: Colors.green,
-                      child: const Text('Upload Album'),
-                    ),
-                  ],
-                ),
+            } else {
+              return _AlbumForm(
+                formKey: _formKey,
+                titleController: _titleController,
+                descriptionController: _desController,
+                coverImagePath: _coverImage?.path,
+                onBack: () => Navigator.of(context).pop(),
+                onPickCoverImage: _pickCoverImage,
+                onUploadAlbum: _uploadAlbum,
               );
             }
-
-            log(state.toString());
-            return const _StateMessage(
-              icon: Icons.cloud_upload_outlined,
-              message: 'Upload form is not ready yet',
-            );
           },
         ),
       ),
@@ -133,10 +102,6 @@ class _UploadAlbumPageState extends State<UploadAlbumPage> {
     final tempFile = File(tempPath);
     await tempFile.writeAsBytes(jpgBytes);
 
-    final fileExists = await tempFile.exists();
-    final fileSize = await tempFile.length();
-    log('Album cover exists: $fileExists, size: $fileSize bytes');
-
     setState(() => _coverImage = XFile(tempFile.path));
   }
 
@@ -156,9 +121,6 @@ class _UploadAlbumPageState extends State<UploadAlbumPage> {
           _desController.text.trim(),
         ),
       );
-      context.read<AlbumListBloc>().add(FetchAlbumsEvent());
-      _showSnackBar('Uploaded album successfully!');
-      context.pop();
     } catch (e) {
       _showSnackBar(e.toString());
     }
@@ -175,6 +137,118 @@ class _UploadAlbumPageState extends State<UploadAlbumPage> {
     _titleController.dispose();
     _desController.dispose();
     super.dispose();
+  }
+}
+
+class _AlbumForm extends StatelessWidget {
+  const _AlbumForm({
+    required this.formKey,
+    required this.titleController,
+    required this.descriptionController,
+    required this.coverImagePath,
+    required this.onBack,
+    required this.onPickCoverImage,
+    required this.onUploadAlbum,
+    this.errorMessage,
+  });
+
+  final GlobalKey<FormState> formKey;
+  final TextEditingController titleController;
+  final TextEditingController descriptionController;
+  final String? coverImagePath;
+  final VoidCallback onBack;
+  final VoidCallback onPickCoverImage;
+  final VoidCallback onUploadAlbum;
+  final String? errorMessage;
+
+  @override
+  Widget build(BuildContext context) {
+    return Form(
+      key: formKey,
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(20, 18, 20, 28),
+        children: [
+          _UploadHeader(
+            title: 'Upload Album',
+            subtitle: 'Create a release with cover artwork',
+            icon: Icons.album_outlined,
+            onBack: onBack,
+          ),
+          if (errorMessage != null) ...[
+            const SizedBox(height: 16),
+            _InlineError(message: errorMessage!),
+          ],
+          const SizedBox(height: 22),
+          const _SectionTitle(title: 'Album Details'),
+          CustomTextFormField(
+            label: 'Album title',
+            controller: titleController,
+            prefixIcon: const Icon(Icons.title),
+            validator: (value) {
+              if (value == null || value.trim().isEmpty) {
+                return 'Please enter an album title';
+              }
+              return null;
+            },
+          ),
+          const SizedBox(height: 16),
+          CustomTextFormField(
+            label: 'Description',
+            controller: descriptionController,
+            prefixIcon: const Icon(Icons.notes_outlined),
+            validator: (value) {
+              if (value == null || value.trim().isEmpty) {
+                return 'Please enter a description';
+              }
+              return null;
+            },
+          ),
+          const SizedBox(height: 24),
+          const _SectionTitle(title: 'Artwork'),
+          _CoverPicker(imagePath: coverImagePath, onTap: onPickCoverImage),
+          const SizedBox(height: 26),
+          CustomElevatedButton(
+            onPressed: onUploadAlbum,
+            backgroundColor: Colors.green,
+            child: const Text('Upload Album'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _InlineError extends StatelessWidget {
+  const _InlineError({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.error.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.error_outline, color: theme.colorScheme.error),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              message,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.error,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -329,30 +403,6 @@ class _CoverPicker extends StatelessWidget {
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _StateMessage extends StatelessWidget {
-  const _StateMessage({required this.icon, required this.message});
-
-  final IconData icon;
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 34),
-            const SizedBox(height: 10),
-            Text(message, textAlign: TextAlign.center),
-          ],
         ),
       ),
     );

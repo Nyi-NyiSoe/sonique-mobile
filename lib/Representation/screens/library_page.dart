@@ -188,9 +188,7 @@ class _LibraryPageState extends State<LibraryPage> {
                                 subtitle: '$albumCount albums',
                                 onTap: () {
                                   context.read<AlbumByArtistBloc>().add(
-                                    FetchAlbumByArtistIdEvent(
-                                      state.user.userId,
-                                    ),
+                                    FetchAlbumByArtistIdEvent(null),
                                   );
                                   context.go('/library/albumByArtist');
                                 },

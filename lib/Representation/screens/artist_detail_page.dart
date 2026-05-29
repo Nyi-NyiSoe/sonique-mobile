@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sonique/Data/models/display_artist_model.dart';
 import 'package:sonique/Data/models/song_data_status.dart';
 import 'package:sonique/Data/models/song_model.dart';
 import 'package:sonique/Representation/Bloc/album_bloc/album_crud_bloc/album_by_artist_bloc/album_by_artist_bloc.dart';
@@ -33,71 +34,17 @@ class ArtistDetailPage extends StatelessWidget {
                 if (state is ArtistLoading) {
                   return const Center(child: CircularProgressIndicator());
                 } else if (state is ArtistLoaded) {
-                  final artist = state.artists.firstWhere(
+                  final matches = state.artists.where(
                     (a) => a.artistId == artistId,
                   );
-                  return Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.blueGrey.shade800,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Row(
-                      children: [
-                        CircleAvatar(
-                          radius: 40,
-                          backgroundColor:
-                              Colors.grey[300], // fallback background
-                          child: ClipOval(
-                            child: CachedNetworkImage(
-                              imageUrl:
-                                  artist.profile_image?.isNotEmpty == true
-                                      ? artist.profile_image!
-                                      : 'https://i.imgur.com/BoN9kdC.png', // default avatar
-                              width: 80, // 2 * radius
-                              height: 80,
-                              fit: BoxFit.cover,
-                              placeholder:
-                                  (context, url) => Container(
-                                    color: Colors.grey[300],
-                                    child: const Center(
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                      ),
-                                    ),
-                                  ),
-                              errorWidget:
-                                  (context, url, error) => Container(
-                                    color: Colors.grey[300],
-                                    child: const Icon(Icons.person, size: 40),
-                                  ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                artist.name,
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              SizedBox(height: 8),
-                              Text(
-                                artist.bio ?? "",
-                                style: TextStyle(color: Colors.white70),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
+                  if (matches.isEmpty) {
+                    return const _StateMessage(
+                      icon: Icons.person_off_outlined,
+                      message: 'Artist not found',
+                    );
+                  }
+
+                  return _ArtistInfoCard(artist: matches.first);
                 } else if (state is ArtistError) {
                   return Center(
                     child: Text(
@@ -259,6 +206,166 @@ class ArtistDetailPage extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _ArtistInfoCard extends StatelessWidget {
+  const _ArtistInfoCard({required this.artist});
+
+  final DisplayArtistModel artist;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final imageUrl =
+        artist.profile_image?.isNotEmpty == true
+            ? artist.profile_image!
+            : 'https://i.imgur.com/BoN9kdC.png';
+    final bio =
+        artist.bio?.trim().isNotEmpty == true
+            ? artist.bio!.trim()
+            : 'No bio yet';
+
+    return Material(
+      color: theme.cardColor,
+      borderRadius: BorderRadius.circular(8),
+      clipBehavior: Clip.antiAlias,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 86,
+              height: 86,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: Colors.green.withValues(alpha: 0.42),
+                  width: 2,
+                ),
+              ),
+              child: ClipOval(
+                child: CachedNetworkImage(
+                  imageUrl: imageUrl,
+                  fit: BoxFit.cover,
+                  placeholder:
+                      (context, url) => const Center(
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                  errorWidget:
+                      (context, url, error) =>
+                          const Icon(Icons.person, size: 42),
+                ),
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          artist.name,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.headlineSmall?.copyWith(
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      _ArtistBadge(songCount: artist.totalSongs ?? 0),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '@${artist.username}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.textTheme.bodyMedium?.color?.withValues(
+                        alpha: 0.62,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    bio,
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.textTheme.bodyMedium?.color?.withValues(
+                        alpha: 0.72,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ArtistBadge extends StatelessWidget {
+  const _ArtistBadge({required this.songCount});
+
+  final int songCount;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.green.withValues(alpha: 0.16),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        '$songCount songs',
+        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+          color: Colors.green,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+  }
+}
+
+class _StateMessage extends StatelessWidget {
+  const _StateMessage({required this.icon, required this.message});
+
+  final IconData icon;
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 22),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
+            size: 30,
+            color: theme.iconTheme.color?.withValues(alpha: 0.58),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            message,
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.68),
+            ),
+          ),
+        ],
       ),
     );
   }
