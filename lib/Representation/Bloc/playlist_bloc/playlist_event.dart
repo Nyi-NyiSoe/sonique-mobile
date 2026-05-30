@@ -1,6 +1,10 @@
 abstract class PlaylistEvent {}
 
-class FetchUserPlaylistEvent extends PlaylistEvent {}
+class FetchUserPlaylistEvent extends PlaylistEvent {
+  final bool forceRefresh;
+
+  FetchUserPlaylistEvent({this.forceRefresh = false});
+}
 
 class FetchPlaylistDetailevent extends PlaylistEvent {
   final int playlistId;

@@ -45,7 +45,7 @@ class _ProfilePageState extends State<ProfilePage> {
       backgroundColor: theme.scaffoldBackgroundColor,
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
-          if (state is AuthLoadingState) {
+          if (state is UnAuthenticatedState) {
             ScaffoldMessenger.of(
               context,
             ).showSnackBar(const SnackBar(content: Text('Logged out')));
@@ -56,7 +56,10 @@ class _ProfilePageState extends State<ProfilePage> {
           child: BlocBuilder<UserDataBloc, UserDataState>(
             builder: (context, state) {
               if (state is UserDataLoadingState) {
-                return const Center(child: CircularProgressIndicator());
+                return _ProfileStatusView(
+                  child: const Center(child: CircularProgressIndicator()),
+                  onLogout: () => _logout(context),
+                );
               } else if (state is UserDataFetchedState) {
                 user = state.user;
                 return RefreshIndicator(
@@ -82,23 +85,41 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                 );
               } else if (state is UserDataErrorState) {
-                return _StateMessage(
-                  icon: Icons.error_outline,
-                  message: state.error,
-                  action: TextButton.icon(
-                    onPressed:
-                        () => context.read<UserDataBloc>().add(
-                          FetchUserDataEvent(),
+                return _ProfileStatusView(
+                  onLogout: () => _logout(context),
+                  child: _StateMessage(
+                    icon: Icons.error_outline,
+                    message: state.error,
+                    action: Wrap(
+                      alignment: WrapAlignment.center,
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        TextButton.icon(
+                          onPressed:
+                              () => context.read<UserDataBloc>().add(
+                                FetchUserDataEvent(),
+                              ),
+                          icon: const Icon(Icons.refresh),
+                          label: const Text('Retry'),
                         ),
-                    icon: const Icon(Icons.refresh),
-                    label: const Text('Retry'),
+                        FilledButton.icon(
+                          onPressed: () => _logout(context),
+                          icon: const Icon(Icons.logout),
+                          label: const Text('Logout'),
+                        ),
+                      ],
+                    ),
                   ),
                 );
               }
 
-              return const _StateMessage(
-                icon: Icons.person_off_outlined,
-                message: 'Something went wrong',
+              return _ProfileStatusView(
+                onLogout: () => _logout(context),
+                child: const _StateMessage(
+                  icon: Icons.person_off_outlined,
+                  message: 'Something went wrong',
+                ),
               );
             },
           ),
@@ -115,19 +136,82 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   void _showUserDetailsModal(BuildContext context) {
+    final currentUser = user;
+    if (currentUser == null) {
+      return;
+    }
+
     showModalBottomSheet(
       useRootNavigator: true,
       isScrollControlled: true,
       context: context,
-      builder: (context) => UserDetailsModal(user: user!),
+      builder: (context) => UserDetailsModal(user: currentUser),
     );
   }
 
   void _showImageUpdateModal(BuildContext context) {
+    final currentUser = user;
+    if (currentUser == null) {
+      return;
+    }
+
     showModalBottomSheet(
       useRootNavigator: true,
       context: context,
-      builder: (context) => ImageUpdateModal(user: user!),
+      builder: (context) => ImageUpdateModal(user: currentUser),
+    );
+  }
+}
+
+class _ProfileStatusView extends StatelessWidget {
+  const _ProfileStatusView({required this.child, required this.onLogout});
+
+  final Widget child;
+  final VoidCallback onLogout;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 18, 20, 28),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: Colors.green.withValues(alpha: 0.16),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(Icons.person_outline, color: Colors.green),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Profile',
+                  style: theme.textTheme.displaySmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              IconButton(
+                tooltip: 'Settings',
+                onPressed: () => context.push(Routes.settings),
+                icon: const Icon(Icons.settings_outlined),
+              ),
+              IconButton(
+                tooltip: 'Logout',
+                onPressed: onLogout,
+                icon: const Icon(Icons.logout),
+              ),
+            ],
+          ),
+          Expanded(child: child),
+        ],
+      ),
     );
   }
 }

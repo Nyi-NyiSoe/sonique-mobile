@@ -50,9 +50,15 @@ class AlbumRemoteData {
 
   /// 🔑 Helper: Build authenticated headers
   Future<Map<String, String>> _getHeaders() async {
-    final currentUser = await authLocalDataSource.getUser();
-
     return {'Content-Type': 'application/json'};
+  }
+
+  String _appendPath(String baseUrl, Object path) {
+    final normalizedBase =
+        baseUrl.endsWith('/')
+            ? baseUrl.substring(0, baseUrl.length - 1)
+            : baseUrl;
+    return '$normalizedBase/$path';
   }
 
   //get all albums
@@ -62,10 +68,7 @@ class AlbumRemoteData {
       print('📡 Fetching albums from: $getAllAlbumsUrl');
       print('🔑 Headers: $headers');
 
-      final response = await client.get(
-       getAllAlbumsUrl,
-        headers: headers,
-      );
+      final response = await client.get(getAllAlbumsUrl, headers: headers);
 
       print('📥 Response status: ${response.statusCode}');
       print('📥 Response body: ${response.body}');
@@ -117,7 +120,7 @@ class AlbumRemoteData {
       print('🔑 Headers: $headers');
 
       // 3️⃣ Construct URL safely
-      final url = '$getAlbumDetailUrl/$albumId';
+      final url = _appendPath(getAlbumDetailUrl, albumId);
       print('🌐 Request URL: $url');
 
       // 4️⃣ Make HTTP GET request
@@ -174,7 +177,7 @@ class AlbumRemoteData {
       final defaultId = currentUser.userId;
 
       // 3️⃣ Construct URL safely
-      final url = '$getAlbumByArtistIdUrl/${artistId ?? defaultId}';
+      final url = _appendPath(getAlbumByArtistIdUrl, artistId ?? defaultId);
       print('🌐 Request URL: $url');
 
       // 4️⃣ Make HTTP GET request

@@ -1,0 +1,158 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-05-30T20:15:00+07:00",
+  "title": "Design System: Sonique",
+  "extensions": {
+    "colorMeta": {
+      "studio-green": {
+        "role": "primary",
+        "displayName": "Studio Green",
+        "canonical": "#35D07F",
+        "tonalRamp": ["oklch(15% 0.08 151)", "oklch(27% 0.10 151)", "oklch(39% 0.12 151)", "oklch(51% 0.14 151)", "oklch(63% 0.16 151)", "oklch(75% 0.12 151)", "oklch(87% 0.07 151)", "oklch(95% 0.03 151)"]
+      },
+      "studio-green-deep": {
+        "role": "primary",
+        "displayName": "Deep Studio Green",
+        "canonical": "#159957",
+        "tonalRamp": ["oklch(15% 0.07 151)", "oklch(27% 0.09 151)", "oklch(39% 0.11 151)", "oklch(51% 0.13 151)", "oklch(63% 0.13 151)", "oklch(75% 0.10 151)", "oklch(87% 0.06 151)", "oklch(95% 0.03 151)"]
+      },
+      "midnight-cyan": {
+        "role": "secondary",
+        "displayName": "Midnight Cyan",
+        "canonical": "#64D2FF",
+        "tonalRamp": ["oklch(15% 0.08 230)", "oklch(27% 0.10 230)", "oklch(39% 0.12 230)", "oklch(51% 0.14 230)", "oklch(63% 0.15 230)", "oklch(75% 0.12 230)", "oklch(87% 0.07 230)", "oklch(95% 0.03 230)"]
+      },
+      "studio-dark-bg": {
+        "role": "neutral",
+        "displayName": "Studio Dark Background",
+        "canonical": "#101211",
+        "tonalRamp": ["#101211", "#191C1A", "#252A27", "#343A36", "#505850", "#737D74", "#A4ADA5", "#EEF2EE"]
+      },
+      "studio-dark-surface": {
+        "role": "neutral",
+        "displayName": "Studio Dark Surface",
+        "canonical": "#191C1A",
+        "tonalRamp": ["#101211", "#191C1A", "#252A27", "#343A36", "#505850", "#737D74", "#A4ADA5", "#EEF2EE"]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Top-level app identity and major page titles."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Forms, row text, metadata, and compact product copy."
+      }
+    },
+    "shadows": [
+      {
+        "name": "login-logo-glow",
+        "value": "0 12px 24px rgba(53, 208, 127, 0.16)",
+        "purpose": "Local identity flourish for the login logo only."
+      }
+    ],
+    "motion": [
+      {
+        "name": "state-feedback",
+        "value": "150ms to 250ms, Material standard easing",
+        "purpose": "Button, selection, focus, and sheet feedback only."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "mobile-first",
+        "value": "Flutter adaptive layout, primary target phone width"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Main action button for login, upload, and create flows.",
+      "html": "<button class=\"ds-btn-primary\">Save changes</button>",
+      "css": ".ds-btn-primary { background: #35D07F; color: #FFFFFF; border: 0; border-radius: 8px; padding: 16px; min-height: 48px; font: 700 14px system-ui, Roboto, San Francisco, sans-serif; cursor: pointer; transition: filter 180ms ease, transform 180ms ease; } .ds-btn-primary:hover { filter: brightness(1.04); } .ds-btn-primary:active { transform: translateY(1px); } .ds-btn-primary:focus-visible { outline: 2px solid #35D07F; outline-offset: 2px; }"
+    },
+    {
+      "name": "Song Row",
+      "kind": "card",
+      "refersTo": "card-surface",
+      "description": "Core tappable row for song playback and song actions.",
+      "html": "<article class=\"ds-song-row\"><div class=\"ds-song-art\">♪</div><div class=\"ds-song-copy\"><strong>Song title</strong><span>Artist name</span></div><button class=\"ds-icon-btn\" aria-label=\"More actions\">⋮</button></article>",
+      "css": ".ds-song-row { display: flex; align-items: center; gap: 10px; height: 86px; padding: 10px; background: #191C1A; color: #FFFFFF; border-radius: 8px; font-family: system-ui, Roboto, San Francisco, sans-serif; } .ds-song-art { width: 66px; height: 66px; display: grid; place-items: center; flex: 0 0 auto; border-radius: 8px; background: rgba(53, 208, 127, 0.16); color: #35D07F; font-size: 24px; } .ds-song-copy { min-width: 0; display: flex; flex-direction: column; gap: 3px; flex: 1; } .ds-song-copy strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 18px; line-height: 1.2; } .ds-song-copy span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: rgba(255,255,255,0.66); font-size: 14px; } .ds-icon-btn { width: 40px; height: 40px; border: 0; border-radius: 8px; background: transparent; color: #FFFFFF; cursor: pointer; } .ds-icon-btn:focus-visible { outline: 2px solid #35D07F; outline-offset: 2px; }"
+    },
+    {
+      "name": "Navigation Bar",
+      "kind": "nav",
+      "refersTo": "nav-bar",
+      "description": "Persistent bottom navigation for Home, Library, and Profile.",
+      "html": "<nav class=\"ds-nav\"><a class=\"ds-nav-item ds-nav-item-active\">Home</a><a class=\"ds-nav-item\">Library</a><a class=\"ds-nav-item\">Profile</a></nav>",
+      "css": ".ds-nav { display: flex; align-items: center; justify-content: space-around; min-height: 64px; padding: 6px 8px; background: #191C1A; color: #FFFFFF; font-family: system-ui, Roboto, San Francisco, sans-serif; } .ds-nav-item { min-width: 72px; padding: 8px 10px; border-radius: 8px; color: rgba(255,255,255,0.72); text-align: center; font-size: 12px; font-weight: 500; text-decoration: none; } .ds-nav-item-active { background: rgba(53, 208, 127, 0.18); color: #FFFFFF; font-weight: 700; } .ds-nav-item:focus-visible { outline: 2px solid #35D07F; outline-offset: 2px; }"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "input-field",
+      "description": "Material form field with label, hint, icon, validation, and accent focus.",
+      "html": "<label class=\"ds-field\"><span>Email</span><input placeholder=\"Enter your email\" /></label>",
+      "css": ".ds-field { display: grid; gap: 6px; color: #FFFFFF; font-family: system-ui, Roboto, San Francisco, sans-serif; } .ds-field span { font-size: 14px; font-weight: 600; } .ds-field input { min-height: 48px; border: 0; border-bottom: 1px solid rgba(255,255,255,0.38); border-radius: 0; background: transparent; color: #FFFFFF; font: 400 16px system-ui, Roboto, San Francisco, sans-serif; } .ds-field input::placeholder { color: rgba(255,255,255,0.62); } .ds-field input:focus { outline: 0; border-bottom-color: #35D07F; box-shadow: 0 1px 0 #35D07F; }"
+    },
+    {
+      "name": "Theme Option Tile",
+      "kind": "card",
+      "refersTo": "card-surface",
+      "description": "Settings tile for choosing one of the app themes.",
+      "html": "<article class=\"ds-theme-tile\"><div class=\"ds-theme-swatch\"><span></span><span></span><span></span></div><div><strong>Studio Dark</strong><p>Dark, neutral, and focused</p></div><span class=\"ds-radio\">●</span></article>",
+      "css": ".ds-theme-tile { display: flex; align-items: center; gap: 14px; padding: 14px; border-radius: 8px; background: #191C1A; color: #FFFFFF; font-family: system-ui, Roboto, San Francisco, sans-serif; } .ds-theme-swatch { display: flex; overflow: hidden; width: 56px; height: 56px; border: 1px solid rgba(255,255,255,0.14); border-radius: 8px; } .ds-theme-swatch span { flex: 1; } .ds-theme-swatch span:nth-child(1) { background: #101211; } .ds-theme-swatch span:nth-child(2) { background: #191C1A; } .ds-theme-swatch span:nth-child(3) { background: #35D07F; } .ds-theme-tile strong { display: block; font-size: 18px; line-height: 1.2; } .ds-theme-tile p { margin: 3px 0 0; color: rgba(255,255,255,0.66); font-size: 14px; } .ds-radio { margin-left: auto; color: #35D07F; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Personal Studio Shelf",
+    "overview": "Sonique should feel like a compact music shelf that belongs to the user: familiar, direct, and focused on listening rather than promotion. The app can borrow standard music-app structure, but it must stay quieter than a commercial streaming clone. Screens should help users browse, play, save, and manage songs without ornamental complexity.\n\nThe visual system is a restrained Material 3 product UI. It uses flat tonal layering, 8px corners, system typography, and a small accent budget. Green marks primary action, selection, and current state; it is not a decorative wash across every surface.",
+    "keyCharacteristics": [
+      "Compact music-app familiarity with Flutter Material controls.",
+      "Restrained accent color used for action and state only.",
+      "Flat, tonal surfaces instead of decorative shadows.",
+      "Mobile-first density with short labels and predictable affordances.",
+      "Minimal motion focused on feedback, never page choreography."
+    ],
+    "rules": [
+      {
+        "name": "The Accent Budget Rule",
+        "body": "Studio Green should stay under 10 percent of any normal app screen. If the screen reads green before it reads music, it is too much.",
+        "section": "colors"
+      },
+      {
+        "name": "The Theme Separation Rule",
+        "body": "Studio Dark, Studio Light, and Midnight are separate theme families. Do not blend their accent colors casually.",
+        "section": "colors"
+      },
+      {
+        "name": "The Product Type Rule",
+        "body": "Use one system sans family for UI labels, data, actions, and headings. Do not add display fonts to the app shell.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat Shelf Rule",
+        "body": "Cards and rows sit on tonal layers at rest. Do not add wide soft shadows to song cards, playlist tiles, navigation bars, or settings tiles.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do keep green restrained and tied to primary actions, selected state, focus, and current music feedback.",
+      "Do preserve the 8px radius system for app controls and repeated rows.",
+      "Do use flat tonal layers for cards, shelves, bottom navigation, and settings tiles.",
+      "Do keep motion minimal and performance-safe, with transitions only for state feedback.",
+      "Do keep the app recognizable as a simple music product with Home, Library, Profile, playlist, and playback patterns."
+    ],
+    "donts": [
+      "Don't create an over-saturated green palette or a screen that feels like a full Spotify clone with fewer features.",
+      "Don't add heavy animation, elaborate page transitions, decorative motion, or visual effects that could reduce performance on mobile devices.",
+      "Don't add complex premium-streaming patterns that the product does not actually support.",
+      "Don't pair a 1px border with a soft wide shadow on the same card or button.",
+      "Don't use large rounded cards, glass panels, gradient text, or decorative stripe backgrounds."
+    ]
+  }
+}

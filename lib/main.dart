@@ -15,25 +15,36 @@ import 'package:sonique/Domain/usecases/song_data_usecase.dart';
 import 'package:sonique/Domain/usecases/user_data_usecase.dart';
 import 'package:sonique/Representation/Bloc/album_bloc/album_crud_bloc/album_by_artist_bloc/album_by_artist_bloc.dart';
 import 'package:sonique/Representation/Bloc/album_bloc/album_crud_bloc/album_by_artist_bloc/album_by_artist_event.dart';
+import 'package:sonique/Representation/Bloc/album_bloc/album_crud_bloc/album_by_artist_bloc/album_by_artist_state.dart';
 import 'package:sonique/Representation/Bloc/album_bloc/album_crud_bloc/album_operations_bloc/album_operations_bloc.dart';
+import 'package:sonique/Representation/Bloc/album_bloc/album_crud_bloc/album_operations_bloc/album_operations_state.dart';
 import 'package:sonique/Representation/Bloc/album_bloc/album_detail_bloc/album_detail_bloc.dart';
+import 'package:sonique/Representation/Bloc/album_bloc/album_detail_bloc/album_detail_state.dart';
 import 'package:sonique/Representation/Bloc/album_bloc/album_list_bloc/album_list_bloc.dart';
 import 'package:sonique/Representation/Bloc/album_bloc/album_list_bloc/album_list_event.dart';
+import 'package:sonique/Representation/Bloc/album_bloc/album_list_bloc/album_list_state.dart';
 import 'package:sonique/Representation/Bloc/artist_bloc/artist_bloc.dart';
 import 'package:sonique/Representation/Bloc/artist_bloc/artist_event.dart';
+import 'package:sonique/Representation/Bloc/artist_bloc/artist_state.dart';
 import 'package:sonique/Representation/Bloc/auth_bloc/auth_bloc.dart';
 import 'package:sonique/Representation/Bloc/auth_bloc/auth_event.dart';
+import 'package:sonique/Representation/Bloc/auth_bloc/auth_state.dart';
 import 'package:sonique/Representation/Bloc/like_song_bloc/like_song_bloc.dart';
 import 'package:sonique/Representation/Bloc/like_song_bloc/like_song_event.dart';
+import 'package:sonique/Representation/Bloc/like_song_bloc/like_song_state.dart';
 import 'package:sonique/Representation/Bloc/music_player_bloc/music_player_bloc.dart';
 import 'package:sonique/Representation/Bloc/music_player_bloc/music_player_event.dart';
 import 'package:sonique/Representation/Bloc/playlist_bloc/playlist_bloc.dart';
 import 'package:sonique/Representation/Bloc/playlist_bloc/playlist_event.dart';
+import 'package:sonique/Representation/Bloc/playlist_bloc/playlist_state.dart';
 import 'package:sonique/Representation/Bloc/song_data_bloc/song_data_bloc.dart';
 import 'package:sonique/Representation/Bloc/song_data_bloc/song_data_event.dart';
+import 'package:sonique/Representation/Bloc/song_data_bloc/song_data_state.dart';
 import 'package:sonique/Representation/Bloc/user_data_bloc/user_data_bloc.dart';
 import 'package:sonique/Representation/Bloc/user_data_bloc/user_data_event.dart';
+import 'package:sonique/Representation/Bloc/user_data_bloc/user_data_state.dart';
 import 'package:sonique/core/services/locator/locator.dart';
+import 'package:sonique/core/services/routes/routes.dart';
 import 'package:sonique/core/theme/app_theme.dart';
 import 'package:sonique/core/theme/app_theme_controller.dart';
 
@@ -160,6 +171,10 @@ class MyApp extends StatelessWidget {
             title: 'Sonique',
             theme: AppTheme().themeFor(selectedTheme),
             debugShowCheckedModeBanner: false,
+            builder:
+                (context, child) => _SessionExpiryGuard(
+                  child: child ?? const SizedBox.shrink(),
+                ),
             routerDelegate: router.routerDelegate,
             routeInformationParser: router.routeInformationParser,
             routeInformationProvider: router.routeInformationProvider,
@@ -167,5 +182,133 @@ class MyApp extends StatelessWidget {
         },
       ),
     );
+  }
+}
+
+class _SessionExpiryGuard extends StatefulWidget {
+  const _SessionExpiryGuard({required this.child});
+
+  final Widget child;
+
+  @override
+  State<_SessionExpiryGuard> createState() => _SessionExpiryGuardState();
+}
+
+class _SessionExpiryGuardState extends State<_SessionExpiryGuard> {
+  bool _handledSessionExpiry = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<AuthBloc, AuthState>(
+          listener: (context, state) {
+            if (state is AuthSuccessState) {
+              _handledSessionExpiry = false;
+            }
+          },
+        ),
+        BlocListener<UserDataBloc, UserDataState>(
+          listener: (context, state) {
+            if (state is UserDataErrorState) {
+              _handleError(context, state.error);
+            }
+          },
+        ),
+        BlocListener<SongDataBloc, SongDataState>(
+          listener: (context, state) => _handleError(context, state.error),
+        ),
+        BlocListener<LikesBloc, LikeSongState>(
+          listener: (context, state) => _handleError(context, state.error),
+        ),
+        BlocListener<PlaylistBloc, PlaylistState>(
+          listener: (context, state) {
+            if (state.status == PlaylistStatus.error) {
+              _handleError(context, state.message);
+            }
+          },
+        ),
+        BlocListener<AlbumListBloc, AlbumListState>(
+          listener: (context, state) {
+            if (state is AlbumListError) {
+              _handleError(context, state.error);
+            }
+          },
+        ),
+        BlocListener<AlbumDetailBloc, AlbumDetailState>(
+          listener: (context, state) {
+            if (state is AlbumDetailError) {
+              _handleError(context, state.error);
+            }
+          },
+        ),
+        BlocListener<AlbumByArtistBloc, AlbumByArtistState>(
+          listener: (context, state) {
+            if (state is AlbumByArtistError) {
+              _handleError(context, state.error);
+            }
+          },
+        ),
+        BlocListener<AlbumOperationsBloc, AlbumOperationsState>(
+          listener: (context, state) {
+            if (state is AlbumOperationError) {
+              _handleError(context, state.error);
+            }
+          },
+        ),
+        BlocListener<ArtistBloc, ArtistState>(
+          listener: (context, state) {
+            if (state is ArtistError) {
+              _handleError(context, state.error);
+            }
+          },
+        ),
+      ],
+      child: widget.child,
+    );
+  }
+
+  void _handleError(BuildContext context, String? error) {
+    if (_handledSessionExpiry || !_isSessionExpiredError(error)) {
+      return;
+    }
+
+    _handledSessionExpiry = true;
+    context.read<AuthBloc>().add(LogoutEvent());
+    context.read<MusicPlayerBloc>().add(ResetPlayer());
+    context.read<LikesBloc>().add(ResetBlocEvent());
+    context.read<PlaylistBloc>().add(ResetLikeBlocEvent());
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context)
+        ..clearSnackBars()
+        ..showSnackBar(
+          const SnackBar(
+            content: Text('Your session expired. Please log in again.'),
+          ),
+        );
+      context.go(Routes.login);
+    });
+  }
+
+  bool _isSessionExpiredError(String? error) {
+    if (error == null) {
+      return false;
+    }
+
+    final normalized = error.toLowerCase();
+    return normalized.contains('invalid refresh token') ||
+        normalized.contains('invalid token') ||
+        normalized.contains('token is required') ||
+        normalized.contains('refresh token or access token is missing') ||
+        normalized.contains('refresh token is missing') ||
+        normalized.contains('access token is missing') ||
+        normalized.contains('missing access token') ||
+        normalized.contains('missing access token or refresh token') ||
+        normalized.contains('unauthorized');
   }
 }
