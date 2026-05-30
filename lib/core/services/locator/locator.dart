@@ -66,7 +66,7 @@ Future<void> setupLocator() async {
   locator.registerLazySingleton(() => http.Client());
   locator.registerLazySingleton(
     () => ApiClient(
-      client: http.Client(),
+      client: locator<http.Client>(),
       tokenStorage: locator<AuthTokenStorage>(),
     ),
   );
@@ -146,7 +146,10 @@ Future<void> setupLocator() async {
     () => AuthLocalDataSource(sharedPreferences: locator<SharedPreferences>()),
   );
   locator.registerLazySingleton<AuthRemoteDataSource>(
-    () => AuthRemoteDataSource(apiClient: locator<ApiClient>(),tokenStorage: locator<AuthTokenStorage>()),
+    () => AuthRemoteDataSource(
+      apiClient: locator<ApiClient>(),
+      tokenStorage: locator<AuthTokenStorage>(),
+    ),
   );
 
   locator.registerLazySingleton<SongRemoteData>(
@@ -165,7 +168,7 @@ Future<void> setupLocator() async {
 
   locator.registerLazySingleton<AlbumRemoteData>(
     () => AlbumRemoteData(
-      client: locator<http.Client>(),
+      client: locator<ApiClient>(),
       authLocalDataSource: locator<AuthLocalDataSource>(),
     ),
   );

@@ -10,51 +10,119 @@ class CustomAlbumCard extends StatelessWidget {
     super.key,
     required this.imageUrl,
     required this.albumId,
+    this.albumName,
+    this.size = 120,
+    this.showTitle = false,
   });
+
   final String imageUrl;
   final int albumId;
+  final String? albumName;
+  final double size;
+  final bool showTitle;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        context.read<AlbumDetailBloc>().add(FetchAlbumDetailEvent(albumId));
-        final currentRoute = GoRouter.of(context).state.uri;
-        if (currentRoute.toString().startsWith('/home')) {
-          context.go('/home/albumDetail');
-        } else if (currentRoute.toString().startsWith('/home/artistDetail')) {
-          context.go('/home/artistDetail/albumDetail');
-        } else {
-          context.go('/library/albumByArtist/albumDetail');
-        }
-      },
-      child: Container(
-        margin: EdgeInsets.all(12),
-        decoration: BoxDecoration(borderRadius: BorderRadius.circular(12)),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(12),
-          child: CachedNetworkImage(
-            imageUrl: imageUrl,
-            fit: BoxFit.cover,
-            width: 120, // 👈 give width
-            height: 120, // 👈 and height
-            placeholder:
-                (context, url) => Container(
-                  width: 120, // 👈 same size as image
-                  height: 120,
-                  color: Colors.grey[300],
-                  child: const Center(
-                    child: CircularProgressIndicator(strokeWidth: 2),
+    final theme = Theme.of(context);
+    final title =
+        albumName?.trim().isNotEmpty == true ? albumName!.trim() : 'Untitled';
+
+    return Semantics(
+      button: true,
+      label: 'Open album $title',
+      child: SizedBox(
+        width: size,
+        child: Material(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: () {
+              if (albumId <= 0) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Album details are unavailable'),
                   ),
-                ),
-            errorWidget:
-                (context, url, error) => Container(
-                  width: 120,
-                  height: 120,
-                  color: Colors.grey[300],
-                  child: const Icon(Icons.broken_image, size: 40),
-                ),
+                );
+                return;
+              }
+
+              context.read<AlbumDetailBloc>().add(
+                FetchAlbumDetailEvent(albumId),
+              );
+              final currentRoute = GoRouter.of(context).state.uri;
+              if (currentRoute.toString().startsWith('/home/artistDetail')) {
+                context.go('/home/artistDetail/albumDetail');
+              } else if (currentRoute.toString().startsWith('/home')) {
+                context.go('/home/albumDetail');
+              } else {
+                context.go('/library/albumByArtist/albumDetail');
+              }
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(6),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: CachedNetworkImage(
+                      imageUrl: imageUrl,
+                      fit: BoxFit.cover,
+                      width: size - 12,
+                      height: size - 12,
+                      placeholder:
+                          (context, url) => _AlbumImageFallback(
+                            size: size - 12,
+                            icon: Icons.album_outlined,
+                          ),
+                      errorWidget:
+                          (context, url, error) => _AlbumImageFallback(
+                            size: size - 12,
+                            icon: Icons.broken_image_outlined,
+                          ),
+                    ),
+                  ),
+                  if (showTitle) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AlbumImageFallback extends StatelessWidget {
+  const _AlbumImageFallback({required this.size, required this.icon});
+
+  final double size;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      width: size,
+      height: size,
+      color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.45),
+      child: Center(
+        child: Icon(
+          icon,
+          size: 34,
+          color: theme.iconTheme.color?.withValues(alpha: 0.54),
         ),
       ),
     );
